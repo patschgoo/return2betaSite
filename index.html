@@ -5,10 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Return2Beta Site</title>
   <style>
-    :root {
-      --header-height: 180px;
-    }
-
     * {
       box-sizing: border-box;
     }
@@ -30,34 +26,35 @@
     }
 
     .header-band {
-      height: var(--header-height);
       width: 100%;
-      background-image: url("images/header.png");
-      background-repeat: repeat-x;
-      background-position: top left;
-      border-bottom: 2px solid rgba(0, 0, 0, 0.2);
       flex-shrink: 0;
+    }
+
+    .header-image {
+      width: 100%;
+      height: auto;
+      display: block;
     }
 
     .content {
       flex: 1;
-      padding: 24px;
+      display: flex;
+      justify-content: flex-end;
+      padding: 10px 16px 24px;
     }
 
     .animals {
-      position: fixed;
-      top: 16px;
-      right: 16px;
-      width: min(28vw, 220px);
+      width: min(24vw, 180px);
       max-width: 40vw;
       height: auto;
       display: block;
-      z-index: 1;
     }
   </style>
 </head>
 <body>
-  <header class="header-band" aria-label="Header"></header>
+  <header class="header-band" aria-label="Header">
+    <img class="header-image" src="images/header.png" alt="Header" />
+  </header>
 
   <main class="content">
     <img class="animals" src="images/animals.png" alt="Animals" />
