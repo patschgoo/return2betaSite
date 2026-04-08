@@ -26,21 +26,47 @@
     }
 
     .header-band {
+      height: 180px;
       width: 100%;
+      background-image: url("images/header.png");
+      background-repeat: repeat-x;
+      background-position: top left;
+      background-size: auto 100%;
       flex-shrink: 0;
-    }
-
-    .header-image {
-      width: 100%;
-      height: auto;
-      display: block;
     }
 
     .content {
       flex: 1;
       display: flex;
-      justify-content: flex-end;
-      padding: 10px 16px 24px;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 24px;
+      padding: 18px 24px 24px;
+    }
+
+    .intro {
+      flex: 1;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding-top: 28px;
+      text-align: center;
+    }
+
+    .intro-text {
+      max-width: 520px;
+      margin: 0;
+      color: #1f1f1f;
+      font-size: clamp(1.15rem, 2vw, 1.6rem);
+      line-height: 1.4;
+      text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.4);
+    }
+
+    .animals-panel {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
     }
 
     .animals {
@@ -49,15 +75,43 @@
       height: auto;
       display: block;
     }
+
+    .animals-label {
+      margin: 0;
+      color: #111;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+
+    @media (max-width: 720px) {
+      .header-band {
+        height: 120px;
+      }
+
+      .content {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .intro {
+        padding-top: 12px;
+      }
+    }
   </style>
 </head>
 <body>
-  <header class="header-band" aria-label="Header">
-    <img class="header-image" src="images/header.png" alt="Header" />
-  </header>
+  <header class="header-band" aria-label="Header"></header>
 
   <main class="content">
-    <img class="animals" src="images/animals.png" alt="Animals" />
+    <section class="intro" aria-label="Welcome text">
+      <p class="intro-text">Welcome to the return2beta corner of the internet, where odd little projects, blocky worlds, and unfinished ideas still get to breathe.</p>
+    </section>
+
+    <section class="animals-panel" aria-label="Server info">
+      <img class="animals" src="images/animals.png" alt="Animals" />
+      <p class="animals-label">mc.return2beta.com</p>
+    </section>
   </main>
 </body>
 </html>
