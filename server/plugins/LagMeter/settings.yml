@@ -1,0 +1,7 @@
+averageLength: 10
+log:
+    enable: true
+    interval: 150
+interval: 40
+useAverage: true
+useSuperPerms: true

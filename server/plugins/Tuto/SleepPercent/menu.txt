@@ -1,0 +1,7 @@
+§6=== SleepPercent ===
+Not everyone needs to sleep for night to pass!
+Only a §epercentage§f of online players need to be
+in beds for the night to skip.
+§fSo if some players want to keep exploring at night,
+they can — as long as enough others are sleeping.
+§fNo more waiting for that one person to go to bed!

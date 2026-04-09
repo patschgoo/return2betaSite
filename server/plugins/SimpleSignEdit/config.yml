@@ -1,0 +1,8 @@
+database:
+    class: org.sqlite.JDBC
+    url: jdbc:sqlite:plugins/SimpleSignEdit/signs.db
+auto-save: true
+break-protect: false
+sneaking: both
+view-owner: 280
+set-owner: 288

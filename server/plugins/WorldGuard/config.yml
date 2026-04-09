@@ -1,0 +1,123 @@
+#
+# WorldGuard's main configuration file
+#
+# This is the global configuration file. Anything placed into here will
+# be applied to all worlds. However, each world has its own configuration
+# file to allow you to replace any setting in here for that world only.
+#
+# About editing this file:
+# - DO NOT USE TABS. You MUST use spaces or Bukkit will complain. If
+#   you use an editor like Notepad++ (recommended for Windows users), you
+#   must configure it to "replace tabs with spaces." In Notepad++, this can
+#   be changed in Settings > Preferences > Language Menu.
+# - Don't get rid of the indents. They are indented so some entries are
+#   in categories (like "enforce-single-session" is in the "protection"
+#   category.
+# - If you want to check the format of this file before putting it
+#   into WorldGuard, paste it into http://yaml-online-parser.appspot.com/
+#   and see if it gives "ERROR:".
+# - Lines starting with # are comments and so they are ignored.
+#
+
+mobs:
+    block-creeper-block-damage: false
+    block-creature-spawn: []
+    block-creeper-explosions: false
+    anti-wolf-dumbness: false
+regions:
+    max-claim-volume: 30000
+    claim-only-inside-existing-regions: false
+    max-region-count-per-player: 7
+    enable: true
+    high-frequency-flags: false
+    wand: 1000
+    use-scheduler: true
+simulation:
+    sponge:
+        enable: true
+        radius: 3
+        redstone: false
+    classic-water: false
+chest-protection:
+    enable: false
+blacklist:
+    use-as-whitelist: false
+    logging:
+        console:
+            enable: true
+        database:
+            pass: ''
+            enable: false
+            user: ''
+            dsn: jdbc:mysql://localhost:3306/minecraft
+            table: blacklist_events
+        file:
+            path: worldguard/logs/%Y-%m-%d.log
+            open-files: 10
+            enable: false
+protection:
+    item-durability: true
+    enforce-single-session: true
+    remove-infinite-stacks: false
+pumpkin-scuba: false
+suppress-tick-sync-warnings: false
+crops:
+    disable-player-trampling: false
+    disable-creature-trampling: false
+summary-on-start: true
+iconomy:
+    buy-on-claim: false
+    enable: false
+    buy-on-claim-price: 1.0
+op-permissions: true
+default:
+    disable-health-regain: false
+dynamics:
+    disable-mushroom-spread: false
+    disable-ice-formation: false
+    disable-snow-melting: false
+    disable-leaf-decay: false
+    disable-ice-melting: false
+    disable-snow-formation: false
+spawn:
+    teleport-to-home-on-death: false
+    spawn-protection: 0
+    kick-on-death: false
+    login-protection: 3
+    exact-respawn: false
+auto-invincible-permission: false
+player-damage:
+    disable-contact-damage: false
+    teleport-on-suffocation: false
+    disable-void-damage: false
+    disable-lava-damage: false
+    disable-lightning-damage: false
+    disable-mob-damage: false
+    disable-drowning-damage: false
+    disable-fall-damage: false
+    disable-fire-damage: false
+    disable-suffocation-damage: false
+    disable-explosion-damage: false
+    teleport-on-void-falling: false
+physics:
+    allow-portal-anywhere: false
+    no-physics-sand: false
+    no-physics-gravel: false
+    disable-water-damage-blocks: []
+weather:
+    disable-thunderstorm: false
+    prevent-lightning-strike-blocks: []
+    disable-lightning-strike-fire: false
+    disable-pig-zombification: false
+    disable-powered-creepers: false
+    always-raining: false
+    always-thundering: false
+    disable-weather: false
+fire:
+    disable-all-fire-spread: false
+    disable-lava-fire-spread: true
+    lava-spread-blocks: []
+    disable-fire-spread-blocks: []
+ignition:
+    block-tnt: false
+    block-lighter: false

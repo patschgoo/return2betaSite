@@ -1,0 +1,7 @@
+§6=== Blacklisted Items ===
+These items §cCANNOT§f be placed by Members:
+§cLava buckets §f(327) §cWater buckets §f(326)
+§cEmpty buckets §f(325) §cTNT §f(block 46)
+§cGold ore §f(block 14) §cDiamond ore §f(block 56)
+§cLava source §f(10, 11) §cWater source §f(8, 9)
+§fYou can build with everything else normally!

@@ -1,0 +1,7 @@
+§6=== PreciousStones - Safety Blocks ===
+§e[Sponge] §f(Block 19) - UNDERWATER BREATHING
+Radius: 10, full world height. Breathe underwater!
+§e[Mushroom Block] §f(Block 100) - HEAL OVER TIME
+Radius: 5. Slowly heals players in the zone.
+§e[Cobweb] §f(Block 30) - PVP OFF ZONE
+Radius: 10. No PvP or mob damage. Safe trading area!

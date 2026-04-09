@@ -1,0 +1,6 @@
+§6=== NoFullHealthEating ===
+You §ccannot eat food§f when your health is full!
+§fThis prevents wasting food items when you don't
+need healing. Your food is preserved until you
+actually need it.
+§fIf you can't eat, it means you're at full health!

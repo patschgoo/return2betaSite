@@ -1,0 +1,4 @@
+§6=== MemoryStone - Fast Travel ===
+Memory Stones are physical waypoints in the world.
+Memorize them, then teleport between them for a fee.
+§eSee pages: §fHowTo, Details

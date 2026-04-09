@@ -1,0 +1,7 @@
+§6=== PreciousStones - Movement Blocks ===
+§e[Mushroom Block] §f(100) - ELEVATOR / CANNON
+Height: 3. Launches you straight up!
+§e[Iron Block] §f(Block 42) - LAUNCH PAD
+Radius: 1. Launches you when you step on it.
+§cNote: Iron Block is also used by FalseBook minecarts!
+Under a rail = constant speed. Elsewhere = launch pad.

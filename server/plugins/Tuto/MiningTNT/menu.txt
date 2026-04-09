@@ -1,0 +1,9 @@
+§6=== MiningTNT ===
+TNT only works §ebelow altitude 70§f (Y-level).
+Above Y=70, TNT will §cnot explode§f at all.
+§fTNT destroys ALL block types when it does explode.
+§eCreepers are nerfed§f (reduced blast damage) but
+do NOT follow the altitude limit — they still
+explode anywhere, just with less power.
+§fThis keeps surface builds safe from TNT griefing
+while still allowing TNT for deep mining.

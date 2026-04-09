@@ -1,0 +1,4 @@
+§6=== BetaExtraGen - World Generation ===
+The world naturally generates extra structures!
+Each has a §e5% chance§f per chunk to spawn.
+§eSee page: §fStructures

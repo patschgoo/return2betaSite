@@ -1,0 +1,7 @@
+§6=== Pickup ===
+Items on the ground are §eautomatically picked up§f
+when you walk near them!
+§fNo need to look directly at items or be right
+on top of them. Just walk nearby and they'll
+fly into your inventory.
+§fHandy for mining, farming, and mob grinding!

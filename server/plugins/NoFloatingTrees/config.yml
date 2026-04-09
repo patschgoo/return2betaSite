@@ -1,0 +1,39 @@
+# NoFloatingTrees v0.7.0 Configuration
+#
+# initial-delay-seconds: How long to wait after a trunk block is broken
+#   before starting removal (in seconds). Default: 5
+#
+# removal-mode: How tree blocks are removed.
+#   "instant"  - All blocks disappear at once after the delay.
+#   "gradual"  - Blocks disappear one by one over time, like leaf decay.
+#   Default: instant
+#
+# gradual-min-ticks: Minimum ticks between each block removal in gradual mode.
+#   20 ticks = 1 second. Default: 5 (0.25 seconds)
+#
+# gradual-max-ticks: Maximum ticks between each block removal in gradual mode.
+#   A random value between min and max is picked for each block.
+#   Default: 20 (1 second)
+#
+# remove-leaves: Whether to remove leaves along with logs.
+#   true  - Logs AND leaves are removed (no floating leaf patches).
+#   false - Only logs are removed, leaves decay naturally.
+#   Default: true
+#
+# max-tree-blocks: Maximum LOG blocks a tree can have.
+#   Trees with more logs than this are assumed to be player builds and skipped.
+#   Default: 200
+#
+# leaf-radius: How far from the nearest log a leaf can be to count as part
+#   of this tree (Manhattan distance). Matches vanilla leaf decay distance.
+#   Lower = tighter detection (won't grab neighbor tree's leaves).
+#   Higher = grabs more leaves but may overlap with adjacent trees.
+#   Default: 4
+
+leaf-radius: 4
+removal-mode: gradual
+gradual-min-ticks: 20
+max-tree-blocks: 200
+gradual-max-ticks: 100
+initial-delay-seconds: 15
+remove-leaves: true

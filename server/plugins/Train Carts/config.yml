@@ -1,0 +1,48 @@
+# In here you can change the settings for the TrainCarts plugin
+# Please note that the default settings are usually the best
+# Changing these settings can cause the plugin to fail
+# To reset the settings, remove this file or set 'use' to false to ignore these settings
+# ======================================================================================
+# cartDistance is the distance kept between normal/turned carts in a group
+# cartDistanceForcer is the factor applied to adjust this distance, too high and it will bump violently
+# nearCartDistanceFactor is the factor applied to the regular forcers if the carts are too close to each other
+# removeDerailedCarts sets if carts without tracks underneath are cleared from the group
+# maxCartSpeed is the maximum speed to use for trains. Use a value between 0 and ~0.4, > 0.4 can cause derailments!
+# maxCartDistance sets the distance at which carts are thrown out of their group
+# breakCombinedCarts sets if combined carts (e.g. PoweredMinecart) breaks up into multiple parts upon breaking (e.g. furnace and minecart)
+# spawnItemDrops sets if items are spawned when breaking a minecart
+# exitOffset is the relative offset of where a player is teleported when exiting a Minecart
+# pushAway settings are settings that push mobs, players, items and others away from a riding minecart
+#    atVelocity sets the velocity of the minecart at which it starts pushing others
+#    force sets the pushing force of a pushing Minecart
+#    pushMobs sets if mobs are pushed away
+#    pushPlayers sets if players are pushed away
+#    pushMisc sets if misc. entities, such as boats and dropped items, are pushed away
+# keepChunksLoaded sets if chunks are loaded near minecart Trains
+normal:
+    cartDistanceForcer: 0.2
+    cartDistance: 1.5
+spawnItemDrops: true
+useCoalFromStorageCart: false
+turned:
+    cartDistanceForcer: 0.3
+    cartDistance: 1.6
+use: true
+removeDerailedCarts: false
+exitOffset:
+    x: 0.0
+    y: 0.0
+    z: 0.0
+nearCartDistanceFactor: 1.4
+keepChunksLoaded: true
+maxCartDistance: 4.0
+poweredCartBoost: 0.1
+maxCartSpeed: 0.35
+breakCombinedCarts: false
+pushAway:
+    pushPlayer: false
+    pushMobs: false
+    atVelocity: 0.1
+    force: 0.2
+    pushPlayers: false
+    pushMisc: true

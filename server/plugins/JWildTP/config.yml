@@ -1,0 +1,17 @@
+worlds:
+    world:
+        minimum-radius: 10
+        maximum-radius: 15
+        center:
+            x: 0
+            z: 0
+        cool-down: 0
+        enabled: true
+    world_nether:
+        minimum-radius: 10
+        maximum-radius: 15
+        center:
+            x: 0
+            z: 0
+        cool-down: 0
+        enabled: false

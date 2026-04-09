@@ -1,0 +1,11 @@
+§6=== All Tutorials (world & info) ===
+§6--- World & Info Plugins ---
+§eMossyGrow §f- Cobble turns mossy over time
+§eCustomPortalSize §f- Build portals any size
+§eBetaExtraGen §f- Ruins, mines, ravines in the world
+§eNaturalGiants §f- Giant zombie spawns (5%)
+§eNaturalHumans §f- Hostile human NPCs (5%)
+§eSeasons §f- Summer/winter cycle
+§eMiningTNT §f- TNT altitude limit
+§eDynamicLight §f- Handheld lighting
+@/tuto GettingStarted AllTutorials4

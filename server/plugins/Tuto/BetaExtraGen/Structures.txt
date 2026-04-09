@@ -1,0 +1,8 @@
+§6=== BetaExtraGen - Structures ===
+§eRuins §f- Crumbling buildings to explore.
+§eAbandoned Mines §f- 4 blocks tall, up to 40 blocks
+deep underground. Watch your step!
+§eRavines §f- 40 blocks long, 30 deep, 4 wide at top.
+Deep crevasses in the terrain.
+§eRuined Nether Portals §f- Partially broken portals
+found in the overworld. Spooky!

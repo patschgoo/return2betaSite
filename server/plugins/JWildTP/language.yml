@@ -1,0 +1,11 @@
+teleport_unsuccessful: '&cUnable to find a safe location to teleport you to. Try again
+    later.'
+world_disabled: '&cSorry, WildTP in your current world is disabled'
+generic_invalid_world: '&cSorry, a world with that name couldn''t be located'
+teleport_successful: '&bYou have been randomly teleported'
+generic_error_player: '&4Sorry, an error occurred:&f %var1%'
+generic_no_save_data: '&4Sorry, Fundamentals has no information on that player.'
+no_permission: '&4Sorry, you don''t have permission for this command.'
+generic_error: '&4Sorry, an error occurred running that command, please contact staff!'
+unavailable_to_console: '&4Sorry, console can''t run this command.'
+player_not_found_full: '&4Can''t find a player called &9%username%'

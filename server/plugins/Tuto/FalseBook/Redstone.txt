@@ -1,0 +1,7 @@
+§6=== FalseBook - Logic Gates ===
+Write these on signs for redstone logic:
+§e[AND] [OR] [NOT] [XOR]
+§e[NAND] [NOR] [XNOR]
+§fConnect redstone to the sign as inputs.
+Output comes from the sign.
+Great for complex redstone circuits!

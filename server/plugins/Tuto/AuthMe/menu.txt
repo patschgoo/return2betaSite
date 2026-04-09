@@ -1,0 +1,6 @@
+§6=== AuthMe - Account Security ===
+§e/register <password> §f- Register (first join only)
+§e/login <password> §f- Log in each session
+§cYou have §e90 seconds§c to log in or you'll be kicked!
+Wrong password = instant kick.
+§fKeep your password safe and don't share it.

@@ -1,0 +1,8 @@
+§6=== SimpleClans - Teams ===
+Form teams with other players!
+§e/clan create <tag> <name> §f- Create a clan (§a$100§f)
+§e/clan invite <player> §f- Invite someone
+§e/clan chat §f- Toggle clan-only chat
+§e/clan info §f- View clan details
+§e/clan list §f- See all clans
+§eSee page: §fRules

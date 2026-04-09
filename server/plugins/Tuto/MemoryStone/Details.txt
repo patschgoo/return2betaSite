@@ -1,0 +1,8 @@
+§6=== MemoryStone - Details ===
+§eCasting Time: §f3 seconds (stand still!)
+§eCooldown: §f10 seconds between teleports
+§eFizzle Cooldown: §f5 seconds if interrupted
+§eCompass Uses: §f50 uses before it wears out
+§eDust Uses: §f10 uses per glowstone dust
+§fLightning strikes at start and end (visual only).
+§fYou need money to use Memory Stones!

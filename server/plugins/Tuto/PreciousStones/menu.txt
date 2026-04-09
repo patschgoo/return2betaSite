@@ -1,0 +1,5 @@
+§6=== PreciousStones - Force Fields ===
+Place special blocks to create invisible force fields!
+Buy them with §e/buy§f. They protect your base.
+§eSee pages: §fProtection, Safety, Traps, Movement, World, Notes
+@/tuto PreciousStones Protection

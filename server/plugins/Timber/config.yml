@@ -1,0 +1,9 @@
+sneakMode: 'on'
+maxLogBlocks: 25
+axes:
+    gold: true
+    diamond: true
+    iron: true
+    wood: true
+    stone: true
+autoReplant: true

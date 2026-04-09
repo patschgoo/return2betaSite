@@ -1,0 +1,27 @@
+log:
+    data: true
+    messages: true
+    files:
+        data: death_data.log
+        messages: death_messages.log
+    time:
+        format: MM/dd/yyyy HH:mm:ss z
+        stamp: true
+monsters:
+    skeleton: Skeleton
+    wolf: Wolf
+    pigzombie: PigZombie
+    zombie: Zombie
+    giant: Giant
+    spider: Spider
+    ghast: Ghast
+    creeper: Creeper
+    unknown: Unknown
+    monster: Monster
+    slime: Slime
+colors:
+    item: GOLD
+    name: DARK_AQUA
+    message: RED
+events:
+    only: false

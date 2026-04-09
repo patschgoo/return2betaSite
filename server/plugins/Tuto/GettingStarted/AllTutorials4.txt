@@ -1,0 +1,13 @@
+§6=== All Tutorials (more info) ===
+§eHeroicDeath §f- Funny death messages
+§eCookieHeal §f- Cookies heal you
+§eSleepPercent §f- Partial sleep to skip night
+§eAntiNetherRoof §f- Can't build on Nether ceiling
+§eNetherText §f- Coordinates when entering Nether
+§eBucketReturn §f- Empty buckets return to inventory
+§eSaddleDrop §f- Pigs drop their saddle
+§eNoFullHealthEating §f- No eating at full HP
+§eNoFloatingTrees §f- Floating treetops removed
+§eBlocksOnGlass §f- Place blocks on glass
+§ePickup §f- Auto item pickup  §eVoiceChat §f- Voice chat
+§eReporting §f- Report bad players  §eBlacklist §f- Banned items

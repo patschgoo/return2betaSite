@@ -1,0 +1,9 @@
+§6=== World - Terrain & Blocks ===
+§eMossyGrow: §fCobble turns mossy over time!
+Near mossy cobble: ~3 min. Near water: ~5 min.
+§eCustom Portals: §fNether portals from 1x2 to 23x23!
+§eBetaExtraGen: §fRuins, mines, ravines, ruined portals
+spawn with §e5%§f chance per chunk.
+§eBlocksOnGlass: §fBuild on top of glass blocks!
+§eGetStairs: §fStairs placed and retrieved more freely.
+§ePickup: §fItems auto-collected when you walk near them.

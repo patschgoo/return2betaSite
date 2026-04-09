@@ -1,0 +1,4 @@
+§6=== Quests - Earn Money & Items ===
+Talk to §eQuestMaster§f or §eAdventurer§f NPCs for quests.
+You can have up to §e3 active quests§f at once.
+§eSee pages: §fTypes, Rewards

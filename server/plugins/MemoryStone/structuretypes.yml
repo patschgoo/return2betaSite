@@ -1,0 +1,375 @@
+structuretypes:
+-   metadata:
+        distanceLimit: '0'
+        memorizecost: '200'
+        global: 'false'
+        type: MEMORYSTONE
+        permissionRequired: memorystone.create.local
+        teleportcost: '50'
+        buildcost: '1000'
+    name: Memory Stone
+    rotator: NONE
+    structure:
+    -   material: STONE
+        x: 1
+        y: 0
+        z: 2
+    -   material: STONE
+        x: 0
+        y: 0
+        z: 1
+    -   material: STONE
+        x: 0
+        y: 0
+        z: 0
+    -   material: STONE
+        x: 0
+        y: 0
+        z: 2
+    -   material: STONE
+        x: 1
+        y: 0
+        z: 1
+    -   material: OBSIDIAN
+        x: 1
+        y: 2
+        z: 1
+    -   material: STONE
+        x: 2
+        y: 0
+        z: 1
+    -   material: STONE
+        x: 1
+        y: 0
+        z: 0
+    -   material: OBSIDIAN
+        x: 1
+        y: 1
+        z: 1
+    -   material: OBSIDIAN
+        x: 1
+        y: 3
+        z: 1
+    -   material: STONE
+        x: 2
+        y: 0
+        z: 0
+    -   material: STONE
+        x: 2
+        y: 0
+        z: 2
+-   metadata:
+        distanceLimit: '0'
+        memorizecost: '750'
+        type: MEMORYSTONE
+        permissionRequired: memorystone.create.crossworld
+        teleportcost: '75'
+        buildcost: '3000'
+        crossworld: 'true'
+    name: Crossworld Stone
+    rotator: NONE
+    structure:
+    -   material: IRON_BLOCK
+        x: 2
+        y: 0
+        z: 0
+    -   material: IRON_BLOCK
+        x: 1
+        y: 0
+        z: 0
+    -   material: IRON_BLOCK
+        x: 1
+        y: 0
+        z: 2
+    -   material: OBSIDIAN
+        x: 1
+        y: 3
+        z: 1
+    -   material: OBSIDIAN
+        x: 1
+        y: 2
+        z: 1
+    -   material: IRON_BLOCK
+        x: 0
+        y: 0
+        z: 1
+    -   material: IRON_BLOCK
+        x: 0
+        y: 0
+        z: 0
+    -   material: IRON_BLOCK
+        x: 1
+        y: 0
+        z: 1
+    -   material: OBSIDIAN
+        x: 1
+        y: 1
+        z: 1
+    -   material: IRON_BLOCK
+        x: 0
+        y: 0
+        z: 2
+    -   material: IRON_BLOCK
+        x: 2
+        y: 0
+        z: 1
+    -   material: IRON_BLOCK
+        x: 2
+        y: 0
+        z: 2
+-   metadata:
+        distanceLimit: '0'
+        memorizecost: '500'
+        global: 'true'
+        type: MEMORYSTONE
+        permissionRequired: memorystone.create.global
+        teleportcost: '65'
+        buildcost: '2000'
+    name: Global Stone
+    rotator: NONE
+    structure:
+    -   material: GOLD_BLOCK
+        x: 2
+        y: 0
+        z: 2
+    -   material: GOLD_BLOCK
+        x: 1
+        y: 0
+        z: 1
+    -   material: OBSIDIAN
+        x: 2
+        y: 1
+        z: 2
+    -   material: GOLD_BLOCK
+        x: 1
+        y: 0
+        z: 2
+    -   material: GOLD_BLOCK
+        x: 2
+        y: 0
+        z: 1
+    -   material: STEP
+        x: 0
+        y: 0
+        z: 0
+    -   material: OBSIDIAN
+        x: 2
+        y: 2
+        z: 2
+    -   material: GOLD_BLOCK
+        x: 3
+        y: 0
+        z: 3
+    -   material: GOLD_BLOCK
+        x: 3
+        y: 0
+        z: 1
+    -   material: STEP
+        x: 4
+        y: 0
+        z: 4
+    -   material: STEP
+        x: 4
+        y: 0
+        z: 1
+    -   material: STEP
+        x: 0
+        y: 0
+        z: 4
+    -   material: STEP
+        x: 0
+        y: 0
+        z: 3
+    -   material: STEP
+        x: 4
+        y: 0
+        z: 0
+    -   material: GOLD_BLOCK
+        x: 1
+        y: 0
+        z: 3
+    -   material: GOLD_BLOCK
+        x: 3
+        y: 0
+        z: 2
+    -   material: STEP
+        x: 4
+        y: 0
+        z: 3
+    -   material: OBSIDIAN
+        x: 2
+        y: 3
+        z: 2
+    -   material: STEP
+        x: 3
+        y: 0
+        z: 4
+    -   material: GOLD_BLOCK
+        x: 2
+        y: 0
+        z: 3
+    -   material: DIAMOND_BLOCK
+        x: 2
+        y: 4
+        z: 2
+    -   material: STEP
+        x: 1
+        y: 0
+        z: 0
+    -   material: STEP
+        x: 3
+        y: 0
+        z: 0
+    -   material: STEP
+        x: 1
+        y: 0
+        z: 4
+    -   material: STEP
+        x: 0
+        y: 0
+        z: 1
+-   metadata:
+        distanceLimit: '0'
+        memorizecost: '1000'
+        global: 'true'
+        type: MEMORYSTONE
+        permissionRequired: memorystone.create.crossworldglobal
+        teleportcost: '150'
+        buildcost: '5000'
+        crossworld: 'true'
+    name: Global Crossworld Stone
+    rotator: NONE
+    structure:
+    -   material: DIAMOND_BLOCK
+        x: 2
+        y: 1
+        z: 2
+    -   material: STEP
+        x: 1
+        y: 0
+        z: 0
+    -   material: STEP
+        x: 4
+        y: 0
+        z: 4
+    -   material: DIAMOND_BLOCK
+        x: 2
+        y: 4
+        z: 2
+    -   material: GOLD_BLOCK
+        x: 2
+        y: 0
+        z: 2
+    -   material: GOLD_BLOCK
+        x: 3
+        y: 0
+        z: 2
+    -   material: GOLD_BLOCK
+        x: 1
+        y: 0
+        z: 1
+    -   material: GOLD_BLOCK
+        x: 3
+        y: 0
+        z: 3
+    -   material: DIAMOND_BLOCK
+        x: 2
+        y: 2
+        z: 2
+    -   material: GOLD_BLOCK
+        x: 2
+        y: 0
+        z: 1
+    -   material: DIAMOND_BLOCK
+        x: 2
+        y: 3
+        z: 2
+    -   material: STEP
+        x: 0
+        y: 0
+        z: 4
+    -   material: STEP
+        x: 4
+        y: 0
+        z: 3
+    -   material: STEP
+        x: 0
+        y: 0
+        z: 0
+    -   material: STEP
+        x: 4
+        y: 0
+        z: 1
+    -   material: GOLD_BLOCK
+        x: 2
+        y: 0
+        z: 3
+    -   material: STEP
+        x: 4
+        y: 0
+        z: 0
+    -   material: GOLD_BLOCK
+        x: 1
+        y: 0
+        z: 3
+    -   material: GOLD_BLOCK
+        x: 1
+        y: 0
+        z: 2
+    -   material: STEP
+        x: 3
+        y: 0
+        z: 4
+    -   material: STEP
+        x: 3
+        y: 0
+        z: 0
+    -   material: STEP
+        x: 0
+        y: 0
+        z: 1
+    -   material: STEP
+        x: 1
+        y: 0
+        z: 4
+    -   material: STEP
+        x: 0
+        y: 0
+        z: 3
+    -   material: GOLD_BLOCK
+        x: 3
+        y: 0
+        z: 1
+-   metadata:
+        distanceLimit: '128'
+        global: 'false'
+        type: NOTELEPORT
+        permissionRequired: memorystone.create.noteleport
+        buildcost: '10000'
+    name: NoTeleport Stone
+    rotator: NONE
+    structure:
+    -   material: DIAMOND_BLOCK
+        x: 1
+        y: 0
+        z: 1
+    -   material: GOLD_BLOCK
+        x: 2
+        y: 0
+        z: 0
+    -   material: GOLD_BLOCK
+        x: 2
+        y: 0
+        z: 2
+    -   material: GOLD_BLOCK
+        x: 0
+        y: 0
+        z: 0
+    -   material: GOLD_BLOCK
+        x: 0
+        y: 0
+        z: 2
+    -   material: DIAMOND_BLOCK
+        x: 1
+        y: 1
+        z: 1

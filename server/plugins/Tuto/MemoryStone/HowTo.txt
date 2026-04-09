@@ -1,0 +1,8 @@
+§6=== MemoryStone - How To Use ===
+§e1. §fFind a Memory Stone (sign says "Memory Stone" in green).
+§e2. §fRight-click the sign to MEMORIZE it (§a$200§f).
+§e3. §fHold a §eCOMPASS§f and right-click to open teleport menu.
+§e4. §fSelect a destination to teleport (§a$50 per use§f).
+§6--- Stone-to-Stone ---
+Use §eGLOWSTONE DUST§f at a Memory Stone to teleport
+directly to another stone (max 10 uses per dust).

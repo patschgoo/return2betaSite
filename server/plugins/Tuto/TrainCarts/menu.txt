@@ -1,0 +1,11 @@
+§6=== TrainCarts - Linked Minecarts ===
+Link multiple minecarts together into a §eTRAIN§f!
+Carts automatically couple when within §e1.5 blocks§f
+of each other on the same track.
+§6Details:
+§eMax link distance: §f4.0 blocks (breaks if exceeded)
+§eMax train speed: §f0.35
+§eChunks stay loaded§f around trains (no despawn!)
+§fCarts on curves link at §e1.6 blocks§f.
+§fGreat for transporting lots of items or giving
+rides to multiple players at once!
