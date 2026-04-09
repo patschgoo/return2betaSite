@@ -1,7 +1,0 @@
-§6=== PreciousStones - Important Notes ===
-§fSneaking (Shift) bypasses damage fields.
-Mushrooms, flowers, fire, crops bypass protection.
-§cChests, crafting tables, furnaces CANNOT be protected
-by PreciousStones. Use LWC for those instead!
-§fFields from different players cannot overlap.
-§cIf you don't log in for 45 days, fields get purged.

@@ -1,7 +1,0 @@
-§6=== More Tips ===
-§e7. §fDeath chest lasts only §c150 sec§f! Use §e/back§f fast!
-§e8. §fSneak + chop bottom log = fell whole tree (need axe!)
-§e9. §fCobblestone turns mossy over time. Free mossy cobble!
-§e10. §fNo fire spread - wooden houses are safe from fire.
-§e11. §fUse §e/ignore <player>§f to block harassers.
-§e12. §fUse §e/helpop <message>§f to contact staff.

@@ -1,3 +1,0 @@
-§6=== World Features ===
-Things that happen automatically in the world!
-§eSee pages: §fTerrain, Mobs, Combat, Other

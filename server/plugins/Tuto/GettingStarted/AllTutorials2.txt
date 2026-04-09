@@ -1,9 +1,0 @@
-§6=== All Tutorials (continued) ===
-§6--- More Interactive ---
-§eCrafting §f- Chainmail & stacking  §eTimber §f- Chop trees
-§eBitTweaks §f- Gameplay changes  §eShowcase §f- Shops
-§eAuthMe §f- Login  §eDeadMansChest §f- Death chests
-§eDynmap §f- Web map  §eCommandSigns §f- Sign commands
-§eWirelessRedstone §f- Wireless signals
-§eTrainCarts §f- Link minecarts  §eWorldGuard §f- Regions
-@/tuto GettingStarted AllTutorials3

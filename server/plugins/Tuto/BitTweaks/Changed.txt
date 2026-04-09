@@ -1,8 +1,0 @@
-§6=== BitTweaks - What's Changed ===
-§cWater does NOT prevent fall damage! BE CAREFUL!
-§fCobwebs DO prevent fall damage though.
-§fBlock drops are fixed (correct items drop).
-§fPig saddles drop correctly when pigs die.
-§fSlime splitting works correctly.
-§fHoe-on-grass for seeds is §cdisabled§f.
-§fPig zombies do NOT drop items when killed.

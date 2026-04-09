@@ -1,8 +1,0 @@
-§6=== World - Combat & Death ===
-§ePvP is ENABLED. §fPlayers can fight each other.
-§eDeath Chest: §fA chest spawns with your items + sign.
-NOT locked, but other players can't loot it.
-§cDisappears after 150 seconds! Use /back fast!
-§cWater does NOT prevent fall damage! (BitTweaks)
-§fFire spread, lightning fire, lava fire: all blocked.
-§eHeroicDeath: §fFunny death messages in chat.

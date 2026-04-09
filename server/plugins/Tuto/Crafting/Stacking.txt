@@ -1,8 +1,0 @@
-§6=== Stackable Items ===
-Some normally non-stackable items now stack!
-§eFood items §f- stack to §e8
-§eBoats, Minecarts §f- stack to §e8
-§eSigns, Doors §f- stack to §e16
-§eBuckets §f- stack to §e16
-§eWool §f- stack to §e64
-§fTools and weapons still stack to 1 (unchanged).

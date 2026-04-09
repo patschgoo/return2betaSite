@@ -1,5 +1,0 @@
-§6=== Economy - What Costs Money ===
-§eLWC Locks: §f/cprivate=$100, /cpassword=$75, /cpublic=$25
-§eMemoryStone: §fMemorize=$200, Teleport=$50 per use
-§eClans: §fCreate=$100, Verify=$1,000
-§fEarn money by doing quests and selling items!

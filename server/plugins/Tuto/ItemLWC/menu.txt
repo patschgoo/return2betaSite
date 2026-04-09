@@ -1,4 +1,0 @@
-§6=== ItemLWC - Lock Individual Items ===
-Lock specific ITEMS inside chests, not the whole chest.
-Uses sneak-punching and special items to interact.
-§eSee pages: §fHowTo, Types, Expiration

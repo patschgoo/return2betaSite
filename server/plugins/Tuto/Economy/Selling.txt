@@ -1,6 +1,0 @@
-§6=== Economy - Selling Items ===
-§e/sell <item> §f- Sell items you're holding
-§e/worth <item> §f- Check how much an item is worth
-§e/balance §f- Check your current balance
-§e/pay <player> <amount> §f- Send money to someone
-§fUse §e/worth§f to look up prices before selling!

@@ -1,6 +1,0 @@
-§6=== BlocksOnGlass ===
-You can place blocks §eon top of glass§f!
-Build glass floors, greenhouses, skylights,
-aquariums, and display cases with ease.
-§fNormally in Beta 1.7.3 you can't place blocks
-on glass. This plugin fixes that!

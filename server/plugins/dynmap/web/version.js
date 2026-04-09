@@ -1,1 +1,0 @@
-var dynmapversion = "0.22.1";

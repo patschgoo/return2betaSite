@@ -1,6 +1,0 @@
-§6=== SaddleDrop ===
-Pigs drop their §esaddle§f when killed!
-§fIn vanilla Beta 1.7.3, saddles are lost forever
-once placed on a pig.
-§fWith this plugin, killing a saddled pig gives
-the saddle back. No more wasted saddles!

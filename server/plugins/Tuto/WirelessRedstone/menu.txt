@@ -1,5 +1,0 @@
-§6=== WirelessRedstone ===
-Create wireless redstone signals across any distance!
-Place §esigns§f to act as transmitters and receivers.
-§fYou have the §eWirelessRedstone.createsign§f permission.
-Ask experienced players for setup instructions.

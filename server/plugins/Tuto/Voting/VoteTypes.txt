@@ -1,8 +1,0 @@
-§6=== Vote Types ===
-§esun §f- Weather to sunny (§a60%§f to pass)
-§erain §f- Weather to rainy (§a80%§f to pass)
-§eday §f- Time to day (§a60%§f to pass)
-§enight §f- Time to night (§a80%§f to pass)
-§ekick §f- Kick a player (§a70%§f to pass)
-Each vote lasts §e60 seconds§f.
-There is a cooldown between votes.

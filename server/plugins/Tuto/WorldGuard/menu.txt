@@ -1,6 +1,0 @@
-§6=== WorldGuard - Region Protection ===
-Claim regions to protect your builds from griefing.
-Ask a §eModerator§f to help set up a region.
-§fRegions prevent others from building, breaking,
-or using blocks in your claimed area.
-§fThis is great for large builds and shared bases!

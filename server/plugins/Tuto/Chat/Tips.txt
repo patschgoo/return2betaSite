@@ -1,6 +1,0 @@
-§6=== Chat Tips ===
-§fChat is global - everyone sees your messages.
-§fYou auto-go AFK after §e5 minutes§f of not moving.
-§fUse §e/ignore§f to block harassers.
-§fUse §e/helpop§f to contact online staff.
-§f§e/trasher§f opens a disposal chest for junk items.

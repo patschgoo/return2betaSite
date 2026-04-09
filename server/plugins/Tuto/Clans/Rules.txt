@@ -1,8 +1,0 @@
-§6=== SimpleClans - Rules ===
-§eClan tag: §f2-5 characters
-§eClan size: §f2-25 members
-§eVerification: §f$1,000 for full features
-§fYou can set rivals and allies with other clans.
-§6Kill Tracking:
-§fRival kills = 1.5x weight
-Civilian kills = 0.5x weight

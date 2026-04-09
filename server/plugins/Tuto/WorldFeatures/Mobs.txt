@@ -1,9 +1,0 @@
-§6=== World - Special Mobs ===
-§eGIANTS: §f5% chance to spawn instead of normal mob.
-200 HP, 10 damage per hit. §c25% chance to breathe
-fire: 5 fireballs, 8-block range! §fBurn in daylight.
-§aDrops: 12 Bone + 3 Diamonds!
-§eHOSTILE HUMANS: §f10% spawn chance. 67% carry weapons
-and/or armor (leather to §ediamond§f). 33% spawn naked.
-§f20% drop chance per gear piece. Kill them for loot!
-§fAll mobs spawn naturally, including ghasts and slimes.

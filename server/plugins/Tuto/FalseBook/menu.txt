@@ -1,4 +1,0 @@
-§6=== FalseBook - Mechanics & Minecarts ===
-FalseBook turns blocks and signs into machines!
-Bridges, doors, gates, logic gates, and minecart systems.
-§eSee pages: §fBridges, Doors, Redstone, Minecarts, MinecartBlocks, ChatRooms

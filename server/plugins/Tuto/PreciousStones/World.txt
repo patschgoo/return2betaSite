@@ -1,8 +1,0 @@
-§6=== PreciousStones - World Effect Blocks ===
-§e[Mob Spawner] §f(Block 52) - SPAWN PREVENTER
-Radius: 20. No mobs or animals spawn here.
-§e[Lit Furnace] §f(Block 62) - AUTO FORESTER
-Radius: 20, Height: 15. Auto-grows trees!
-§e[Diamond Ore] §f(Block 56) - GRIEF REVERT
-Radius: 20, Height: 15. Revert grief damage!
-§a/buy diamondore ($250)
