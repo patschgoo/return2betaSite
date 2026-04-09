@@ -1,0 +1,5 @@
+§6=== Mail System ===
+Send messages to offline players!
+§e/mail send <player> <message> §f- Send mail
+§e/mail read §f- Read your mail
+§e/mail clear §f- Clear your mailbox

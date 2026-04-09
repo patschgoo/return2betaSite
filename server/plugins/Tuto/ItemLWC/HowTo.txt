@@ -1,0 +1,8 @@
+§6=== ItemLWC - How To Use ===
+§e1. §fLook at a chest/furnace/dispenser.
+§e2. §fHold a §eLEVER§f and SNEAK-PUNCH (Shift+Click) the block.
+§e3. §fA menu appears in chat. Type the number to choose.
+§6--- Special Items ---
+§eLever (ID 69) §f- Opens protection menu (sneak-punch)
+§eIron Ingot (ID 265) §f- Unlock password-protected items
+§eClock (ID 347) §f- Check time left on a lock

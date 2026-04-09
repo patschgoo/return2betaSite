@@ -1,0 +1,6 @@
+default-size: 5
+carpet-light: 89
+center-light: true
+carpet: 20
+max-size: 15
+crouch-descent: true

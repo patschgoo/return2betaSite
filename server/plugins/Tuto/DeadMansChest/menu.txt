@@ -1,0 +1,8 @@
+§6=== DeadMansChest - Death Chest ===
+When you die, a §echest§f spawns with all your items!
+A §esign§f with your name is placed on it.
+§cThe chest is NOT locked and has NO beacon tower.
+§fOther players cannot loot your chest though.
+Items that don't fit drop on the ground.
+§cThe chest disappears after §e150 seconds§c (2.5 min)!
+§fUse §e/back§f quickly to get to your death location!

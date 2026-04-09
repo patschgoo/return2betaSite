@@ -1,0 +1,7 @@
+§6=== FalseBook - Bridges & Gates ===
+§e[Bridge] §fon a sign: extends up to 20 blocks long,
+5 blocks wide. Toggle with redstone or clicking.
+§e[Gate] §fon a sign: made of Fence (block 85), up to
+20 blocks wide. Great for castle entrances!
+§6Materials: §fStone, Dirt, Cobblestone, Planks, Logs,
+Leaves, Glass, Sandstone, Double Slab, Half Slab.

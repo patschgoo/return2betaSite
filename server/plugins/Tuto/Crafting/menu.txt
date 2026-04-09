@@ -1,0 +1,6 @@
+§6=== Crafting Changes ===
+§eSee pages: §fChainmail, Stacking
+§6Chainmail Armor is CRAFTABLE!
+Normally uncraftable in Minecraft. Here you can!
+Each piece uses §eIron Ingots + String§f in the
+normal armor pattern.

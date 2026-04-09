@@ -1,0 +1,497 @@
+# QuestPlus Pools Configuration
+# Each entry has: name, min, max, money-min, money-max, items
+# Difficulty reflects rarity, danger level and accessibility
+# Amounts are inversely proportional to difficulty
+# min-tier: minimum difficulty tier for entry to appear (0=any, 1=Easy+, 2=Medium+, 3=Hard+)
+#
+# Economy reference points:
+#   /cpublic $25, /cpassword $75, /cprivate $100
+#   MemoryStone teleport $50, memorize $200, crossworld memorize $750
+#   Healer/Wizard $100, Clan verify $1,000
+#   Player starts with $30 (iConomy)
+
+collect:
+  time-min-seconds: 180
+  time-max-seconds: 600
+  items:
+    4:
+      name: Cobblestone
+      min: 16
+      max: 64
+      difficulty: 0.3
+      min-tier: 0
+      money-min: 8.0
+      money-max: 25.0
+      items: true
+    12:
+      name: Sand
+      min: 16
+      max: 48
+      difficulty: 0.3
+      min-tier: 0
+      money-min: 8.0
+      money-max: 25.0
+      items: true
+    17:
+      name: Wood
+      min: 16
+      max: 64
+      difficulty: 0.3
+      min-tier: 0
+      money-min: 8.0
+      money-max: 30.0
+      items: true
+    296:
+      name: Wheat
+      min: 12
+      max: 48
+      difficulty: 0.4
+      min-tier: 0
+      money-min: 10.0
+      money-max: 35.0
+      items: true
+    263:
+      name: Coal
+      min: 8
+      max: 24
+      difficulty: 0.5
+      min-tier: 0
+      money-min: 12.0
+      money-max: 40.0
+      items: true
+    352:
+      name: Bone
+      min: 4
+      max: 16
+      difficulty: 0.5
+      min-tier: 0
+      money-min: 12.0
+      money-max: 40.0
+      items: true
+    287:
+      name: String
+      min: 4
+      max: 12
+      difficulty: 0.6
+      min-tier: 0
+      money-min: 15.0
+      money-max: 45.0
+      items: true
+    334:
+      name: Leather
+      min: 4
+      max: 12
+      difficulty: 0.6
+      min-tier: 0
+      money-min: 15.0
+      money-max: 50.0
+      items: true
+    331:
+      name: Redstone
+      min: 6
+      max: 20
+      difficulty: 0.7
+      min-tier: 0
+      money-min: 18.0
+      money-max: 55.0
+      items: true
+    289:
+      name: Gunpowder
+      min: 3
+      max: 10
+      difficulty: 0.8
+      min-tier: 0
+      money-min: 20.0
+      money-max: 60.0
+      items: true
+    265:
+      name: Iron Ingot
+      min: 3
+      max: 12
+      difficulty: 1.0
+      min-tier: 1
+      money-min: 25.0
+      money-max: 75.0
+      items: true
+    348:
+      name: Glowstone Dust
+      min: 3
+      max: 10
+      difficulty: 1.3
+      min-tier: 1
+      money-min: 25.0
+      money-max: 80.0
+      items: true
+    341:
+      name: Slimeball
+      min: 2
+      max: 6
+      difficulty: 1.4
+      min-tier: 1
+      money-min: 25.0
+      money-max: 75.0
+      items: true
+    266:
+      name: Gold Ingot
+      min: 2
+      max: 6
+      difficulty: 1.5
+      min-tier: 2
+      money-min: 35.0
+      money-max: 100.0
+      items: true
+    264:
+      name: Diamond
+      min: 1
+      max: 3
+      difficulty: 2.5
+      min-tier: 3
+      money-min: 60.0
+      money-max: 175.0
+      items: true
+
+kill:
+  time-min-seconds: 180
+  time-max-seconds: 600
+  mobs:
+    zombie:
+      name: Zombie
+      min: 3
+      max: 12
+      difficulty: 0.5
+      min-tier: 0
+      money-min: 12.0
+      money-max: 40.0
+      items: true
+    spider:
+      name: Spider
+      min: 3
+      max: 10
+      difficulty: 0.6
+      min-tier: 0
+      money-min: 15.0
+      money-max: 50.0
+      items: true
+    skeleton:
+      name: Skeleton
+      min: 2
+      max: 8
+      difficulty: 0.8
+      min-tier: 0
+      money-min: 20.0
+      money-max: 60.0
+      items: true
+    creeper:
+      name: Creeper
+      min: 2
+      max: 6
+      difficulty: 1.2
+      min-tier: 1
+      money-min: 25.0
+      money-max: 75.0
+      items: true
+    slime:
+      name: Slime
+      min: 2
+      max: 6
+      difficulty: 1.4
+      min-tier: 1
+      money-min: 25.0
+      money-max: 80.0
+      items: true
+    pigzombie:
+      name: Pig Zombie
+      min: 2
+      max: 5
+      difficulty: 1.8
+      min-tier: 2
+      money-min: 35.0
+      money-max: 100.0
+      items: true
+    ghast:
+      name: Ghast
+      min: 1
+      max: 3
+      difficulty: 2.5
+      min-tier: 3
+      money-min: 50.0
+      money-max: 150.0
+      items: true
+
+kill-animal:
+  time-min-seconds: 120
+  time-max-seconds: 480
+  mobs:
+    chicken:
+      name: Chicken
+      min: 5
+      max: 15
+      difficulty: 0.3
+      money-min: 5.0
+      money-max: 20.0
+      items: true
+    cow:
+      name: Cow
+      min: 4
+      max: 12
+      difficulty: 0.4
+      money-min: 8.0
+      money-max: 25.0
+      items: true
+    pig:
+      name: Pig
+      min: 4
+      max: 12
+      difficulty: 0.4
+      money-min: 8.0
+      money-max: 25.0
+      items: true
+    sheep:
+      name: Sheep
+      min: 4
+      max: 12
+      difficulty: 0.4
+      money-min: 8.0
+      money-max: 25.0
+      items: true
+    squid:
+      name: Squid
+      min: 2
+      max: 8
+      difficulty: 0.7
+      money-min: 12.0
+      money-max: 40.0
+      items: true
+    wolf:
+      name: Wolf
+      min: 2
+      max: 5
+      difficulty: 0.9
+      money-min: 18.0
+      money-max: 50.0
+      items: true
+
+mine:
+  time-min-seconds: 120
+  time-max-seconds: 600
+  blocks:
+    17:
+      name: Wood
+      min: 10
+      max: 32
+      difficulty: 0.3
+      min-tier: 0
+      money-min: 8.0
+      money-max: 30.0
+      items: true
+    16:
+      name: Coal Ore
+      min: 8
+      max: 24
+      difficulty: 0.4
+      min-tier: 0
+      money-min: 10.0
+      money-max: 35.0
+      items: true
+    15:
+      name: Iron Ore
+      min: 3
+      max: 12
+      difficulty: 0.8
+      min-tier: 0
+      money-min: 20.0
+      money-max: 65.0
+      items: true
+    73:
+      name: Redstone Ore
+      min: 4
+      max: 12
+      difficulty: 1.0
+      min-tier: 1
+      money-min: 20.0
+      money-max: 65.0
+      items: true
+    21:
+      name: Lapis Lazuli Ore
+      min: 2
+      max: 8
+      difficulty: 1.3
+      min-tier: 1
+      money-min: 25.0
+      money-max: 80.0
+      items: true
+    14:
+      name: Gold Ore
+      min: 2
+      max: 6
+      difficulty: 1.5
+      min-tier: 2
+      money-min: 35.0
+      money-max: 100.0
+      items: true
+    49:
+      name: Obsidian
+      min: 3
+      max: 10
+      difficulty: 2.0
+      min-tier: 2
+      money-min: 35.0
+      money-max: 110.0
+      items: true
+    56:
+      name: Diamond Ore
+      min: 1
+      max: 4
+      difficulty: 2.5
+      min-tier: 3
+      money-min: 60.0
+      money-max: 175.0
+      items: true
+
+place:
+  time-min-seconds: 120
+  time-max-seconds: 480
+  blocks:
+    3:
+      name: Dirt
+      min: 16
+      max: 64
+      difficulty: 0.3
+      min-tier: 0
+      money-min: 5.0
+      money-max: 18.0
+      items: true
+    4:
+      name: Cobblestone
+      min: 16
+      max: 64
+      difficulty: 0.3
+      min-tier: 0
+      money-min: 5.0
+      money-max: 18.0
+      items: true
+    5:
+      name: Planks
+      min: 16
+      max: 48
+      difficulty: 0.4
+      min-tier: 0
+      money-min: 8.0
+      money-max: 25.0
+      items: true
+    1:
+      name: Stone
+      min: 8
+      max: 32
+      difficulty: 0.6
+      min-tier: 0
+      money-min: 10.0
+      money-max: 35.0
+      items: true
+    24:
+      name: Sandstone
+      min: 8
+      max: 24
+      difficulty: 0.6
+      min-tier: 0
+      money-min: 12.0
+      money-max: 40.0
+      items: true
+    45:
+      name: Bricks
+      min: 4
+      max: 16
+      difficulty: 1.0
+      min-tier: 1
+      money-min: 18.0
+      money-max: 55.0
+      items: true
+
+kill-player:
+  amount-min: 1
+  amount-max: 2
+  time-min-seconds: 300
+  time-max-seconds: 1200
+  money-min: 40.0
+  money-max: 150.0
+  items: true
+
+kill-giant:
+  time-min-seconds: 600
+  time-max-seconds: 1200
+  mobs:
+    giant:
+      name: Giant
+      min: 1
+      max: 1
+      difficulty: 3.0
+      min-tier: 3
+      money-min: 75.0
+      money-max: 225.0
+      items: true
+
+kill-human:
+  time-min-seconds: 180
+  time-max-seconds: 600
+  npcs:
+    any:
+      name: Human
+      min: 1
+      max: 4
+      difficulty: 1.2
+      min-tier: 0
+      money-min: 15.0
+      money-max: 60.0
+      items: true
+
+multi-objective-chance: 25
+
+# Reward item pool
+# min-tier: minimum difficulty tier to receive this reward (0=any, 1=Easy+, 2=Medium+, 3=Hard+)
+rewards:
+  items:
+    287:
+      name: String
+      min: 2
+      max: 6
+      min-tier: 0
+    352:
+      name: Bone
+      min: 2
+      max: 6
+      min-tier: 0
+    265:
+      name: Iron Ingot
+      min: 1
+      max: 5
+      min-tier: 0
+    266:
+      name: Gold Ingot
+      min: 1
+      max: 3
+      min-tier: 1
+    331:
+      name: Redstone
+      min: 3
+      max: 10
+      min-tier: 1
+    348:
+      name: Glowstone Dust
+      min: 1
+      max: 5
+      min-tier: 2
+    341:
+      name: Slimeball
+      min: 1
+      max: 3
+      min-tier: 2
+    264:
+      name: Diamond
+      min: 1
+      max: 2
+      min-tier: 3
+    322:
+      name: Golden Apple
+      min: 1
+      max: 1
+      min-tier: 3

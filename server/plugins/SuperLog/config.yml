@@ -1,0 +1,14 @@
+send-message-when-TNT-is-placed: false
+create-individual-player-logs: false
+memory-in-MB-until-new-command-logs-file-is-created: 50.0
+memory-in-MB-until-new-[player]-logs-file-is-created: 50.0
+log-bucket-emptying-and-filling: true
+make-individual-player-logs: false
+send-message-when-TNT-is-ignited: false
+log-block-placement: true
+log-commands: true
+send-message-when-Flint_and_Steel-is-used: false
+log-chest-openings: true
+memory-in-MB-until-new-block-logs-file-is-created: 50.0
+log-block-breaking: true
+memory-in-MB-until-new-chest-logs-file-is-created: 50.0

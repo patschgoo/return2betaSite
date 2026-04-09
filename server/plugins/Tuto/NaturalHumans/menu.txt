@@ -1,0 +1,7 @@
+§6=== NaturalHumans ===
+§c10% chance§f a hostile Human NPC spawns in the world!
+Replaces: Zombies, Skeletons, Spiders, Creepers,
+Pigs, Cows, Sheep, and Chickens.
+§eSee pages: §fEquipment, Drops
+§fWatch out for the armored ones — they hit hard!
+They count for multi-objective quest kills.

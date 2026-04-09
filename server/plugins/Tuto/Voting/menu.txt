@@ -1,0 +1,6 @@
+§6=== Voting System ===
+Players can vote on server changes!
+§e/vote <type> §f- Start a vote
+§e/vote yes §f/ §e/vote no §f- Cast your vote
+§e/vote list §f- See available vote types
+§eSee page: §fVoteTypes

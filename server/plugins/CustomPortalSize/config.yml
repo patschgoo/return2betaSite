@@ -1,0 +1,9 @@
+# CustomPortal Configuration
+# Minimum portal interior width (default vanilla is 2)
+min-width: 1
+# Maximum portal interior width
+max-width: 23
+# Minimum portal interior height (must be at least 2 for a player to pass through)
+min-height: 2
+# Maximum portal interior height
+max-height: 23

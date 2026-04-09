@@ -1,0 +1,6 @@
+§6=== CookieHeal ===
+Eating a §ecookie§f heals you!
+§fCookies restore health on this server, making them
+a useful healing item to carry around.
+§fBake cookies with wheat and cocoa beans,
+then eat them to heal up during or after combat!

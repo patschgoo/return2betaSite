@@ -1,0 +1,8 @@
+§6=== Quests - Rewards ===
+§eMoney: §f$5 (easy) up to $300 (hard)
+§eItems: §fIron, Gold, Redstone, Glowstone, Diamonds,
+Golden Apples
+§eDifficulty: §fTier 0 (easy) to Tier 4 (legendary)
+Higher tier = bigger rewards but harder objectives.
+§fLeaderboard resets every week (168 hours).
+A global quest appears every 60 minutes for everyone!

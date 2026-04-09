@@ -1,0 +1,6 @@
+§6=== Reporting Bad Players ===
+§e/report <player> <reason> §f- Report a rule breaker
+You can report without limits as a Member.
+Reports are stored in a database and mods review
+them when they log in.
+§fIf you need immediate help: §e/helpop <message>

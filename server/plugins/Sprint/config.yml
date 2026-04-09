@@ -1,0 +1,16 @@
+options:
+    energy-lost-per-second: 1
+    high-jump-enabled: false
+    energy-gained-per-second: 1
+    requires-command-enabled: false
+    speed: 0.6
+messages:
+    energy-lost-color: f
+    interval: 5
+    energy-gained-color: f
+requires-item:
+    item-id: 301
+    enabled: false
+held-item:
+    item-id: 0
+    enabled: false

@@ -1,0 +1,5 @@
+§6=== LWC - Lock Your Blocks ===
+Lock chests, doors, furnaces & more so only YOU can use them.
+Blocks do NOT auto-lock! You must lock them manually.
+§eSee pages: §fCommands, Costs, Tips
+@/tuto LWC Commands

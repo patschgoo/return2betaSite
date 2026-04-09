@@ -1,0 +1,9 @@
+§6=== New Member Tips ===
+§fWelcome! Here are the most important things to know:
+§e1. §fSet your home: §e/sethome
+§e2. §fLock your chests: §e/cprivate §f(costs $100)
+§e3. §fWatch out for §cGiants§f and §cHostile Humans§f!
+§e4. §cWater does NOT break your fall!
+§e5. §fDo quests for money (find QuestMaster NPCs)
+§e6. §fBuy protection stones: §e/buy
+§eSee pages: §fMoreTips, AllTutorials

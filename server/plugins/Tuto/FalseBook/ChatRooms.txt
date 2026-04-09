@@ -1,0 +1,6 @@
+§6=== FalseBook - Chat Rooms ===
+Create chat rooms with signs!
+Place a sign with §e[ChatRoom]§f on line 1 and the
+room name on line 2.
+Right-click the sign to join or leave the room.
+Only players in the same room see those messages.

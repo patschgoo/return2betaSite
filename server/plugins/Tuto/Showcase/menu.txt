@@ -1,0 +1,7 @@
+§6=== Showcase - Item Display & Shops ===
+Display and trade items with showcases!
+§eSee page: §fTypes
+§fAll showcase types are §afree to create§f!
+Showcases are protected - others can't break them.
+Auto-saves every §e60 seconds§f.
+Place an item on a block to start a showcase.

@@ -1,0 +1,11 @@
+MustReadRules: You must read the rules in order to accept them!
+AcceptedMsg: You have succesfully accepted the rules! Have fun!
+NotifyOPs: true
+AllowBuildBeforeAccept: false
+TpPositionY: 0.0
+TpPositionZ: 0.0
+AcceptedAllreadyMsg: You have allready accepted the rules!
+CantBuildMsg: You must accept rules to build!
+TpPositionX: 0.0
+TpAfterAccept: false
+TpWorld: world

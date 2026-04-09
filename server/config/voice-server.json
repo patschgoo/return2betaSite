@@ -1,0 +1,7 @@
+{
+  "port": 25566,
+  "server_host": "0.0.0.0",
+  "audio": {
+    "max_distance": 48.0
+  }
+}

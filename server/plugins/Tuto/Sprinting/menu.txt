@@ -1,0 +1,8 @@
+§6=== Sprinting ===
+Hold a §eFEATHER§f (item 288) to sprint!
+Just hold it in your hand and you'll run faster.
+§eSpeed Boost: §f0.6x faster
+§eEnergy Drain: §f2 energy/sec while sprinting
+§eRecharge: §f1 energy/sec while standing still
+§fYou'll see energy messages every 5 seconds.
+§cSprinting does NOT work in the air or in water.

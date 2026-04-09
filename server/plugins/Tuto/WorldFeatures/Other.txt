@@ -1,0 +1,13 @@
+§6=== World - Other Features ===
+§eCookieHeal: §fEating cookies heals you!
+§eSaddleDrop: §fPigs drop saddle on death.
+§eNoFullHealthEating: §fCan't waste food at full HP.
+§eAntiNetherRoof: §fCan't build on Nether ceiling.
+§eNetherText: §fShows coordinates entering/leaving Nether.
+§eSleepPercent: §fOnly some players need to sleep.
+§eDynamicLight: §fHolding a light source lights the area!
+§eBucketReturn: §fEmpty bucket returns to inventory.
+§eMiningTNT: §fTNT only works below Y=70. Destroys
+§eALL§f block types. Creepers still explode normally.
+§eVoiceChat: §fProximity voice within 48 blocks (port 25566).
+§eTrasher: §f/trasher opens a disposal chest for junk.

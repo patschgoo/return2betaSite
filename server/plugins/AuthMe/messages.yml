@@ -1,0 +1,31 @@
+Command:
+    UnregisterResponse: '&aYou are now unregistered!'
+    RegisterResponse: '&aRegistered using the password: &e%1'
+    LoginResponse: '&aPassword accepted. Welcome.'
+    LogoutResponse: '&aSuccessfully logged out!'
+    ChangePasswordResponse: '&aPassword successfully changed!'
+    RegisterExtraInfoCheckFailed: '&cYour %1 does not match our rules!'
+Kick:
+    OtherUserLoggedIn: There is already a player logged in with the same name! Try another one!
+    NotRegistered: Please visit our site http://fg-tech.de/registration to register your playername!
+    DisallowedCharacters: Your playername (%1) is not set, contains invalid characters or is too short/long!
+JoinMessage:
+    Command: '&eTo register, type /register <password>'
+    ForceRegistration: '&dYou have to register an account before playing!'
+    FreeRegistration: '&dYou are free to register an account for best protection of
+        your account!'
+Sessions:
+    Hint: '&aYou were automatically identified and logged in. Welcome.'
+Error:
+    NotRegistered: '&cError: You are not registered!'
+    DatasourceError: '&cInternal error! Please notify an admin about this issue!'
+    NotLogged: '&cError: You are not logged in!'
+    PlayerNotRegistered: '&cError: This player is not registered!'
+    AlreadyRegistered: '&cError: You are already registered!'
+    InvalidPassword: '&cInvalid password'
+    AlreadyLoggedIn: '&cError: You are already logged in!'
+    WrongPassword: '&cError: You inserted a wrong password!'
+Alert:
+    Registration: '&cPlease register yourself with /register <password>'
+    PluginReloaded: '&cThe server was reloaded! Please log in again...'
+    Login: '&cPlease identify yourself with /login <password>'

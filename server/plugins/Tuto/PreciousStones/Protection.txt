@@ -1,0 +1,9 @@
+§6=== PreciousStones - Protection Blocks ===
+§e[Glowing Redstone Ore] §f(Block 74) - PROTECTION FIELD
+Radius: 20, Height: 15. Blocks placing, breaking,
+explosions, fire, liquid flow. §a/buy glowingredstoneore ($750)
+§e[Lapis Ore] §f(Block 21) - ENTRY BLOCKER
+Radius: 5. Stops unauthorized players from entering.
+§a/buy lapisore ($500)
+§e[Note Block] §f(Block 25) - SNITCH
+Radius: 5. Alerts you when players enter. 50 records.
