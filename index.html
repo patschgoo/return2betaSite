@@ -63,6 +63,107 @@
       text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.692);
     }
 
+    .map-panel {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+
+    .map-wrapper {
+      position: relative;
+      width: min(24vw, 180px);
+      height: min(24vw, 180px);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 6px;
+      overflow: hidden;
+      background: #111;
+      transition: all 0.3s ease;
+    }
+
+    .map-wrapper iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    .map-controls {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      display: flex;
+      gap: 4px;
+      z-index: 10;
+    }
+
+    .map-btn {
+      width: 24px;
+      height: 24px;
+      border: none;
+      border-radius: 4px;
+      background: rgba(0, 0, 0, 0.65);
+      color: #fff;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+      transition: background 0.2s;
+    }
+
+    .map-btn:hover {
+      background: rgba(0, 0, 0, 0.85);
+    }
+
+    .map-label {
+      margin: 0;
+      color: #ffffff;
+      font-size: 1rem;
+      font-weight: 400;
+      letter-spacing: 0.04em;
+    }
+
+    .map-panel.maximized {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 1000;
+      background: rgba(0, 0, 0, 0.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      margin: 0;
+    }
+
+    .map-panel.maximized .map-wrapper {
+      width: 100%;
+      height: 100%;
+      max-width: 100%;
+      max-height: 100%;
+      border-radius: 8px;
+    }
+
+    .map-panel.maximized .map-controls {
+      top: 8px;
+      right: 8px;
+    }
+
+    .map-panel.maximized .map-btn {
+      width: 32px;
+      height: 32px;
+      font-size: 18px;
+    }
+
+    .map-panel.maximized .map-label {
+      display: none;
+    }
+
     .animals-panel {
       display: flex;
       flex-direction: column;
@@ -105,6 +206,16 @@
   <header class="header-band" aria-label="Header"></header>
 
   <main class="content">
+    <section class="map-panel" id="mapPanel" aria-label="Server map">
+      <div class="map-wrapper">
+        <div class="map-controls">
+          <button class="map-btn" id="mapToggle" title="Maximize map" onclick="toggleMap()">&#x26F6;</button>
+        </div>
+        <iframe src="http://5.9.123.120:50180/" title="Server Map" loading="lazy" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
+      </div>
+      <p class="map-label">Server Map</p>
+    </section>
+
     <section class="intro" aria-label="Welcome text">
       <p class="intro-text">Welcome to the return2beta corner of the internet, where odd little projects, blocky worlds, and unfinished ideas still get to breathe.</p>
     </section>
@@ -114,5 +225,22 @@
       <p class="animals-label">mc.return2beta.com</p>
     </section>
   </main>
+
+  <script>
+    function toggleMap() {
+      const panel = document.getElementById('mapPanel');
+      const btn = document.getElementById('mapToggle');
+      const maximized = panel.classList.toggle('maximized');
+      btn.innerHTML = maximized ? '&#x2715;' : '&#x26F6;';
+      btn.title = maximized ? 'Minimize map' : 'Maximize map';
+    }
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') {
+        const panel = document.getElementById('mapPanel');
+        if (panel.classList.contains('maximized')) toggleMap();
+      }
+    });
+  </script>
 </body>
 </html>
