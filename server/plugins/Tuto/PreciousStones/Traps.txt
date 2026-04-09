@@ -1,7 +1,0 @@
-§6=== PreciousStones - Traps & Weapons ===
-§e[Mushroom Block] §f(100) - SHOCK MINE
-Height: 3. Lightning on contact! One-time use.
-§e[Mushroom Block] §f(100) - PROXIMITY MINE
-Radius: 1, Height: 5. Explodes near players! One-time use.
-§e[Mushroom Block] §f(100) - DAMAGE OVER TIME
-Radius: 5. Hurts players in zone. Max 10 per player.

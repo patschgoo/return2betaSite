@@ -1,9 +1,0 @@
-§6=== NaturalHumans - Weapons & Drops ===
-§e33%§f chance to spawn holding a weapon:
-§f  Sword §e30%§f | Axe §e25%§f | Pickaxe §e15%§f
-§f  Shovel §e10%§f | Hoe §e10%§f | Bow §e10%§f
-§6Drop Chances (each piece):
-§f  Helmet: §e20%§f  Chestplate: §e20%§f
-§f  Leggings: §e20%§f  Boots: §e20%§f
-§f  Weapon: §e20%§f
-§fKilling armored humans can get you free gear!

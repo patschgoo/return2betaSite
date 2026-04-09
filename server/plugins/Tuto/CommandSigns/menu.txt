@@ -1,6 +1,0 @@
-§6=== CommandSigns ===
-Special signs execute commands when you right-click!
-Placed by Mods/Admins, but you can §eUSE§f all sign types.
-§fYou have §ecommandsigns.use.*§f permission.
-Signs might teleport you, give items, toggle features,
-or do other special actions. Look for them around spawn!

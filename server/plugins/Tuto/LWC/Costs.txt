@@ -1,6 +1,0 @@
-§6=== LWC Lock Costs ===
-Each lock costs money (Command iConomy):
-§e/cprivate §f= §a$100
-§e/cpassword §f= §a$75
-§e/cpublic §f= §a$25
-You have UNLIMITED locks. No limit on how many!

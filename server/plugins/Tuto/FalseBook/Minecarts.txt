@@ -1,7 +1,0 @@
-§6=== FalseBook - Minecart System ===
-Place special blocks UNDER rails for track powers!
-§fMax speed: §e0.7§f (faster than vanilla)
-Launch speed: §e3.0§f (very fast start)
-Carts are deleted when you exit them.
-§eSee page: §fMinecartBlocks §ffor the full block list.
-@/tuto FalseBook MinecartBlocks

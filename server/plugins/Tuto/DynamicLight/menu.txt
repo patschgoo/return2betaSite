@@ -1,7 +1,0 @@
-§6=== DynamicLight ===
-Holding a §etorch§f, §eglowstone§f, or other light source
-in your hand §elights up the area§f around you in
-real-time! No need to place it down.
-§fGreat for exploring caves — just hold a torch and
-the darkness around you is lit up as you walk.
-§fWorks with any light-emitting item in your hand.

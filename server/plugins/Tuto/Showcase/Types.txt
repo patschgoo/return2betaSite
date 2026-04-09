@@ -1,6 +1,0 @@
-§6=== Showcase Types ===
-§eBasic §f- Display an item on a block for all to see.
-§eExchange §f- Trade items with players (item for item).
-§eFinite §f- Sell limited stock for money.
-§eInfinite §f- Unlimited items for money (admin shops).
-§eTutorial §f- Display an item with info text.

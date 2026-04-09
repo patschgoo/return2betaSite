@@ -1,7 +1,0 @@
-§6=== AntiNetherRoof ===
-You §ccannot§f build or walk on top of the Nether ceiling!
-§fIn vanilla Minecraft, players can glitch above the
-Nether's bedrock ceiling and build there.
-§fThis plugin prevents that exploit entirely.
-If you try to get above the ceiling, you'll be
-stopped or pushed back down.

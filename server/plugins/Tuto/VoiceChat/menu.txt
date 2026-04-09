@@ -1,8 +1,0 @@
-§6=== LegacyVoiceChat ===
-The server has §eproximity voice chat§f!
-Other players within §e48 blocks§f can hear you.
-§6How to Connect:
-Connect to the voice server on §eport 25566§f.
-(Same server IP, different port.)
-§fOnly nearby players hear you — it's proximity
-based, so it feels natural and immersive!

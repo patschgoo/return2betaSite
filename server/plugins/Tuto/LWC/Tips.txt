@@ -1,8 +1,0 @@
-§6=== LWC Tips ===
-§fLockable blocks: Chests, Furnaces, Dispensers,
-Signs, Wooden/Iron Doors, Trapdoors.
-§eMagnet: §fDropped items within 3 blocks get sucked
-into your locked chests. Great for mob grinders!
-§eIron Doors: §fClick to open if you have access.
-§eDouble Doors: §fBoth open together automatically.
-§cRemember: Blocks do NOT auto-lock. Use /cprivate!

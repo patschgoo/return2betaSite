@@ -1,6 +1,0 @@
-§6=== ItemLWC - Protection Types ===
-§ePUBLIC §f- Anyone can see the item, nobody can take it.
-Great for display cases. Visitors can create these too.
-§ePRIVATE §f- Only YOU can access the item. Members only.
-§ePASSWORD §f- Locked with a password you set. Others use
-an Iron Ingot on the block to enter the password.

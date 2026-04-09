@@ -1,7 +1,0 @@
-sets:
-    markers:
-        hide: false
-        label: Markers
-        markers: {}
-        layerprio: 0
-icons: {}

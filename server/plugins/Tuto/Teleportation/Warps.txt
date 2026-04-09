@@ -1,6 +1,0 @@
-§6=== Warps & Wild Teleport ===
-§e/warp <name> §f- Teleport to a public warp point
-§e/warp list §f- See all available warps
-§e/wildtp §f- Random teleport 10-15 blocks away
-Great for escaping tight spots!
-§cOnly works in the overworld, not in the nether.

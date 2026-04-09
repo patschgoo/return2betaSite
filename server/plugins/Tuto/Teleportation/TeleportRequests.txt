@@ -1,6 +1,0 @@
-§6=== Teleport Requests ===
-§e/tpa <player> §f- Ask to teleport TO someone
-§e/tpahere <player> §f- Ask someone to teleport to YOU
-§e/tpaccept §f- Accept a teleport request
-§e/tpdeny §f- Deny a teleport request
-You can have up to §e5 homes§f!

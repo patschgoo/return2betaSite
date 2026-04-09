@@ -1,7 +1,0 @@
-§6=== CustomPortalSize ===
-Nether portals can be built in custom sizes!
-§fMinimum: §e1x2 blocks §f(tiny portal)
-§fMaximum: §e23x23 blocks §f(massive portal!)
-§fThat's way bigger than vanilla's fixed 2x3 size.
-Build a massive portal as a landmark, or make a
-tiny 1x2 one to save obsidian!

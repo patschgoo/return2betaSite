@@ -1,8 +1,0 @@
-§6=== Teleportation Commands ===
-§e/sethome §f- Save your location as home
-§e/home §f- Teleport to your saved home
-§e/delhome §f- Delete your home
-§e/spawn §f- Teleport to server spawn
-§e/back §f- Return to last location (great after death!)
-§e/getpos §f- Show your X, Y, Z coordinates
-§eSee pages: §fTeleportRequests, Warps

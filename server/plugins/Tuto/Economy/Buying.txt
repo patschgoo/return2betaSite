@@ -1,6 +1,0 @@
-§6=== Economy - Buying Protection Stones ===
-§e/buy <item> §f- Buy PreciousStones blocks
-Protection stones are §conly§f obtainable via /buy:
-§eGlowing Redstone Ore §f= §a$750 §f(base protection)
-§eLapis Ore §f= §a$500 §f(entry blocker)
-§eDiamond Ore §f= §a$250 §f(grief revert)

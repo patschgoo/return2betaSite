@@ -1,9 +1,0 @@
-§6=== BitTweaks - Still Vanilla ===
-These are §eNOT changed§f (vanilla behavior):
-§fLeaf decay: normal.
-§fBonemeal on sheep: does not work.
-§fSleeping: normal.
-§fBonemeal on sugarcane: does not work.
-§fGolden pickaxe: no silk touch.
-§fSquids: cannot be milked.
-§fTNT: normal power. Explosions break blocks.

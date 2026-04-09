@@ -1,5 +1,0 @@
-Just put a [permissions node] on the beginning of the file
-This page can only be seen by player with permissions
-This page is displayed in the list for player having permissions
-And a complete tuto with permission nodes will not been displayed in /tutolist for others
-See admin Page if you have the tuto.admin nodes

@@ -1,8 +1,0 @@
-§6=== Dynmap - Live Web Map ===
-There's a live web map of the server!
-Open in your browser: §ehttp://<server-ip>:50180
-§fYou can see:
-- Overworld and Nether rendered in real-time
-- Where other players are
-- Chat through the web interface
-§fAsk staff for the exact server address.

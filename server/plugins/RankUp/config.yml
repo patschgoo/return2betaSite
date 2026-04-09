@@ -1,7 +1,0 @@
-default:
-    startingGroup: 'Visitor'
-    endingGroup: 'Member'
-    rankup_command_enabled: false
-    rankup_word_enabled: false
-    rankup_word: ''
-    rankup_sign_enabled: true

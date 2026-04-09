@@ -1,2 +1,0 @@
-[tuto.admin]
-This page can only be seen by players with tuto.admin permission node

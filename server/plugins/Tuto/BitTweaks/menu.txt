@@ -1,5 +1,0 @@
-§6=== BitTweaks - Gameplay Changes ===
-These mechanics differ from vanilla Beta 1.7.3!
-§eSee pages: §fChanged, NotChanged
-§c!!! Water does NOT prevent fall damage !!!
-§cDO NOT jump into water from high up!

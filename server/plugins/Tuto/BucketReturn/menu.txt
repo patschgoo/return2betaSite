@@ -1,5 +1,0 @@
-§6=== BucketReturn ===
-When you use a bucket (for milk, water, or lava),
-the §eempty bucket returns§f to your inventory!
-§fNo more losing buckets after using them.
-Works for all bucket types automatically.

@@ -1,6 +1,0 @@
-§6=== Chainmail Armor Recipes ===
-Use §eIron Ingots + String§f in the armor crafting pattern:
-§fChainmail Helmet = Iron + String (helmet shape)
-§fChainmail Chestplate = Iron + String (chestplate shape)
-§fChainmail Leggings = Iron + String (leggings shape)
-§fChainmail Boots = Iron + String (boots shape)

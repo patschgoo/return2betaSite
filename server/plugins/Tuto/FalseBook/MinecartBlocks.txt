@@ -1,9 +1,0 @@
-§6=== FalseBook - Minecart Blocks ===
-§eGold Ore §f(14) = 2x Speed  §eGold Block §f(41) = 8x Speed
-§eIron Block §f(42) = Constant 0.2 speed
-§eObsidian §f(49) = Station (stops cart, use with signs)
-§eCoal Ore §f(16) = Eject rider  §eBedrock §f(7) = Reverse
-§eGravel §f(13) = 25% brake  §eSoul Sand §f(88) = 50% brake
-§eIron Ore §f(15) = Collect/deposit items from chests
-§eNetherrack §f(87) = Sort items  §eLapis Ore §f(21) = Emitter
-§cIron Block & Lapis Ore also used by PreciousStones!

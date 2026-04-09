@@ -1,7 +1,0 @@
-§6=== NetherText ===
-When you enter or leave the §cNether§f, your
-coordinates are displayed in chat!
-§fIt shows the §eequivalent overworld position§f
-so you know where you are in both dimensions.
-§fThis helps with navigation and building
-linked portals between overworld and Nether.

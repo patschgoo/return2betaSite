@@ -1,7 +1,0 @@
-§6=== ItemLWC - Lock Expiration ===
-§cALL lock types expire after 30 days of inactivity!
-This includes private, password, AND public locks.
-§cALL block types can expire (chests, furnaces, doors, etc).
-§fUse a §eClock§f on a locked block to check time remaining.
-§fTo remove your lock: sneak-punch your protected block
-and choose the remove option from the menu.

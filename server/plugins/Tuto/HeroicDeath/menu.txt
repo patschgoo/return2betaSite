@@ -1,7 +1,0 @@
-§6=== HeroicDeath ===
-When you die, a §efunny message§f appears in chat!
-§eSee page: §fMessages
-§fEach death type has its own pool of messages.
-§e13 death types§f: Drown, Cactus, Fire, Explosion,
-Creeper, Fall, PVP, Void, Monsters, Lava,
-Suffocation, Dispenser, Lightning, and Other.

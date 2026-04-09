@@ -1,9 +1,0 @@
-§6=== MossyGrow ===
-Cobblestone slowly turns into §eMossy Cobblestone§f!
-§6Two ways it happens:
-§eNear Mossy Cobble: §fAny cobble within 1 block of
-mossy cobble converts after ~§e3 minutes §f(180 sec).
-§eNear Water: §fAny cobble within 1 block of water
-converts after ~§e5 minutes §f(300 sec).
-§fCobble walls weather over time. Mossy cobble spreads
-to neighbors. Water makes things mossy too!

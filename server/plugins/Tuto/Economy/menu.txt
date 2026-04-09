@@ -1,4 +1,0 @@
-§6=== Economy - Money & Trading ===
-You start with §a$30§f. Earn more through quests & selling!
-§eSee pages: §fSelling, Buying, Costs
-@/tuto Economy Selling

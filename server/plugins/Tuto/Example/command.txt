@@ -1,6 +1,0 @@
-I'm the example for the command interaction
-Just place a @ (default Char) before the command
-Like that
-@/tuto list
-Thanks and ...
-Have fun !
