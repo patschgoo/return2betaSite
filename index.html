@@ -89,6 +89,7 @@
       gap: 4px;
       position: relative;
       transition: all 0.3s ease;
+      align-self: flex-end;
     }
 
     .map-wrapper {
@@ -223,21 +224,11 @@
 </head>
 <body>
   <header class="header-band" aria-label="Header">
-    <a class="nav-link" href="/"><img src="images/home.png" alt="Home icon" />Home</a>
-    <a class="nav-link" href="/map/"><img src="images/map.webp" alt="Map icon" />Map</a>
+    <a class="nav-link" href="/"><img src="images/home_icon.png" alt="Home icon" />Home</a>
+    <a class="nav-link" href="/map/"><img src="images/map_icon.webp" alt="Map icon" />Map</a>
   </header>
 
   <main class="content">
-    <section class="map-panel" id="mapPanel" aria-label="Server map">
-      <div class="map-wrapper">
-        <div class="map-controls">
-          <button class="map-btn" id="mapToggle" title="Maximize map" onclick="toggleMap()">&#x26F6;</button>
-        </div>
-        <iframe src="https://map.return2beta.com/" title="Server Map" loading="lazy" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
-      </div>
-      <p class="map-label">Server Map</p>
-    </section>
-
     <section class="intro" aria-label="Welcome text">
       <p class="intro-text">Welcome to the return2beta corner of the internet, where odd little projects, blocky worlds, and unfinished ideas still get to breathe.</p>
     </section>
@@ -245,6 +236,16 @@
     <section class="animals-panel" aria-label="Server info">
       <img class="animals" src="images/animals.png" alt="Animals" />
       <p class="animals-label">mc.return2beta.com</p>
+    </section>
+
+    <section class="map-panel" id="mapPanel" aria-label="Server map">
+      <p class="map-label">Server Map</p>
+      <div class="map-wrapper">
+        <div class="map-controls">
+          <button class="map-btn" id="mapToggle" title="Maximize map" onclick="toggleMap()">&#x26F6;</button>
+        </div>
+        <iframe src="https://map.return2beta.com/" title="Server Map" loading="lazy" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
+      </div>
     </section>
   </main>
 
