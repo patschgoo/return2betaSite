@@ -69,8 +69,6 @@
     }
 
     .intro {
-      display: flex;
-      justify-content: center;
       text-align: center;
     }
 
@@ -211,14 +209,12 @@
     }
 
     .animals-panel {
-      position: fixed;
-      top: 60px;
-      right: 24px;
+      float: right;
+      margin: 0 0 16px 24px;
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 8px;
-      z-index: 100;
     }
 
     .animals {
@@ -306,6 +302,11 @@
   </header>
 
   <main class="content">
+    <section class="animals-panel" aria-label="Server info">
+      <img class="animals" src="images/animals.png" alt="Animals" />
+      <p class="animals-label">IP: mc.return2beta.com</p>
+    </section>
+
     <section class="intro" aria-label="Welcome text">
       <div class="intro-text">
         <h1>Welcome to Return2Beta</h1>
@@ -322,10 +323,7 @@
       <p>IP: mc.return2beta.com</p>
     </section>
 
-    <section class="animals-panel" aria-label="Server info">
-      <img class="animals" src="images/animals.png" alt="Animals" />
-      <p class="animals-label">IP: mc.return2beta.com</p>
-    </section>
+
 
     <section class="map-panel" id="mapPanel" aria-label="Server map">
       <p class="map-label">Server Map</p>
