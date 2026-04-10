@@ -105,10 +105,11 @@
       flex-direction: column;
       align-items: center;
       gap: 4px;
-      float: right;
-      clear: right;
-      margin: 16px 0 16px 24px;
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
       transition: all 0.3s ease;
+      z-index: 100;
     }
 
     .map-wrapper {
@@ -178,7 +179,6 @@
       justify-content: center;
       padding: 24px;
       margin: 0;
-      float: none;
     }
 
     .map-panel.maximized .map-wrapper {
