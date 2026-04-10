@@ -207,6 +207,10 @@
       display: none;
     }
 
+    .mobile-animals {
+      display: none;
+    }
+
     .animals-panel {
       position: fixed;
       top: 60px;
@@ -265,6 +269,33 @@
       .map-panel {
         display: none;
       }
+
+      .mobile-animals {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        padding: 16px 0 0;
+      }
+
+      .mobile-animals img {
+        width: 120px;
+        height: auto;
+      }
+
+      .mobile-animals p {
+        margin: 0;
+        color: #ffffff;
+        font-size: 0.85rem;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+      }
+
+      .mobile-animals hr {
+        width: 80%;
+        border: none;
+        border-top: 2px solid rgba(255,255,255,0.3);
+        margin: 8px 0 0;
+      }
     }
   </style>
 </head>
@@ -275,6 +306,12 @@
   </header>
 
   <main class="content">
+    <section class="mobile-animals" aria-label="Server info mobile">
+      <img src="images/animals.png" alt="Animals" />
+      <p>IP: mc.return2beta.com</p>
+      <hr />
+    </section>
+
     <section class="intro" aria-label="Welcome text">
       <div class="intro-text">
         <h1>Welcome to Return2Beta</h1>
