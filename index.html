@@ -57,17 +57,12 @@
 
     .content {
       flex: 1;
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 24px;
+      position: relative;
       padding: 18px 24px 24px;
     }
 
     .intro {
-      flex: 1;
       display: flex;
-      align-items: flex-start;
       justify-content: center;
       padding-top: 28px;
       text-align: center;
@@ -87,9 +82,11 @@
       flex-direction: column;
       align-items: center;
       gap: 4px;
-      position: relative;
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
       transition: all 0.3s ease;
-      align-self: flex-end;
+      z-index: 100;
     }
 
     .map-wrapper {
@@ -185,10 +182,14 @@
     }
 
     .animals-panel {
+      position: fixed;
+      top: 60px;
+      right: 24px;
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 8px;
+      z-index: 100;
     }
 
     .animals {
