@@ -6,6 +6,13 @@
   <title>Return2Beta</title>
   <link rel="icon" type="image/png" href="images/icon.png" />
   <style>
+    @font-face {
+      font-family: 'Minecraft';
+      src: url('https://cdn.jsdelivr.net/gh/IdreesInc/Minecraft-Font@main/Minecraft.otf') format('opentype');
+      font-weight: normal;
+      font-style: normal;
+    }
+
     * {
       box-sizing: border-box;
     }
@@ -18,7 +25,7 @@
 
     body {
       min-height: 100vh;
-      font-family: sans-serif;
+      font-family: 'Minecraft', sans-serif;
       background-image: url("images/background.png");
       background-repeat: repeat;
       background-size: auto;
@@ -69,12 +76,31 @@
     }
 
     .intro-text {
-      max-width: 520px;
+      max-width: 680px;
       margin: 0;
       color: #ffffff;
-      font-size: clamp(1.15rem, 2vw, 1.6rem);
-      line-height: 1.4;
+      font-size: clamp(0.75rem, 1.4vw, 1rem);
+      line-height: 1.8;
       text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.692);
+    }
+
+    .intro-text h1 {
+      font-size: clamp(1.4rem, 3vw, 2.2rem);
+      margin: 0 0 20px;
+      color: #55ff55;
+      text-shadow: 3px 3px 0 rgba(0, 0, 0, 0.7);
+    }
+
+    .intro-text p {
+      margin: 0 0 16px;
+    }
+
+    .intro-text p:last-child {
+      margin-bottom: 0;
+    }
+
+    .intro-text .highlight {
+      color: #ffaa00;
     }
 
     .map-panel {
@@ -231,21 +257,18 @@
 
   <main class="content">
     <section class="intro" aria-label="Welcome text">
-      <p class="intro-text">Welcome to Return2Beta
-
-Step back into the golden age of Minecraft with Return2Beta, a lovingly crafted Beta 1.7.3 multiplayer experience. Our server is built for players who miss the simplicity, charm, and raw creativity of classic Minecraft — before enchantments, before hunger, before the modern era changed everything.
-
-Return2Beta stays true to the authentic feel of Beta 1.7.3, but with a twist:
-we’ve added custom plugins designed specifically for the server to enhance gameplay while preserving the original atmosphere. From subtle quality-of-life improvements to unique features that blend seamlessly into the beta style, Return2Beta offers the perfect balance of nostalgia and innovation.
-
-Whether you're revisiting old memories or discovering Beta Minecraft for the first time, our world is yours to shape. Build, survive, explore, and enjoy Minecraft as it was meant to be.
-
-Join us — and experience the true return to beta.</p>
+      <div class="intro-text">
+        <h1>Welcome to Return2Beta</h1>
+        <p>Step back into the golden age of Minecraft with <span class="highlight">Return2Beta</span>, a lovingly crafted Beta 1.7.3 multiplayer experience. Our server is built for players who miss the simplicity, charm, and raw creativity of classic Minecraft — before enchantments, before hunger, before the modern era changed everything.</p>
+        <p>Return2Beta stays true to the authentic feel of Beta 1.7.3, but with a twist: we’ve added custom plugins designed specifically for the server to enhance gameplay while preserving the original atmosphere. From subtle quality-of-life improvements to unique features that blend seamlessly into the beta style, <span class="highlight">Return2Beta</span> offers the perfect balance of nostalgia and innovation.</p>
+        <p>Whether you’re revisiting old memories or discovering Beta Minecraft for the first time, our world is yours to shape. Build, survive, explore, and enjoy Minecraft as it was meant to be.</p>
+        <p class="highlight">Join us — and experience the true return to beta.</p>
+      </div>
     </section>
 
     <section class="animals-panel" aria-label="Server info">
       <img class="animals" src="images/animals.png" alt="Animals" />
-      <p class="animals-label">mc.return2beta.com</p>
+      <p class="animals-label">IP: mc.return2beta.com</p>
     </section>
 
     <section class="map-panel" id="mapPanel" aria-label="Server map">
