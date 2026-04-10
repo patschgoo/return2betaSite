@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Server Map – Return2Beta</title>
+  <title>Plugins – Return2Beta</title>
   <link rel="icon" type="image/png" href="../images/icon.png" />
   <style>
     @font-face {
@@ -15,13 +15,16 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body {
       width: 100%;
-      height: 100%;
+      min-height: 100%;
       font-family: 'Minecraft', sans-serif;
       background-image: url("../images/background.png");
       background-repeat: repeat;
       background-size: auto;
+    }
+    body {
       display: flex;
       flex-direction: column;
+      min-height: 100vh;
     }
     .header-band {
       height: 48px;
@@ -54,15 +57,22 @@
     .nav-spacer {
       flex: 1;
     }
-    .map-area {
+    .content {
       flex: 1;
-      overflow: hidden;
+      padding: 24px;
+      text-align: center;
+      color: #fff;
     }
-    .map-area iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-      display: block;
+    .content h1 {
+      font-size: clamp(1.4rem, 3vw, 2.2rem);
+      color: #55ff55;
+      text-shadow: 3px 3px 0 rgba(0, 0, 0, 0.7);
+      margin-bottom: 20px;
+    }
+    .content p {
+      font-size: clamp(0.75rem, 1.4vw, 1rem);
+      line-height: 1.8;
+      text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.692);
     }
     @media (max-width: 720px) {
       .header-band {
@@ -83,8 +93,10 @@
     <div class="nav-spacer"></div>
     <a class="nav-link" href="/plugins/">Plugins<img src="../images/plugins_icon.gif" alt="Plugins icon" /></a>
   </header>
-  <div class="map-area">
-    <iframe src="https://map.return2beta.com/" title="Server Map" loading="lazy" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
-  </div>
+
+  <main class="content">
+    <h1>Plugins</h1>
+    <p>Coming soon...</p>
+  </main>
 </body>
 </html>
