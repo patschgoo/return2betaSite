@@ -106,10 +106,38 @@
       align-items: center;
       gap: 4px;
       position: fixed;
-      right: 24px;
+      right: 0;
       bottom: 24px;
-      transition: all 0.3s ease;
+      transition: transform 0.3s ease;
       z-index: 100;
+      padding-right: 24px;
+    }
+
+    .map-panel.collapsed {
+      transform: translateX(calc(100% - 32px));
+    }
+
+    .map-fold-btn {
+      position: absolute;
+      left: -32px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 32px;
+      height: 48px;
+      border: none;
+      border-radius: 6px 0 0 6px;
+      background: rgba(0, 0, 0, 0.65);
+      color: #fff;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+
+    .map-fold-btn:hover {
+      background: rgba(0, 0, 0, 0.85);
     }
 
     .map-wrapper {
@@ -325,7 +353,8 @@
 
 
 
-    <section class="map-panel" id="mapPanel" aria-label="Server map">
+    <section class="map-panel collapsed" id="mapPanel" aria-label="Server map">
+      <button class="map-fold-btn" id="mapFoldBtn" title="Show map" onclick="toggleFold()">&#x25C0;</button>
       <p class="map-label">Server Map</p>
       <div class="map-wrapper">
         <div class="map-controls">
@@ -337,9 +366,20 @@
   </main>
 
   <script>
+    function toggleFold() {
+      const panel = document.getElementById('mapPanel');
+      const btn = document.getElementById('mapFoldBtn');
+      const collapsed = panel.classList.toggle('collapsed');
+      btn.innerHTML = collapsed ? '&#x25C0;' : '&#x25B6;';
+      btn.title = collapsed ? 'Show map' : 'Hide map';
+    }
+
     function toggleMap() {
       const panel = document.getElementById('mapPanel');
       const btn = document.getElementById('mapToggle');
+      if (panel.classList.contains('collapsed')) {
+        toggleFold();
+      }
       const maximized = panel.classList.toggle('maximized');
       btn.innerHTML = maximized ? '&#x2715;' : '&#x26F6;';
       btn.title = maximized ? 'Minimize map' : 'Maximize map';
