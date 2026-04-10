@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>About – Return2Beta</title>
+  <link rel="icon" type="image/png" href="../images/icon.png" />
+  <style>
+    @font-face {
+      font-family: 'Minecraft';
+      src: url('https://cdn.jsdelivr.net/gh/IdreesInc/Minecraft-Font@main/Minecraft.otf') format('opentype');
+      font-weight: normal;
+      font-style: normal;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      width: 100%;
+      min-height: 100%;
+      font-family: 'Minecraft', sans-serif;
+      background-image: url("../images/background.png");
+      background-repeat: repeat;
+      background-size: auto;
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    .header-band {
+      height: 48px;
+      width: 100%;
+      background-image: url("../images/header.png");
+      background-repeat: repeat-x;
+      background-position: top left;
+      background-size: auto 100%;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 48px;
+      padding: 0 48px;
+    }
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+      color: #fff;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+    }
+    .nav-link img {
+      height: 32px;
+      width: 32px;
+      object-fit: contain;
+    }
+    .nav-spacer {
+      flex: 1;
+    }
+    .content {
+      flex: 1;
+      padding: 24px;
+      text-align: center;
+      color: #fff;
+    }
+    .content h1 {
+      font-size: clamp(1.4rem, 3vw, 2.2rem);
+      color: #55ff55;
+      text-shadow: 3px 3px 0 rgba(0, 0, 0, 0.7);
+      margin-bottom: 20px;
+    }
+    .content p {
+      font-size: clamp(0.75rem, 1.4vw, 1rem);
+      line-height: 1.8;
+      text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.692);
+    }
+    @media (max-width: 720px) {
+      .header-band {
+        height: 48px;
+        gap: 24px;
+        padding: 0 16px;
+      }
+      .nav-link { font-size: 0.8rem; }
+      .nav-link img { height: 28px; width: 28px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="header-band" aria-label="Header">
+    <a class="nav-link" href="/"><img src="../images/home_icon.png" alt="Home icon" />Home</a>
+    <a class="nav-link" href="/map/"><img src="../images/map_icon.webp" alt="Map icon" />Map</a>
+    <a class="nav-link" href="/plugins/"><img src="../images/plugins_icon.png" alt="Plugins icon" />Plugins</a>
+    <a class="nav-link" href="https://discord.gg/vVvs7tN5p7" target="_blank" rel="noopener noreferrer"><img src="../images/discord_icon.png" alt="Discord icon" />Discord</a>
+    <div class="nav-spacer"></div>
+    <a class="nav-link" href="/about/">About<img src="../images/about_icon.gif" alt="About icon" /></a>
+  </header>
+
+  <main class="content">
+    <h1>About</h1>
+    <p>Coming soon...</p>
+  </main>
+</body>
+</html>
