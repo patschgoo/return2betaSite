@@ -105,10 +105,11 @@
       flex-direction: column;
       align-items: center;
       gap: 4px;
-      float: right;
-      clear: right;
-      margin: 0 0 16px 24px;
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
       transition: all 0.3s ease;
+      z-index: 100;
     }
 
     .map-wrapper {
@@ -254,7 +255,6 @@
 
       .intro {
         padding-top: 12px;
-        margin-bottom: 0;
       }
 
       .animals-panel {
@@ -307,16 +307,6 @@
       <p class="animals-label">IP: mc.return2beta.com</p>
     </section>
 
-    <section class="map-panel" id="mapPanel" aria-label="Server map">
-      <p class="map-label">Server Map</p>
-      <div class="map-wrapper">
-        <div class="map-controls">
-          <button class="map-btn" id="mapToggle" title="Maximize map" onclick="toggleMap()">&#x26F6;</button>
-        </div>
-        <iframe src="https://map.return2beta.com/" title="Server Map" loading="lazy" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
-      </div>
-    </section>
-
     <section class="intro" aria-label="Welcome text">
       <div class="intro-text">
         <h1>Welcome to Return2Beta</h1>
@@ -335,7 +325,15 @@
 
 
 
-
+    <section class="map-panel" id="mapPanel" aria-label="Server map">
+      <p class="map-label">Server Map</p>
+      <div class="map-wrapper">
+        <div class="map-controls">
+          <button class="map-btn" id="mapToggle" title="Maximize map" onclick="toggleMap()">&#x26F6;</button>
+        </div>
+        <iframe src="https://map.return2beta.com/" title="Server Map" loading="lazy" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
+      </div>
+    </section>
   </main>
 
   <script>
