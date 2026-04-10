@@ -51,13 +51,16 @@
       background-image: url("../images/header.png");
       background-repeat: repeat-x;
       background-size: auto 48px;
-      transform: scaleX(-1);
+      transform: scaleY(-1);
       z-index: 0;
       pointer-events: none;
     }
     .header-band > * {
       position: relative;
       z-index: 1;
+    }
+    .header-band.wrapped .howto-link {
+      flex-direction: row-reverse;
     }
     .nav-link {
       display: flex;
@@ -114,12 +117,23 @@
     <a class="nav-link" href="/plugins/"><img src="../images/plugins_icon.png" alt="Plugins icon" />Plugins</a>
     <a class="nav-link" href="https://discord.gg/vVvs7tN5p7" target="_blank" rel="noopener noreferrer"><img src="../images/discord_icon.png" alt="Discord icon" />Discord</a>
     <div class="nav-spacer"></div>
-    <a class="nav-link" href="/how-to/"><img src="../images/how-to_icon.gif" alt="How to icon" /><span class="howto-text">How to Join &amp; more</span></a>
+    <a class="nav-link howto-link" href="/how-to/"><span class="howto-text">How to Join &amp; more</span><img src="../images/how-to_icon.gif" alt="How to icon" /></a>
   </header>
 
   <main class="content">
     <h1>How to Join &amp; more</h1>
     <p>Coming soon...</p>
   </main>
+  <script>
+    (function() {
+      const header = document.querySelector('.header-band');
+      if (!header) return;
+      function check() {
+        header.classList.toggle('wrapped', header.scrollHeight > 48);
+      }
+      new ResizeObserver(check).observe(header);
+      check();
+    })();
+  </script>
 </body>
 </html>
