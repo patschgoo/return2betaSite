@@ -224,9 +224,12 @@
     }
     .cw-expand-link:hover { color: #55ff55; }
     /* Desktop/iPad: over the map area */
+    .cw-resize-handle { display: none; position: absolute; top: 0; left: 0; width: 16px; height: 16px; cursor: nwse-resize; z-index: 12; }
+    .cw-resize-handle::after { content: ''; position: absolute; top: 3px; left: 3px; width: 8px; height: 8px; border-top: 2px solid rgba(85,255,85,0.5); border-left: 2px solid rgba(85,255,85,0.5); }
     @media (min-width: 721px) {
       .chat-widget-btn { bottom: 80px; right: 24px; }
-      .chat-widget-panel { bottom: 140px; right: 24px; resize: both; overflow: auto; min-width: 300px; min-height: 300px; }
+      .chat-widget-panel { bottom: 140px; right: 24px; }
+      .cw-resize-handle { display: block; }
     }
     /* Mobile: bottom right */
     @media (max-width: 720px) {
@@ -236,6 +239,7 @@
   </style>
   <button class="chat-widget-btn" id="cwToggle" title="Open chat"><img src="../images/chat_icon.png" alt="Chat" /></button>
   <div class="chat-widget-panel" id="cwPanel">
+    <div class="cw-resize-handle" id="cwResize"></div>
     <div class="cw-header">
       <span>Chat <span class="cw-status" id="cwStatus">Connecting...</span></span>
       <button class="cw-close" id="cwClose">&times;</button>
@@ -323,6 +327,9 @@
     });
     nameInput.addEventListener('keydown', function(e){if(e.key==='Enter')nameBtn.click();});
   })();
+  </script>
+  <script>
+  (function(){var h=document.getElementById('cwResize'),p=document.getElementById('cwPanel');if(!h||!p)return;h.addEventListener('mousedown',function(e){e.preventDefault();var sw=p.offsetWidth,sh=p.offsetHeight,sx=e.clientX,sy=e.clientY;function move(e){p.style.width=Math.max(300,sw+(sx-e.clientX))+'px';p.style.height=Math.max(300,sh+(sy-e.clientY))+'px';}function up(){document.removeEventListener('mousemove',move);document.removeEventListener('mouseup',up);}document.addEventListener('mousemove',move);document.addEventListener('mouseup',up);});})();
   </script>
 </body>
 </html>
