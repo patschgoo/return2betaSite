@@ -476,7 +476,7 @@
     .chat-widget-btn{position:fixed;z-index:500;width:52px;height:52px;border-radius:50%;border:2px solid rgba(85,255,85,0.5);background:rgba(6,10,6,0.88);cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 12px rgba(0,0,0,0.5);transition:background .15s,transform .15s}
     .chat-widget-btn:hover{background:rgba(20,40,20,0.95);transform:scale(1.08)}
     .chat-widget-btn img{width:30px;height:30px;object-fit:contain}
-    .chat-widget-panel{position:fixed;z-index:500;width:440px;height:560px;background:rgba(6,10,6,0.95);border:2px solid rgba(85,255,85,0.35);border-radius:8px;display:none;flex-direction:column;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.6);font-family:'Minecraft',sans-serif}
+    .chat-widget-panel{position:fixed;z-index:500;width:340px;height:420px;background:rgba(6,10,6,0.95);border:2px solid rgba(85,255,85,0.35);border-radius:8px;display:none;flex-direction:column;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.6);font-family:'Minecraft',sans-serif}
     .chat-widget-panel.open{display:flex}
     .cw-header{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-bottom:1px solid rgba(85,255,85,0.22);font-size:.7rem;color:#55ff55;text-shadow:1px 1px 0 rgba(0,0,0,0.8)}
     .cw-close{background:none;border:none;color:#55ff55;font-size:1rem;cursor:pointer;font-family:'Minecraft',sans-serif}.cw-close:hover{color:#ff5555}
@@ -496,7 +496,7 @@
     .cw-name-box input{width:180px;padding:6px 10px;background:rgba(0,0,0,0.6);border:1px solid rgba(85,255,85,0.3);border-radius:3px;color:#d8d8d8;font-family:'Minecraft',sans-serif;font-size:.7rem;outline:none;margin-bottom:8px;display:block;margin-left:auto;margin-right:auto}
     .cw-name-box button{padding:6px 18px;background:rgba(85,255,85,0.22);border:2px solid rgba(85,255,85,0.5);border-radius:3px;color:#55ff55;font-family:'Minecraft',sans-serif;font-size:.65rem;cursor:pointer}
     .cw-expand-link{display:block;text-align:center;padding:4px;font-size:.55rem;color:#888;text-decoration:none;border-top:1px solid rgba(85,255,85,0.12)}.cw-expand-link:hover{color:#55ff55}
-    @media(min-width:721px){.chat-widget-btn{bottom:80px;right:24px}.chat-widget-panel{bottom:140px;right:24px}}
+    @media(min-width:721px){.chat-widget-btn{bottom:80px;right:24px}.chat-widget-panel{bottom:140px;right:24px;resize:both;overflow:auto;min-width:300px;min-height:300px}}
     @media(max-width:720px){.chat-widget-btn{bottom:16px;right:16px}.chat-widget-panel{bottom:76px;right:8px;width:290px;height:370px}}
   </style>
   <button class="chat-widget-btn" id="cwToggle" title="Open chat"><img src="../images/chat_icon.png" alt="Chat" /></button>
