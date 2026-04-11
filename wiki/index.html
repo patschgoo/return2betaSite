@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wiki – Return2Beta</title>
+  <link rel="icon" type="image/png" href="../images/icon.png" />
+  <style>
+    @font-face {
+      font-family: 'Minecraft';
+      src: url('https://cdn.jsdelivr.net/gh/IdreesInc/Minecraft-Font@main/Minecraft.otf') format('opentype');
+      font-weight: normal;
+      font-style: normal;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      width: 100%;
+      height: 100%;
+      font-family: 'Minecraft', sans-serif;
+      background-image: url("../images/background.png");
+      background-repeat: repeat;
+      background-size: auto;
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      padding-top: 48px;
+    }
+    .header-band {
+      min-height: 48px;
+      width: 100%;
+      background-image: url("../images/header.png");
+      background-repeat: repeat-x;
+      background-position: top left;
+      background-size: auto 48px;
+      flex-shrink: 0;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0 48px;
+      padding: 0 48px;
+      position: fixed;
+      top: 0;
+      z-index: 10;
+    }
+    .header-band::after {
+      content: '';
+      position: absolute;
+      top: 48px;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image: url("../images/header.png");
+      background-repeat: repeat-x;
+      background-size: auto 48px;
+      transform: scaleY(-1);
+      z-index: 0;
+      pointer-events: none;
+    }
+    .header-band > * {
+      position: relative;
+      z-index: 1;
+    }
+    .header-band.wrapped .howto-link {
+      flex-direction: row-reverse;
+    }
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      height: 48px;
+      text-decoration: none;
+      color: #fff;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+    }
+    .nav-link img {
+      height: 32px;
+      width: 32px;
+      object-fit: contain;
+    }
+    .nav-spacer { flex: 1; }
+    .wiki-frame {
+      flex: 1;
+      width: 100%;
+      border: none;
+    }
+    @media (max-width: 720px) {
+      .header-band {
+        min-height: 48px;
+        gap: 0 24px;
+        padding: 0 16px;
+      }
+      .nav-link { font-size: 0.8rem; }
+      .nav-link img { height: 28px; width: 28px; }
+      .howto-text { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="header-band" aria-label="Header">
+    <a class="nav-link" href="/"><img src="../images/home_icon.png" alt="Home icon" />Home</a>
+    <a class="nav-link" href="/map/"><img src="../images/map_icon.webp" alt="Map icon" />Map</a>
+    <a class="nav-link" href="/plugins/"><img src="../images/plugins_icon.png" alt="Plugins icon" />Plugins</a>
+    <a class="nav-link" href="/chat/"><img src="../images/chat_icon.png" alt="Chat icon" />Chat</a>
+    <a class="nav-link" href="/wiki/"><img src="../images/wiki_icon.png" alt="Wiki icon" />Wiki</a>
+    <a class="nav-link" href="https://discord.gg/vVvs7tN5p7" target="_blank" rel="noopener noreferrer"><img src="../images/discord_icon.png" alt="Discord icon" />Discord</a>
+    <div class="nav-spacer"></div>
+    <a class="nav-link howto-link" href="/how-to/"><span class="howto-text">How to Join &amp; more</span><img src="../images/how-to_icon.gif" alt="How to icon" /></a>
+  </header>
+
+  <iframe class="wiki-frame" src="https://web.archive.org/web/20110902065819/http://www.minecraftwiki.net:80/wiki/Minecraft_Wiki" title="Minecraft Wiki (Beta era)"></iframe>
+
+  <script>
+    (function() {
+      const header = document.querySelector('.header-band');
+      if (!header) return;
+      function check() {
+        header.classList.toggle('wrapped', header.scrollHeight > 48);
+      }
+      new ResizeObserver(check).observe(header);
+      check();
+    })();
+  </script>
+</body>
+</html>
