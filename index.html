@@ -72,6 +72,8 @@
     .header-band.wrapped .howto-link {
       flex-direction: row-reverse;
     }
+    body.header-wrapped .animals { margin-top: 50px; }
+    body.header-wrapped .intro-text h1 { margin-top: 30px; }
     .nav-link {
       display: flex;
       align-items: center;
@@ -371,13 +373,13 @@
 
   <main class="content">
     <section class="animals-panel" aria-label="Server info">
-      <img class="animals" src="images/animals.png" alt="Animals" style="margin-top: 50px;" />
+      <img class="animals" src="images/animals.png" alt="Animals" />
       <p class="animals-label">IP: mc.return2beta.com</p>
     </section>
 
     <section class="intro" aria-label="Welcome text">
       <div class="intro-text">
-        <h1 style="margin-top: 30px;">Welcome to Return2Beta</h1>
+        <h1>Welcome to Return2Beta</h1>
         <p>Step back into the golden age of Minecraft with <span class="highlight">Return2Beta</span>, a lovingly crafted Beta 1.7.3 multiplayer experience. Our server is built for players who miss the simplicity, charm, and raw creativity of classic Minecraft — before enchantments, before hunger, before the modern era changed everything.</p>
         <p>Return2Beta stays true to the authentic feel of Beta 1.7.3, but with a twist: we’ve added custom plugins designed specifically for the server to enhance gameplay while preserving the original atmosphere. From subtle quality-of-life improvements to unique features that blend seamlessly into the beta style, <span class="highlight">Return2Beta</span> offers the perfect balance of nostalgia and innovation.</p>
         <p>Whether you’re revisiting old memories or discovering Beta Minecraft for the first time, our world is yours to shape. Build, survive, explore, and enjoy Minecraft as it was meant to be.</p>
@@ -438,6 +440,7 @@
       if (!header) return;
       function check() {
         header.classList.toggle('wrapped', header.scrollHeight > 48);
+        document.body.classList.toggle('header-wrapped', header.scrollHeight > 48);
       }
       new ResizeObserver(check).observe(header);
       check();
