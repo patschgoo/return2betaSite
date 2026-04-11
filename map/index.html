@@ -267,7 +267,9 @@
     var nameOverlay = document.getElementById('cwNameOverlay');
     var nameInput = document.getElementById('cwNameInput');
     var nameBtn = document.getElementById('cwNameBtn');
-    var ws = null, username = null, reconnectDelay = 1000, opened = false;
+    var ws = null, username = localStorage.getItem('r2b_chat_username'), reconnectDelay = 1000, opened = false;
+
+    if (username) { nameOverlay.classList.add('hidden'); }
 
     toggle.addEventListener('click', function() {
       panel.classList.toggle('open');
@@ -316,6 +318,7 @@
     input.addEventListener('keydown', function(e){if(e.key==='Enter')send();});
     nameBtn.addEventListener('click', function(){
       var n=nameInput.value.trim(); if(!n)return; username=n;
+      localStorage.setItem('r2b_chat_username', n);
       if(ws&&ws.readyState===1) ws.send(JSON.stringify({type:'set_username',username:n}));
     });
     nameInput.addEventListener('keydown', function(e){if(e.key==='Enter')nameBtn.click();});
