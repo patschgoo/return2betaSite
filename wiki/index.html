@@ -93,11 +93,11 @@
     }
     .dark-toggle {
       position: fixed;
-      top: 56px;
-      right: 16px;
+      top: 58px;
+      right: 24px;
       z-index: 20;
-      width: 44px;
-      height: 44px;
+      width: 52px;
+      height: 50px;
       border-radius: 50%;
       border: 2px solid rgba(85,255,85,0.5);
       background: rgba(6,10,6,0.88);
@@ -161,11 +161,19 @@
   <script>
     (function() {
       const header = document.querySelector('.header-band');
+      const darkBtn = document.getElementById('darkToggle');
       if (!header) return;
       function check() {
-        header.classList.toggle('wrapped', header.scrollHeight > 48);
+        var wrapped = header.scrollHeight > 48;
+        header.classList.toggle('wrapped', wrapped);
+        if (window.innerWidth <= 720) {
+          darkBtn.style.top = (header.offsetTop + header.offsetHeight + 4) + 'px';
+        } else {
+          darkBtn.style.top = '58px';
+        }
       }
       new ResizeObserver(check).observe(header);
+      window.addEventListener('resize', check);
       check();
     })();
   </script>
@@ -269,8 +277,8 @@
     .cw-resize-handle { display: none; position: absolute; top: 0; left: 0; width: 16px; height: 16px; cursor: nwse-resize; z-index: 12; }
     .cw-resize-handle::after { content: ''; position: absolute; top: 3px; left: 3px; width: 8px; height: 8px; border-top: 2px solid rgba(85,255,85,0.5); border-left: 2px solid rgba(85,255,85,0.5); }
     @media (min-width: 721px) {
-      .chat-widget-btn { bottom: 80px; right: 24px; }
-      .chat-widget-panel { bottom: 140px; right: 24px; }
+      .chat-widget-btn { bottom: 20px; right: 24px; }
+      .chat-widget-panel { bottom: 80px; right: 24px; }
       .cw-resize-handle { display: block; }
     }
     @media (max-width: 720px) {
