@@ -255,6 +255,8 @@
         <li><a href="#betacraft">BetaCraft Launcher</a></li>
         <li><a href="#multimc">MultiMC</a></li>
         <li><a href="#prism">Prism Launcher</a></li>
+        <li><a href="#ultimmc">UltimMC</a></li>
+        <li><a href="#retrowrapper">RetroWrapper</a></li>
         <li><a href="#lts">Minecraft-LTS-Launcher</a></li>
         <li><a href="#server-mods">Server Mods</a></li>
         <li><a href="#useful-mods">Useful Mods</a></li>
@@ -336,8 +338,51 @@
       <div class="note">Prism Launcher may need Java 8 for Beta 1.7.3. If it doesn't launch, go to <strong>Settings</strong> → <strong>Java</strong> and select a Java 8 installation.</div>
     </div>
 
+    <!-- ─── UltimMC ─── -->
+    <h2 id="ultimmc">4. UltimMC</h2>
+    <div class="launcher-section">
+      <p>UltimMC is a fork of MultiMC with built-in offline/cracked account support — no need to manually configure offline mode.</p>
+
+      <h3>Download</h3>
+      <p>Get UltimMC from GitHub: <a href="https://github.com/UltimMC/Launcher" target="_blank" rel="noopener noreferrer">github.com/UltimMC/Launcher</a></p>
+
+      <h3>Setup</h3>
+      <ol>
+        <li>Download the latest release and extract it.</li>
+        <li>Open UltimMC.</li>
+        <li>Click <strong>"Profiles"</strong> (top-right) and add an <strong>offline account</strong> with your desired username.</li>
+        <li>Click <strong>"Add Instance"</strong> in the top toolbar.</li>
+        <li>Expand <strong>Old Beta</strong> and select <code>b1.7.3</code>.</li>
+        <li>Name the instance (e.g. "Return2Beta") and click <strong>OK</strong>.</li>
+        <li>Double-click the instance to launch.</li>
+        <li>In-game, go to <strong>Multiplayer</strong> → enter <code>mc.return2beta.com</code> and connect.</li>
+      </ol>
+
+      <div class="note">UltimMC works like MultiMC but with easier offline account management. If you don't see Old Beta versions, go to <strong>Settings</strong> → <strong>Minecraft</strong> and check <strong>"Show old versions"</strong>.</div>
+    </div>
+
+    <!-- ─── RetroWrapper ─── -->
+    <h2 id="retrowrapper">5. RetroWrapper</h2>
+    <div class="launcher-section">
+      <p>RetroWrapper is a lightweight wrapper that patches legacy Minecraft versions to work with modern Java and fixes common issues like sound, skins, and multiplayer. It works with any MultiMC-based launcher.</p>
+
+      <h3>Download</h3>
+      <p>Get RetroWrapper from GitHub: <a href="https://github.com/AltronMaxX/RetroWrapper" target="_blank" rel="noopener noreferrer">github.com/AltronMaxX/RetroWrapper</a></p>
+
+      <h3>Setup</h3>
+      <ol>
+        <li>Download the latest RetroWrapper <code>.jar</code> from the GitHub releases page.</li>
+        <li>In your MultiMC-based launcher, create a <code>b1.7.3</code> instance.</li>
+        <li>Right-click the instance → <strong>Edit Instance</strong> → <strong>Version</strong>.</li>
+        <li>Click <strong>"Add to Minecraft.jar"</strong> and select the RetroWrapper jar.</li>
+        <li>Launch the instance and connect to <code>mc.return2beta.com</code>.</li>
+      </ol>
+
+      <div class="note">RetroWrapper automatically fixes sound, skins, and online functionality for Beta 1.7.3. It's a jar mod — add it directly to the Minecraft jar, not the mods folder.</div>
+    </div>
+
     <!-- ─── Minecraft-LTS-Launcher ─── -->
-    <h2 id="lts">4. Minecraft-LTS-Launcher</h2>
+    <h2 id="lts">6. Minecraft-LTS-Launcher</h2>
     <div class="launcher-section">
       <p>The Minecraft-LTS-Launcher (Long-Term Support) is a lightweight launcher specifically designed for playing legacy Minecraft versions with modern fixes.</p>
 
@@ -358,7 +403,7 @@
     </div>
 
     <!-- ─── Server Mods ─── -->
-    <h2 id="server-mods">5. Server Mods</h2>
+    <h2 id="server-mods">7. Server Mods</h2>
     <div class="launcher-section">
       <p>These are client-side mods required to experience server features that need a matching mod on your end. Install them by placing the files into your <code>.minecraft/mods</code> folder (create it if it doesn't exist). Risugami's ModLoader is required.</p>
 
@@ -368,7 +413,7 @@
     </div>
 
     <!-- ─── Useful Mods ─── -->
-    <h2 id="useful-mods">6. Useful Mods</h2>
+    <h2 id="useful-mods">8. Useful Mods</h2>
     <div class="launcher-section">
       <p>These optional mods enhance your Beta 1.7.3 experience. All require <strong>Risugami's ModLoader</strong> (see below).</p>
 
