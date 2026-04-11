@@ -215,25 +215,47 @@
     }
 
     /* ── Foldable plugin-selector panel ─────────────────── */
+    /* panel-wrap slides as one unit; tab is glued to its right edge */
     .panel-wrap {
+      --panel-w: 210px;
       position: fixed;
-      top: 0;
+      top: 0;           /* overridden by JS to sit below header */
       left: 0;
-      height: 100vh;
+      bottom: 0;
       z-index: 200;
-      display: flex;
-      align-items: stretch;
+      width: var(--panel-w);
+      transform: translateX(calc(-1 * var(--panel-w)));
+      transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
       pointer-events: none;
-      flex-direction: row-reverse;
+    }
+    .panel-wrap.open {
+      transform: translateX(0);
     }
 
-    /* The vertical toggle tab that sticks out on the right of the panel */
+    /* The panel contents */
+    .plugin-panel {
+      pointer-events: all;
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 100%;
+      background: rgba(6, 10, 6, 0.85);
+      border-right: 2px solid rgba(85,255,85,0.28);
+      backdrop-filter: blur(3px);
+      -webkit-backdrop-filter: blur(3px);
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Tab sits flush against the right edge of the panel, moves with it */
     .panel-tab {
       pointer-events: all;
-      align-self: center;
-      writing-mode: vertical-rl;
-      text-orientation: mixed;
-      transform: rotate(180deg);
+      position: absolute;
+      left: var(--panel-w);
+      top: 50%;
+      transform: translateY(-50%);
+      writing-mode: vertical-rl;  /* text reads top → bottom */
       background: rgba(8, 14, 8, 0.82);
       border: 2px solid rgba(85,255,85,0.45);
       border-left: none;
@@ -254,36 +276,16 @@
       color: #aaff88;
       border-color: rgba(85,255,85,0.7);
     }
-    .panel-tab .tab-arrow {
+    /* Arrow rendered in normal (horizontal) mode so it doesn't get rotated by writing-mode */
+    .tab-arrow {
       display: block;
-      font-style: normal;
-      letter-spacing: 0;
-      margin-top: 6px;
-      font-size: 0.8rem;
-      color: #55ff55;
-      transition: transform 0.35s;
+      writing-mode: horizontal-tb;
+      text-align: center;
+      margin-top: 8px;
+      font-size: 0.85rem;
     }
-    .panel-wrap:not(.open) .tab-arrow {
-      transform: rotate(180deg);
-    }
-
-    /* The sliding panel itself */
-    .plugin-panel {
-      pointer-events: all;
-      width: 210px;
-      height: 100%;
-      background: rgba(6, 10, 6, 0.85);
-      border-right: 2px solid rgba(85,255,85,0.28);
-      backdrop-filter: blur(3px);
-      -webkit-backdrop-filter: blur(3px);
-      display: flex;
-      flex-direction: column;
-      transform: translateX(-100%);
-      transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    .panel-wrap.open .plugin-panel {
-      transform: translateX(0);
-    }
+    .panel-wrap:not(.open) .tab-arrow::before { content: '\25B6'; } /* ▶ */
+    .panel-wrap.open      .tab-arrow::before { content: '\25C0'; } /* ◀ */
 
     .plugin-panel-header {
       flex-shrink: 0;
@@ -343,7 +345,7 @@
       .nav-link { font-size: 0.8rem; }
       .nav-link img { height: 28px; width: 28px; }
       .howto-text { display: none; }
-      .plugin-panel { width: 175px; }
+      .panel-wrap { --panel-w: 175px; }
       #plugin-readme { padding: 18px 16px; }
     }
   </style>
@@ -360,19 +362,19 @@
 
   <main class="content">
     <h1>Plugins</h1>
-    <p id="intro-hint">Open the panel on the right and select a plugin to read about it.</p>
+    <p id="intro-hint">Open the panel on the left and select a plugin to read about it.</p>
     <div id="plugin-readme"></div>
   </main>
 
   <!-- Foldable plugin selector panel -->
   <div class="panel-wrap" id="panelWrap">
-    <button class="panel-tab" id="panelTab" aria-expanded="false" aria-controls="pluginPanel">
-      Plugins<em class="tab-arrow">&#9660;</em>
-    </button>
     <nav class="plugin-panel" id="pluginPanel" aria-label="Plugin list">
       <div class="plugin-panel-header">&#8212; Plugin List &#8212;</div>
       <div class="plugin-list" id="pluginList" role="list"></div>
     </nav>
+    <button class="panel-tab" id="panelTab" aria-expanded="false" aria-controls="pluginPanel">
+      Plugins<span class="tab-arrow" aria-hidden="true"></span>
+    </button>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/marked@9/marked.min.js"></script>
@@ -440,13 +442,22 @@
   </script>
   <script>
     (function () {
-      const header = document.querySelector('.header-band');
+      const header  = document.querySelector('.header-band');
+      const panelWrapEl = document.getElementById('panelWrap');
       if (!header) return;
-      function check() {
+
+      function checkHeader() {
         header.classList.toggle('wrapped', header.scrollHeight > 48);
       }
-      new ResizeObserver(check).observe(header);
-      check();
+
+      function updatePanelTop() {
+        panelWrapEl.style.top = (header.offsetTop + header.offsetHeight) + 'px';
+      }
+
+      const obs = new ResizeObserver(() => { checkHeader(); updatePanelTop(); });
+      obs.observe(header);
+      checkHeader();
+      updatePanelTop();
     })();
   </script>
 </body>
