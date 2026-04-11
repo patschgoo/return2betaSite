@@ -87,19 +87,110 @@
     .content {
       flex: 1;
       padding: 24px;
-      text-align: center;
       color: #fff;
+      max-width: 900px;
+      margin: 0 auto;
     }
     .content h1 {
       font-size: clamp(1.4rem, 3vw, 2.2rem);
       color: #55ff55;
       text-shadow: 3px 3px 0 rgba(0, 0, 0, 0.7);
       margin-bottom: 20px;
+      text-align: center;
     }
-    .content p {
-      font-size: clamp(0.75rem, 1.4vw, 1rem);
+    .content h2 {
+      font-size: clamp(1rem, 2vw, 1.4rem);
+      color: #55ff55;
+      text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.7);
+      margin: 32px 0 12px 0;
+      border-bottom: 2px solid rgba(85,255,85,0.25);
+      padding-bottom: 6px;
+    }
+    .content h3 {
+      font-size: clamp(0.8rem, 1.5vw, 1.1rem);
+      color: #aaffaa;
+      text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.7);
+      margin: 20px 0 8px 0;
+    }
+    .content p, .content li {
+      font-size: clamp(0.7rem, 1.2vw, 0.9rem);
       line-height: 1.8;
-      text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.692);
+      text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.6);
+    }
+    .content ol, .content ul {
+      padding-left: 24px;
+      margin-bottom: 12px;
+    }
+    .content li {
+      margin-bottom: 6px;
+    }
+    .content code {
+      background: rgba(0,0,0,0.5);
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-family: 'Minecraft', monospace;
+      color: #ffff55;
+      font-size: 0.85em;
+      border: 1px solid rgba(85,255,85,0.15);
+    }
+    .content .server-ip {
+      display: inline-block;
+      background: rgba(0,0,0,0.6);
+      padding: 6px 16px;
+      border: 2px solid rgba(85,255,85,0.4);
+      border-radius: 4px;
+      color: #55ff55;
+      font-size: clamp(0.9rem, 1.6vw, 1.2rem);
+      margin: 12px 0;
+      text-shadow: 2px 2px 0 rgba(0,0,0,0.8);
+    }
+    .content .note {
+      background: rgba(85,255,85,0.08);
+      border-left: 3px solid rgba(85,255,85,0.4);
+      padding: 10px 14px;
+      margin: 12px 0;
+      border-radius: 0 4px 4px 0;
+      font-size: clamp(0.65rem, 1.1vw, 0.82rem);
+      color: #ccc;
+    }
+    .launcher-section {
+      background: rgba(0,0,0,0.35);
+      border: 1px solid rgba(85,255,85,0.15);
+      border-radius: 6px;
+      padding: 16px 20px;
+      margin: 16px 0;
+    }
+    .content a {
+      color: #55ff55;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+    .content a:hover {
+      color: #aaffaa;
+    }
+    .toc {
+      background: rgba(0,0,0,0.4);
+      border: 1px solid rgba(85,255,85,0.2);
+      border-radius: 6px;
+      padding: 14px 20px;
+      margin-bottom: 24px;
+      display: inline-block;
+      text-align: left;
+    }
+    .toc h3 {
+      margin: 0 0 8px 0;
+      font-size: 0.85rem;
+      color: #55ff55;
+    }
+    .toc ol {
+      padding-left: 20px;
+      margin: 0;
+    }
+    .toc li {
+      margin-bottom: 4px;
+    }
+    .toc a {
+      font-size: clamp(0.65rem, 1.1vw, 0.82rem);
     }
     @media (max-width: 720px) {
       .header-band {
@@ -125,8 +216,138 @@
   </header>
 
   <main class="content">
-    <h1>How to Join &amp; more</h1>
-    <p>Coming soon...</p>
+    <h1>How to Join Return2Beta</h1>
+    <p style="text-align:center; margin-bottom: 16px;">Server IP:</p>
+    <p style="text-align:center;"><span class="server-ip">mc.return2beta.com</span></p>
+
+    <div class="toc" style="margin: 24px auto; display: block; max-width: 360px;">
+      <h3>Table of Contents</h3>
+      <ol>
+        <li><a href="#betacraft">BetaCraft Launcher</a></li>
+        <li><a href="#multimc">MultiMC</a></li>
+        <li><a href="#prism">Prism Launcher</a></li>
+        <li><a href="#lts">Minecraft-LTS-Launcher</a></li>
+      </ol>
+    </div>
+
+    <div class="note">All launchers listed below are free and support offline/cracked mode. You do <strong>not</strong> need a Mojang or Microsoft account to play on Return2Beta.</div>
+
+    <!-- ─── BetaCraft ─── -->
+    <h2 id="betacraft">1. BetaCraft Launcher</h2>
+    <div class="launcher-section">
+      <p>BetaCraft is the most popular launcher for legacy Minecraft versions. It comes with Beta 1.7.3 built in and handles authentication automatically.</p>
+
+      <h3>Download</h3>
+      <p>Get BetaCraft from the official site: <a href="https://betacraft.uk" target="_blank" rel="noopener noreferrer">betacraft.uk</a></p>
+
+      <h3>Setup</h3>
+      <ol>
+        <li>Install and open BetaCraft Launcher.</li>
+        <li>Click <strong>"Edit instances"</strong> (or the <strong>+</strong> button) to create a new instance.</li>
+        <li>In the version list, find and select <code>b1.7.3</code>.</li>
+        <li>Name the instance (e.g. "Return2Beta") and click <strong>OK</strong>.</li>
+        <li>In the main window, enter your desired username in the username field.</li>
+        <li>Select your new instance and click <strong>Play</strong>.</li>
+        <li>Once Minecraft opens, go to <strong>Multiplayer</strong> → <strong>Add Server</strong> or <strong>Direct Connect</strong>.</li>
+        <li>Enter the server address: <code>mc.return2beta.com</code></li>
+        <li>Click <strong>Connect</strong> and enjoy!</li>
+      </ol>
+
+      <div class="note">BetaCraft automatically patches Beta 1.7.3 to work with modern server lists. No extra setup needed.</div>
+    </div>
+
+    <!-- ─── MultiMC ─── -->
+    <h2 id="multimc">2. MultiMC</h2>
+    <div class="launcher-section">
+      <p>MultiMC is an advanced instance-based launcher that supports legacy Minecraft versions.</p>
+
+      <h3>Download</h3>
+      <p>Get MultiMC from: <a href="https://multimc.org" target="_blank" rel="noopener noreferrer">multimc.org</a></p>
+
+      <h3>Setup</h3>
+      <ol>
+        <li>Install and open MultiMC.</li>
+        <li>Click <strong>"Add Instance"</strong> in the top toolbar.</li>
+        <li>In the version selection, expand <strong>Old Beta</strong> and select <code>b1.7.3</code>.</li>
+        <li>Name the instance (e.g. "Return2Beta") and click <strong>OK</strong>.</li>
+        <li>Go to <strong>Profiles</strong> (top-right) → <strong>Manage Accounts</strong>.</li>
+        <li>Add an <strong>offline account</strong> with your desired username.</li>
+        <li>Select the offline account as your active profile.</li>
+        <li>Double-click the instance to launch.</li>
+        <li>In-game, go to <strong>Multiplayer</strong> → enter <code>mc.return2beta.com</code> and connect.</li>
+      </ol>
+
+      <div class="note">If you don't see Old Beta versions, go to <strong>Settings</strong> → <strong>Minecraft</strong> and check <strong>"Show old versions"</strong>.</div>
+    </div>
+
+    <!-- ─── Prism Launcher ─── -->
+    <h2 id="prism">3. Prism Launcher</h2>
+    <div class="launcher-section">
+      <p>Prism Launcher is a modern, open-source fork of MultiMC with additional features and active development.</p>
+
+      <h3>Download</h3>
+      <p>Get Prism Launcher from: <a href="https://prismlauncher.org" target="_blank" rel="noopener noreferrer">prismlauncher.org</a></p>
+
+      <h3>Setup</h3>
+      <ol>
+        <li>Install and open Prism Launcher.</li>
+        <li>On first launch, it will ask you to set up an account. Choose <strong>"Add Offline"</strong> and enter your username.</li>
+        <li>Click <strong>"Add Instance"</strong> in the top toolbar.</li>
+        <li>In the version filter on the left, check <strong>"Old Beta"</strong>.</li>
+        <li>Select <code>b1.7.3</code> from the version list.</li>
+        <li>Name the instance (e.g. "Return2Beta") and click <strong>OK</strong>.</li>
+        <li>Make sure your offline account is selected (top-right corner).</li>
+        <li>Double-click the instance to launch.</li>
+        <li>In-game, go to <strong>Multiplayer</strong> → enter <code>mc.return2beta.com</code> and connect.</li>
+      </ol>
+
+      <div class="note">Prism Launcher may need Java 8 for Beta 1.7.3. If it doesn't launch, go to <strong>Settings</strong> → <strong>Java</strong> and select a Java 8 installation.</div>
+    </div>
+
+    <!-- ─── Minecraft-LTS-Launcher ─── -->
+    <h2 id="lts">4. Minecraft-LTS-Launcher</h2>
+    <div class="launcher-section">
+      <p>The Minecraft-LTS-Launcher (Long-Term Support) is a lightweight launcher specifically designed for playing legacy Minecraft versions with modern fixes.</p>
+
+      <h3>Download</h3>
+      <p>Get the LTS Launcher from GitHub: <a href="https://github.com/AiDSl/Minecraft-LTS-Launcher" target="_blank" rel="noopener noreferrer">github.com/AiDSl/Minecraft-LTS-Launcher</a></p>
+
+      <h3>Setup</h3>
+      <ol>
+        <li>Download the latest release from the GitHub releases page.</li>
+        <li>Extract the archive and run the launcher.</li>
+        <li>Enter your desired username in the username field.</li>
+        <li>Select version <code>b1.7.3</code> from the version dropdown.</li>
+        <li>Click <strong>Play</strong> to launch the game.</li>
+        <li>In-game, go to <strong>Multiplayer</strong> → enter <code>mc.return2beta.com</code> and connect.</li>
+      </ol>
+
+      <div class="note">The LTS Launcher automatically applies legacy fixes for Beta 1.7.3 including sound, skins, and server list support.</div>
+    </div>
+
+    <!-- ─── Troubleshooting ─── -->
+    <h2>Troubleshooting</h2>
+    <div class="launcher-section">
+      <h3>Can't connect to the server?</h3>
+      <ul>
+        <li>Make sure you're using version <code>b1.7.3</code> exactly — not 1.7.3 (Release) or b1.7.2.</li>
+        <li>Check that you entered the server address correctly: <code>mc.return2beta.com</code></li>
+        <li>If using a firewall, ensure outgoing connections on port <code>25565</code> are allowed.</li>
+      </ul>
+
+      <h3>Game crashes on launch?</h3>
+      <ul>
+        <li>Beta 1.7.3 requires <strong>Java 8</strong>. If you have a newer Java version, configure your launcher to use Java 8 specifically.</li>
+        <li>Try allocating less RAM (512 MB–1 GB is enough for Beta).</li>
+      </ul>
+
+      <h3>No sound?</h3>
+      <ul>
+        <li>Beta 1.7.3 uses the old sound system. BetaCraft and LTS Launcher patch this automatically. For MultiMC/Prism, you may need to download legacy sound resources manually.</li>
+      </ul>
+    </div>
+
+    <p style="text-align:center; margin-top: 32px; color: #888; font-size: clamp(0.6rem, 1vw, 0.8rem);">Need more help? Ask in our <a href="https://discord.gg/vVvs7tN5p7" target="_blank" rel="noopener noreferrer">Discord</a> or use the <a href="/chat/">Chat</a>!</p>
   </main>
   <script>
     (function() {
