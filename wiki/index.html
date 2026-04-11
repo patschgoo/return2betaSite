@@ -97,7 +97,7 @@
       right: 24px;
       z-index: 20;
       width: 52px;
-      height: 50px;
+      height: 52px;
       border-radius: 50%;
       border: 2px solid rgba(85,255,85,0.5);
       background: rgba(6,10,6,0.88);
@@ -166,10 +166,12 @@
       function check() {
         var wrapped = header.scrollHeight > 48;
         header.classList.toggle('wrapped', wrapped);
-        if (window.innerWidth <= 720) {
+        if (wrapped) {
           darkBtn.style.top = (header.offsetTop + header.offsetHeight + 4) + 'px';
+          darkBtn.style.right = '16px';
         } else {
           darkBtn.style.top = '58px';
+          darkBtn.style.right = '24px';
         }
       }
       new ResizeObserver(check).observe(header);
