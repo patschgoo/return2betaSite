@@ -144,6 +144,28 @@
       margin: 12px 0;
       text-shadow: 2px 2px 0 rgba(0,0,0,0.8);
     }
+    .ip-box {
+      background: rgba(0,0,0,0.5);
+      border: 2px solid rgba(85,255,85,0.3);
+      border-radius: 6px;
+      padding: 16px 24px;
+      margin: 16px auto;
+      max-width: 400px;
+      text-align: center;
+      line-height: 2.2;
+    }
+    .ip-box .ip {
+      display: block;
+      color: #aaa;
+      font-size: clamp(0.7rem, 1.2vw, 0.9rem);
+      text-shadow: 1px 1px 0 rgba(0,0,0,0.7);
+    }
+    .ip-box .ip.primary {
+      color: #55ff55;
+      font-size: clamp(1rem, 1.8vw, 1.3rem);
+      text-shadow: 2px 2px 0 rgba(0,0,0,0.8);
+      font-weight: bold;
+    }
     .content .note {
       background: rgba(85,255,85,0.08);
       border-left: 3px solid rgba(85,255,85,0.4);
@@ -217,14 +239,14 @@
 
   <main class="content">
     <h1>How to Join Return2Beta</h1>
-    <p style="text-align:center; margin-bottom: 16px;">Server IPs:</p>
-    <p style="text-align:center;">
-      <span class="server-ip">mc.return2beta.com</span><br>
-      <span class="server-ip">beta.mildvanilla.org</span><br>
-      <span class="server-ip">mc.mildbeta.world</span><br>
-      <span class="server-ip">5.9.123.120:50179</span><br>
-      <span class="server-ip">217.160.170.104</span>
-    </p>
+    <p style="text-align:center; margin-bottom: 8px;">Server IPs:</p>
+    <div class="ip-box">
+      <span class="ip primary">mc.return2beta.com</span>
+      <span class="ip">beta.mildvanilla.org</span>
+      <span class="ip">mc.mildbeta.world</span>
+      <span class="ip">5.9.123.120:50179</span>
+      <span class="ip">217.160.170.104</span>
+    </div>
 
     <div class="toc" style="margin: 24px auto; display: block; max-width: 360px;">
       <h3>Table of Contents</h3>
@@ -233,6 +255,8 @@
         <li><a href="#multimc">MultiMC</a></li>
         <li><a href="#prism">Prism Launcher</a></li>
         <li><a href="#lts">Minecraft-LTS-Launcher</a></li>
+        <li><a href="#server-mods">Server Mods</a></li>
+        <li><a href="#useful-mods">Useful Mods</a></li>
         <li><a href="#troubleshooting">Troubleshooting</a></li>
       </ol>
     </div>
@@ -330,6 +354,34 @@
       </ol>
 
       <div class="note">The LTS Launcher automatically applies legacy fixes for Beta 1.7.3 including sound, skins, and server list support.</div>
+    </div>
+
+    <!-- ─── Server Mods ─── -->
+    <h2 id="server-mods">5. Server Mods</h2>
+    <div class="launcher-section">
+      <p>These are client-side mods required to experience server features that need a matching mod on your end. Install them by placing the files into your <code>.minecraft/mods</code> folder (create it if it doesn't exist). Risugami's ModLoader is required.</p>
+
+      <h3>Seasons Client</h3>
+      <p>The server runs the <strong>Seasons</strong> plugin, which cycles between Winter and Summer with different weather patterns. The client mod adds visual season indicators.</p>
+      <p><a href="/Server%20Mods/SeasonsClient.zip" download>Download SeasonsClient.zip</a></p>
+    </div>
+
+    <!-- ─── Useful Mods ─── -->
+    <h2 id="useful-mods">6. Useful Mods</h2>
+    <div class="launcher-section">
+      <p>These optional mods enhance your Beta 1.7.3 experience. All require <strong>Risugami's ModLoader</strong> (see below).</p>
+
+      <h3>Risugami's ModLoader</h3>
+      <p>The classic mod loader for Beta 1.7.3 — required by most mods listed here. It lets the game load mods from the <code>mods</code> folder without modifying the jar directly.</p>
+      <p><a href="https://github.com/coffeenotfound/ModloaderFix-b1.7.3" target="_blank" rel="noopener noreferrer">Download ModLoaderFix for b1.7.3</a></p>
+
+      <h3>OptiFine</h3>
+      <p>The essential performance mod — boosts FPS, adds HD texture support, fog control, and many visual options. Highly recommended even on modern hardware.</p>
+      <p><a href="https://mcarchive.net/mods/optifine?gvsn=b1.7.3" target="_blank" rel="noopener noreferrer">Download OptiFine for b1.7.3</a></p>
+
+      <h3>LegacyVoiceChat</h3>
+      <p>Adds proximity-based voice chat — talk to nearby players (within 48 blocks) using your microphone instead of typing. The server runs LegacyVoiceChat version <strong>0.1.0</strong> on port <code>25566</code>. See the <a href="/plugins/">Plugins page</a> for server-side details.</p>
+      <p><a href="https://legacyvoicechat.com/" target="_blank" rel="noopener noreferrer">Download LegacyVoiceChat</a></p>
     </div>
 
     <!-- ─── Troubleshooting ─── -->
