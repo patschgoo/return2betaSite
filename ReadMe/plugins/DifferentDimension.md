@@ -10,8 +10,6 @@ Players can enter the dimension through the `/dd join` command or by right-click
 ---
 
 ## How It Affects You
-
-### As a Player
 - When you enter the Different Dimension, **every single command is blocked** — no `/home`, no `/tp`, no `/gamemode`, no `/give`, nothing
 - The **only** command that works inside is `/dd leave` (and `/dd help` for reference)
 - Your position in both worlds is remembered — leave the dimension, come back days later, and you appear at the exact block you left
@@ -19,14 +17,6 @@ Players can enter the dimension through the `/dd join` command or by right-click
 - You can enter through `/dd join` or by right-clicking a portal sign placed by an admin
 - Chat is shared across both worlds by default. Messages from dimension players show a purple **[DD]** tag so you know where they are
 - All standard game mechanics work (mining, building, mobs, hunger, etc.) — just no commands
-
-### As an Admin
-- You can set a custom spawn point for the dimension with `/dd setspawn`
-- You can create portal signs by placing a sign with `[DD]` on the first line (requires OP or `differentdimension.admin`)
-- You can configure the dimension world type, seed, and messages
-- You can configure chat to be shared or separated between worlds, and set colored tags and message colors
-- You can whitelist additional commands if needed
-- Admin commands (`/dd setspawn`, `/dd reload`) work for OP players or players with `differentdimension.admin`
 
 ---
 

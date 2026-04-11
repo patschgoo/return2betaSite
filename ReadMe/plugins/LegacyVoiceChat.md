@@ -70,31 +70,10 @@ Other players with the voice mod can see your current voice state:
 
 ---
 
-## Server Configuration
-
-The server-side voice configuration is located at `config/voice-server.json`:
-
-```json
-{
-  "port": 25566,
-  "server_host": "0.0.0.0",
-  "audio": {
-    "max_distance": 48.0
-  }
-}
-```
-
-| Setting | Default | Description |
-|---|---|---|
-| `port` | `25566` | UDP port the voice server listens on |
-| `server_host` | `0.0.0.0` | Address the voice server binds to |
-| `audio.max_distance` | `48.0` | Maximum distance (in blocks) at which players can hear each other in proximity mode |
-
----
-
 ## Notes
 - Requires a compatible client-side mod to use voice chat.
 - Voice chat is proximity-based by default — only nearby players can hear you.
+- The `audio.max_distance` setting controls the maximum hearing range (default: **48 blocks**).
 - Group voice chat bypasses the distance limit for group members.
 - Groups can be password-protected to keep conversations private.
 - The server cannot control client keybinds — those are set in your mod options.
