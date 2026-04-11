@@ -218,15 +218,16 @@
     .panel-wrap {
       position: fixed;
       top: 0;
-      right: 0;
+      left: 0;
       height: 100vh;
       z-index: 200;
       display: flex;
       align-items: stretch;
       pointer-events: none;
+      flex-direction: row-reverse;
     }
 
-    /* The vertical toggle tab that sticks out on the left of the panel */
+    /* The vertical toggle tab that sticks out on the right of the panel */
     .panel-tab {
       pointer-events: all;
       align-self: center;
@@ -235,8 +236,8 @@
       transform: rotate(180deg);
       background: rgba(8, 14, 8, 0.82);
       border: 2px solid rgba(85,255,85,0.45);
-      border-right: none;
-      border-radius: 6px 0 0 6px;
+      border-left: none;
+      border-radius: 0 6px 6px 0;
       color: #55ff55;
       font-family: 'Minecraft', sans-serif;
       font-size: 0.72rem;
@@ -262,7 +263,7 @@
       color: #55ff55;
       transition: transform 0.35s;
     }
-    .panel-wrap.open .tab-arrow {
+    .panel-wrap:not(.open) .tab-arrow {
       transform: rotate(180deg);
     }
 
@@ -272,12 +273,12 @@
       width: 210px;
       height: 100%;
       background: rgba(6, 10, 6, 0.85);
-      border-left: 2px solid rgba(85,255,85,0.28);
+      border-right: 2px solid rgba(85,255,85,0.28);
       backdrop-filter: blur(3px);
       -webkit-backdrop-filter: blur(3px);
       display: flex;
       flex-direction: column;
-      transform: translateX(100%);
+      transform: translateX(-100%);
       transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
     }
     .panel-wrap.open .plugin-panel {
