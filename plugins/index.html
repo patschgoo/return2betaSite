@@ -276,15 +276,17 @@
       color: #aaff88;
       border-color: rgba(85,255,85,0.7);
     }
-    /* Arrow: inline-block so transform works; counter-rotate to cancel vertical-rl's 90° CW rotation */
+    /* Arrow rendered in normal (horizontal) mode so it doesn't get rotated by writing-mode */
     .tab-arrow {
-      display: inline-block;
-      transform: rotate(-90deg);
-      margin-inline-end: 6px; /* spacing below arrow in vertical flow */
+      display: block;
+      writing-mode: horizontal-tb;
+      text-align: center;
+      margin-bottom: 16px;
       font-size: 0.85rem;
+      width: 100%;
     }
-    .panel-wrap:not(.open) .tab-arrow::before { content: '\25BC'; } /* ▼ closed */
-    .panel-wrap.open      .tab-arrow::before { content: '\25B2'; } /* ▲ open  */
+    .panel-wrap:not(.open) .tab-arrow::before { content: '\25B6'; } /* ▶ */
+    .panel-wrap.open      .tab-arrow::before { content: '\25C0'; } /* ◀ */
 
     .plugin-panel-header {
       flex-shrink: 0;
