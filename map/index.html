@@ -16,6 +16,7 @@
     html, body {
       width: 100%;
       height: 100%;
+      padding-top: 48px;
       font-family: 'Minecraft', sans-serif;
       background-image: url("../images/background.png");
       background-repeat: repeat;
@@ -36,7 +37,9 @@
       align-items: center;
       gap: 0 48px;
       padding: 0 48px;
-      position: relative;
+      position: fixed;
+      top: 0;
+      z-index: 10;
     }
     .header-band::after {
       content: '';
