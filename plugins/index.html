@@ -367,14 +367,14 @@
 
   <main class="content">
     <h1>Plugins</h1>
-    <p id="intro-hint">Open the panel on the left and select a plugin to read about it.</p>
+    <p id="intro-hint" style="display:none">Open the panel on the left and select a plugin to read about it.</p>
     <div id="plugin-readme"></div>
   </main>
 
   <!-- Foldable plugin selector panel -->
-  <div class="panel-wrap" id="panelWrap">
+  <div class="panel-wrap open" id="panelWrap">
     <nav class="plugin-panel" id="pluginPanel" aria-label="Plugin list">
-      <div class="plugin-panel-header">&#8212; Plugin List &#8212;</div>
+      <div class="plugin-panel-header" id="panelHeader">&#8212; Server Text &#8212;</div>
       <div class="plugin-list" id="pluginList" role="list"></div>
     </nav>
     <button class="panel-tab" id="panelTab" aria-expanded="false" aria-controls="pluginPanel">
@@ -414,6 +414,7 @@
     const pluginList = document.getElementById('pluginList');
     const readme     = document.getElementById('plugin-readme');
     const introHint  = document.getElementById('intro-hint');
+    const panelHeader = document.getElementById('panelHeader');
 
     // Build plugin list buttons
     PLUGINS.forEach(name => {
@@ -431,11 +432,26 @@
       panelTab.setAttribute('aria-expanded', open);
     });
 
+    // Load server readme by default
+    panelTab.setAttribute('aria-expanded', true);
+    (async function loadServerReadme() {
+      readme.classList.add('visible');
+      readme.innerHTML = '<p class="readme-loading">Loading...</p>';
+      try {
+        const res = await fetch('../ReadMe/server/README.md');
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        readme.innerHTML = marked.parse(await res.text());
+      } catch {
+        readme.innerHTML = '<p class="readme-loading">Could not load server info.</p>';
+      }
+    })();
+
     // Load and render plugin markdown
     async function selectPlugin(name, btn) {
       document.querySelectorAll('.plugin-item').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
 
+      panelHeader.innerHTML = '\u2014 Plugin List \u2014';
       introHint.style.display = 'none';
       readme.classList.add('visible');
       readme.innerHTML = '<p class="readme-loading">Loading...</p>';
