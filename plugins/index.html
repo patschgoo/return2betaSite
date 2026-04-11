@@ -481,6 +481,7 @@
 
       function updatePanelTop() {
         panelWrapEl.style.top = (header.offsetTop + header.offsetHeight) + 'px';
+        document.body.style.paddingTop = header.offsetHeight + 'px';
       }
 
       const obs = new ResizeObserver(() => { checkHeader(); updatePanelTop(); });
