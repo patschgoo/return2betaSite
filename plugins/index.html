@@ -443,7 +443,7 @@
         if (!res.ok) throw new Error('HTTP ' + res.status);
         const text = await res.text();
         readme.innerHTML = marked.parse(text);
-        readme.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       } catch {
         readme.innerHTML = '<p class="readme-loading">Could not load plugin info.</p>';
       }
