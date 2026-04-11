@@ -115,6 +115,29 @@
       background: rgba(20,40,20,0.95);
       transform: scale(1.08);
     }
+    .wiki-disclaimer {
+      position: fixed;
+      bottom: 12px;
+      left: 16px;
+      z-index: 20;
+      background: rgba(6,10,6,0.55);
+      border: 1px solid rgba(85,255,85,0.2);
+      border-radius: 4px;
+      padding: 6px 12px;
+      font-family: 'Minecraft', sans-serif;
+      font-size: clamp(0.5rem, 0.9vw, 0.65rem);
+      color: rgba(255,255,255,0.5);
+      text-shadow: 1px 1px 0 rgba(0,0,0,0.6);
+      pointer-events: auto;
+    }
+    .wiki-disclaimer a {
+      color: rgba(85,255,85,0.6);
+      text-decoration: none;
+    }
+    .wiki-disclaimer a:hover {
+      color: #55ff55;
+      text-decoration: underline;
+    }
     @media (max-width: 720px) {
       .header-band {
         min-height: 48px;
@@ -141,6 +164,7 @@
 
   <iframe class="wiki-frame" id="wikiFrame" src="https://web.archive.org/web/20110902065819/http://www.minecraftwiki.net:80/wiki/Minecraft_Wiki" title="Minecraft Wiki (Beta era)"></iframe>
   <button class="dark-toggle" id="darkToggle" title="Toggle dark mode">☾</button>
+  <div class="wiki-disclaimer" id="wikiDisclaimer">Disclaimer: this is a redirection to the archived <a href="https://web.archive.org/web/20110902065819/http://www.minecraftwiki.net:80/wiki/Minecraft_Wiki" target="_blank" rel="noopener noreferrer">Minecraft Wiki</a></div>
 
   <script>
     (function() {
