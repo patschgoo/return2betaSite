@@ -147,7 +147,7 @@
     .chat-widget-panel {
       position: fixed;
       z-index: 500;
-      width: 440px; height: 560px;
+      width: 340px; height: 420px;
       background: rgba(6,10,6,0.95);
       border: 2px solid rgba(85,255,85,0.35);
       border-radius: 8px;
@@ -226,7 +226,7 @@
     /* Desktop/iPad: over the map area */
     @media (min-width: 721px) {
       .chat-widget-btn { bottom: 80px; right: 24px; }
-      .chat-widget-panel { bottom: 140px; right: 24px; }
+      .chat-widget-panel { bottom: 140px; right: 24px; resize: both; overflow: auto; min-width: 300px; min-height: 300px; }
     }
     /* Mobile: bottom right */
     @media (max-width: 720px) {
