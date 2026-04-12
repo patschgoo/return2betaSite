@@ -252,7 +252,20 @@
       .nav-link { font-size: 0.8rem; }
       .nav-link img { height: 28px; width: 28px; }
       .howto-text { display: none; }
+      .header-band > .nav-link,
+      .header-band > .nav-spacer { display: none; }
+      .nav-carousel { display: flex; }
+      .nav-caret { padding: 0 10px; }
+      .nav-carousel-items { gap: 8px; }
     }
+    /* Nav carousel */
+    .nav-carousel { display: none; width: 100%; align-items: center; justify-content: center; height: 48px; }
+    .nav-caret { background: none; border: none; color: rgba(255,255,255,0.8); font-size: 1.1rem; cursor: pointer; padding: 0 14px; height: 48px; display: flex; align-items: center; flex-shrink: 0; transition: color 0.15s; }
+    .nav-caret:hover { color: #fff; }
+    .nav-caret:disabled { opacity: 0.2; cursor: default; }
+    .nav-carousel-items { display: flex; align-items: center; justify-content: center; gap: 20px; flex: 1; overflow: hidden; }
+    .nav-carousel .nav-link { white-space: nowrap; }
+    .nav-carousel .nav-link.nav-current { color: #55ff55; text-shadow: 0 0 8px rgba(85,255,85,0.4); }
   </style>
 </head>
 <body>
@@ -265,6 +278,11 @@
     <a class="nav-link" href="https://discord.gg/vVvs7tN5p7" target="_blank" rel="noopener noreferrer"><img src="../images/discord_icon.png" alt="Discord icon" />Discord</a>
     <div class="nav-spacer"></div>
     <a class="nav-link howto-link" href="/how-to/"><span class="howto-text">How to Join &amp; more</span><img src="../images/how-to_icon.gif" alt="How to icon" /></a>
+    <div class="nav-carousel" id="navCarousel">
+      <button class="nav-caret" id="navPrev" aria-label="Previous pages">&#9664;</button>
+      <div class="nav-carousel-items" id="navCarouselItems"></div>
+      <button class="nav-caret" id="navNext" aria-label="Next pages">&#9654;</button>
+    </div>
   </header>
 
   <main class="chat-area">
@@ -463,6 +481,63 @@
       new ResizeObserver(check).observe(header);
       check();
     })();
+  </script>
+  <script>
+    (function () {
+      var header = document.querySelector('.header-band');
+      if (!header) return;
+      var allLinks = Array.from(header.querySelectorAll(':scope > .nav-link'));
+      var spacer = header.querySelector(':scope > .nav-spacer');
+      var carousel = document.getElementById('navCarousel');
+      var prevBtn = document.getElementById('navPrev');
+      var nextBtn = document.getElementById('navNext');
+      var itemsEl = document.getElementById('navCarouselItems');
+      if (!carousel || !prevBtn || !nextBtn || !itemsEl || !allLinks.length) return;
+      var N = 3, page = 0;
+      var total = Math.ceil(allLinks.length / N);
+      var cp = location.pathname.replace(/\/$/, '') || '/';
+      for (var i = 0; i < allLinks.length; i++) {
+        var lh = (allLinks[i].getAttribute('href') || '').replace(/\/$/, '') || '/';
+        if (lh === cp) { page = Math.floor(i / N); break; }
+      }
+      function render() {
+        itemsEl.innerHTML = '';
+        allLinks.slice(page * N, (page + 1) * N).forEach(function (a) {
+          var cl = a.cloneNode(true);
+          var lh = (a.getAttribute('href') || '').replace(/\/$/, '') || '/';
+          if (lh === cp) cl.classList.add('nav-current');
+          itemsEl.appendChild(cl);
+        });
+        prevBtn.disabled = page === 0;
+        nextBtn.disabled = page >= total - 1;
+      }
+      prevBtn.addEventListener('click', function () { if (page > 0) { page--; render(); } });
+      nextBtn.addEventListener('click', function () { if (page < total - 1) { page++; render(); } });
+      render();
+      var forced = false;
+      function forceOn() {
+        if (forced) return; forced = true;
+        allLinks.forEach(function (a) { a.style.display = 'none'; });
+        if (spacer) spacer.style.display = 'none';
+        carousel.style.display = 'flex';
+      }
+      function forceOff() {
+        if (!forced) return; forced = false;
+        allLinks.forEach(function (a) { a.style.display = ''; });
+        if (spacer) spacer.style.display = '';
+        if (window.innerWidth > 720) carousel.style.display = 'none';
+      }
+      if (window.innerWidth > 720 && header.scrollHeight > 100) forceOn();
+      var rt;
+      window.addEventListener('resize', function () {
+        clearTimeout(rt);
+        rt = setTimeout(function () {
+          if (window.innerWidth <= 720) { forceOff(); return; }
+          forceOff();
+          requestAnimationFrame(function () { if (header.scrollHeight > 100) forceOn(); });
+        }, 150);
+      });
+    }());
   </script>
 </body>
 </html>
