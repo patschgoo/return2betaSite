@@ -89,6 +89,10 @@
       border: none;
       transition: filter 0.3s;
     }
+    .wiki-frame.scaled {
+      flex: none;
+      transform-origin: top left;
+    }
     .wiki-frame.dark {
       filter: invert(0.9) hue-rotate(180deg);
     }
@@ -198,6 +202,28 @@
         btn.textContent = dark ? '\u2600' : '\u263E';
         localStorage.setItem('r2b_wiki_dark', dark ? '1' : '0');
       });
+    })();
+  </script>
+  <script>
+    (function() {
+      var frame = document.getElementById('wikiFrame');
+      var WIKI_W = 980;
+      function scaleWiki() {
+        if (window.innerWidth <= 720) {
+          var scale = window.innerWidth / WIKI_W;
+          frame.style.width = WIKI_W + 'px';
+          frame.style.height = Math.ceil((window.innerHeight - 48) / scale) + 'px';
+          frame.style.transform = 'scale(' + scale + ')';
+          frame.classList.add('scaled');
+        } else {
+          frame.style.width = '';
+          frame.style.height = '';
+          frame.style.transform = '';
+          frame.classList.remove('scaled');
+        }
+      }
+      scaleWiki();
+      window.addEventListener('resize', scaleWiki);
     })();
   </script>
 
