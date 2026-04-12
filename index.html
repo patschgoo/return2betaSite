@@ -487,6 +487,7 @@
       const collapsed = panel.classList.toggle('collapsed');
       btn.innerHTML = collapsed ? '&#x25C0;' : '&#x25B6;';
       btn.title = collapsed ? 'Show map' : 'Hide map';
+      localStorage.setItem('r2b_map_collapsed', collapsed ? '1' : '0');
     }
 
     function toggleMap() {
@@ -506,6 +507,14 @@
         if (panel.classList.contains('maximized')) toggleMap();
       }
     });
+
+    (function() {
+      if (localStorage.getItem('r2b_map_collapsed') === '1') {
+        var p = document.getElementById('mapPanel');
+        var b = document.getElementById('mapFoldBtn');
+        if (p) { p.classList.add('collapsed'); b.innerHTML = '&#x25C0;'; b.title = 'Show map'; }
+      }
+    })();
   </script>
   <script>
     (function() {

@@ -687,6 +687,37 @@
     }());
   </script>
 
+  <!-- Map popup -->
+  <style>
+    .map-panel{display:flex;flex-direction:column;align-items:center;gap:4px;position:fixed;right:0;bottom:24px;transition:transform 0.3s ease;z-index:100;padding-right:24px}
+    .map-panel.collapsed{transform:translateX(calc(100% - 32px))}
+    .map-fold-btn{position:absolute;left:-24px;top:216px;width:24px;height:36px;border:none;border-radius:4px 0 0 4px;background:rgba(0,0,0,0.4);color:rgba(255,255,255,0.5);font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.2s,color 0.2s}
+    .map-fold-btn:hover{background:rgba(0,0,0,0.7);color:#fff}
+    .map-wrapper{position:relative;width:min(36vw,270px);height:min(36vw,270px);border:2px solid rgba(255,255,255,0.3);border-radius:6px;overflow:hidden;background:#111;transition:all 0.3s ease}
+    .map-wrapper iframe{width:100%;height:100%;border:none}
+    .map-controls{position:absolute;top:4px;right:4px;display:flex;gap:4px;z-index:10}
+    .map-btn{width:24px;height:24px;border:none;border-radius:4px;background:rgba(0,0,0,0.65);color:#fff;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;transition:background 0.2s}
+    .map-btn:hover{background:rgba(0,0,0,0.85)}
+    .map-label{margin:0;color:#fff;font-size:1rem;font-weight:400;letter-spacing:0.04em;font-family:'Minecraft',sans-serif}
+    .map-panel.maximized{position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:1000;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;padding:24px;margin:0}
+    .map-panel.maximized .map-wrapper{width:100%;height:100%;max-width:100%;max-height:100%;border-radius:8px}
+    .map-panel.maximized .map-controls{top:8px;right:8px}
+    .map-panel.maximized .map-btn{width:32px;height:32px;font-size:18px}
+    .map-panel.maximized .map-label{display:none}
+    @media(max-width:720px){.map-panel{display:none}}
+  </style>
+  <section class="map-panel" id="mapPanel" aria-label="Server map">
+    <button class="map-fold-btn" id="mapFoldBtn" title="Hide map">&#x25B6;</button>
+    <p class="map-label">Server Map</p>
+    <div class="map-wrapper">
+      <div class="map-controls"><button class="map-btn" id="mapToggle" title="Maximize map">&#x26F6;</button></div>
+      <iframe src="https://map.return2beta.com/" title="Server Map" loading="lazy" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
+    </div>
+  </section>
+  <script>
+  (function(){var mp=document.getElementById('mapPanel'),fb=document.getElementById('mapFoldBtn'),mt=document.getElementById('mapToggle');if(localStorage.getItem('r2b_map_collapsed')==='1'){mp.classList.add('collapsed');fb.innerHTML='&#x25C0;';fb.title='Show map';}fb.addEventListener('click',function(){var c=mp.classList.toggle('collapsed');fb.innerHTML=c?'&#x25C0;':'&#x25B6;';fb.title=c?'Show map':'Hide map';localStorage.setItem('r2b_map_collapsed',c?'1':'0');});mt.addEventListener('click',function(){if(mp.classList.contains('collapsed')){mp.classList.remove('collapsed');fb.innerHTML='&#x25B6;';fb.title='Hide map';localStorage.setItem('r2b_map_collapsed','0');}var m=mp.classList.toggle('maximized');mt.innerHTML=m?'\u2715':'\u26F6';mt.title=m?'Minimize map':'Maximize map';});document.addEventListener('keydown',function(e){if(e.key==='Escape'&&mp.classList.contains('maximized')){mp.classList.remove('maximized');mt.innerHTML='\u26F6';mt.title='Maximize map';}});var DU='https://map.return2beta.com/up/world/world/',PU='https://corsproxy.io/?'+encodeURIComponent(DU);function ok(r){if(!r.ok)throw new Error(r.status);return r.json();}function on(){mp.style.display='';document.body.classList.remove('map-hidden');}function off(){mp.style.display='none';document.body.classList.add('map-hidden');}function chk(){fetch(DU).then(ok).then(on).catch(function(){fetch(PU).then(ok).then(on).catch(off);});}chk();setInterval(chk,30000);})();
+  </script>
+
   <!-- Floating chat widget -->
   <style>
     .chat-widget-btn{position:fixed;z-index:500;width:52px;height:52px;border-radius:50%;border:2px solid rgba(85,255,85,0.5);background:rgba(6,10,6,0.88);cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 12px rgba(0,0,0,0.5);transition:background .15s,transform .15s}
@@ -715,7 +746,8 @@
     .cw-logout{background:none;border:none;color:#888;font-family:'Minecraft',sans-serif;font-size:.55rem;cursor:pointer;margin-left:6px;padding:0}.cw-logout:hover{color:#ff5555}
     .cw-resize-handle{display:none;position:absolute;top:0;left:0;width:16px;height:16px;cursor:nwse-resize;z-index:12}
     .cw-resize-handle::after{content:'';position:absolute;top:3px;left:3px;width:8px;height:8px;border-top:2px solid rgba(85,255,85,0.5);border-left:2px solid rgba(85,255,85,0.5)}
-    @media(min-width:721px){.chat-widget-btn{bottom:20px;right:24px}.chat-widget-panel{bottom:80px;right:24px}.cw-resize-handle{display:block}}
+    @media(min-width:721px){.chat-widget-btn{bottom:320px;right:24px}.chat-widget-panel{bottom:380px;right:24px}.cw-resize-handle{display:block}}
+    @media(min-width:721px){body.map-hidden .chat-widget-btn{bottom:20px}body.map-hidden .chat-widget-panel{bottom:80px}}
     @media(max-width:720px){.chat-widget-btn{bottom:16px;right:16px}.chat-widget-panel{bottom:76px;right:8px;width:290px;height:370px}}
   </style>
   <button class="chat-widget-btn" id="cwToggle" title="Open chat"><img src="../images/chat_icon.png" alt="Chat" /></button>

@@ -1,0 +1,103 @@
+Return2Beta Server - Connection Guide
+======================================
+
+
+=== Java Edition (1.7.2 - 1.21.x) ===
+
+  mc.return2beta.com            (SRV record auto-redirects to port 25568)
+  mc.return2beta.com:25568      (explicit ViaProxy port)
+  beta.mildvanilla.org:25568    (explicit ViaProxy port)
+  mc.mildbeta.world:25568       (explicit ViaProxy port)
+  217.160.170.104:25568         (explicit ViaProxy port)
+
+  The SRV record only exists for mc.return2beta.com.
+  The other domains require :25568 to be specified manually.
+
+
+=== Bedrock Edition (Windows 10/11, Mobile) ===
+
+  mc.return2beta.com            port 19132
+  beta.mildvanilla.org          port 19132
+  mc.mildbeta.world             port 19132
+  217.160.170.104               port 19132
+
+  Note: Bedrock does not support SRV records, port must be entered manually.
+  Console (Xbox/PlayStation/Switch) cannot add third-party servers directly.
+
+
+=== EaglercraftX (Browser) ===
+
+  wss://mc.return2beta.com
+
+  Connect via an EaglercraftX client that supports custom WebSocket servers.
+  Handled by nginx SSL (port 443) -> WebSocket proxy (port 8081).
+
+
+=== Beta 1.7.3 (Direct Connection) ===
+
+  5.9.123.120:50179             (direct to Gravelhost server)
+  mc.return2beta.com            (SRV sends to ViaProxy 25568, which also works for Beta)
+  mc.return2beta.com:25565      (VPS nginx stream proxy -> Gravelhost)
+  mc.return2beta.com:25568      (VPS ViaProxy -> Gravelhost, also works)
+  beta.mildvanilla.org          (default port 25565, nginx stream -> Gravelhost)
+  beta.mildvanilla.org:25565    (same as above, explicit port)
+  mc.mildbeta.world             (default port 25565, nginx stream -> Gravelhost)
+  mc.mildbeta.world:25565       (same as above, explicit port)
+  217.160.170.104               (default port 25565, nginx stream -> Gravelhost)
+  217.160.170.104:25565         (same as above, explicit port)
+  217.160.170.104:25568         (ViaProxy, also works for Beta)
+
+  25565 is the Minecraft default port, so it can be omitted.
+
+
+======================================================================
+                         INFRASTRUCTURE
+======================================================================
+
+Server Host (Gravelhost)
+-------------------------
+  IP:    5.9.123.120
+  Port:  50179 (Minecraft Beta 1.7.3 / Poseidon)
+  Port:  50180 (Dynmap web map)
+
+VPS (IONOS)
+-------------
+  IP:    217.160.170.104
+  IPv6:  2a02:2479:cb:5300::1
+  OS:    Ubuntu 24.04
+
+Services on VPS
+----------------
+  nginx             - Ports 80, 443, 25565
+                      Port 80/443: SSL for mc/map/chat subdomains
+                      Port 25565:  TCP stream proxy -> 5.9.123.120:50179 (Beta direct)
+  ViaProxy          - Port 25568 (Java 1.7.2-1.21.x protocol translation to Beta)
+  Geyser            - Port 19132/UDP (Bedrock translation, runs inside ViaProxy)
+  WebSocket Proxy   - Port 8081 (EaglercraftX, proxied via nginx SSL on port 443)
+
+Systemd Services
+-----------------
+  nginx.service           - enabled (auto-start)
+  viaproxy.service        - enabled (auto-start)
+  websocket-proxy.service - enabled (auto-start)
+
+DNS Records (Cloudflare - return2beta.com)
+-------------------------------------------
+  A      mc.return2beta.com       -> 217.160.170.104
+  A      map.return2beta.com      -> 217.160.170.104
+  A      chat.return2beta.com     -> 217.160.170.104
+  SRV    _minecraft._tcp.mc       -> 0 5 25568 mc.return2beta.com
+  CNAME  return2beta.com          -> patschgoo.github.io (website)
+  CNAME  www.return2beta.com      -> return2beta.com (website)
+  CNAME  github.return2beta.com   -> patschgoo.github.io (website)
+
+DNS Records (other domains)
+-----------------------------
+  beta.mildvanilla.org           -> 217.160.170.104 (no SRV)
+  mc.mildbeta.world              -> 217.160.170.104 (no SRV)
+
+Web Services
+-------------
+  https://mc.return2beta.com     - EaglercraftX WebSocket endpoint
+  https://map.return2beta.com    - Dynmap live map
+  https://chat.return2beta.com   - Server chat
