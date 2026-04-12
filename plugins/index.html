@@ -566,6 +566,11 @@
 
     // Load server readme by default
     panelTab.setAttribute('aria-expanded', true);
+    // Close panel on mobile
+    if (window.innerWidth <= 720) {
+      panelWrap.classList.remove('open');
+      panelTab.setAttribute('aria-expanded', false);
+    }
     (async function loadServerReadme() {
       readme.classList.add('visible');
       readme.innerHTML = '<p class="readme-loading">Loading...</p>';
