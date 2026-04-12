@@ -313,6 +313,15 @@
       position: relative;
       cursor: default;
     }
+    .player-count .status-dot {
+      display: inline-block;
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      margin-right: 4px;
+      vertical-align: middle;
+    }
+    .player-count .status-dot.online { background: #55ff55; box-shadow: 0 0 4px #55ff55; }
+    .player-count .status-dot.offline { background: #ff5555; box-shadow: 0 0 4px #ff5555; }
     .player-count .count { color: #55ff55; }
     .player-count .player-tooltip {
       display: none;
@@ -583,13 +592,14 @@
       var MAX = 20;
       var names = shuffle(players.map(function(p) { return p.account || p.name; }));
       var tooltip = n > 0 ? '<span class="player-tooltip">' + names.map(esc).join(', ') + '</span>' : '';
-      set('<span class="count">' + pad(n) + '/' + pad(MAX) + '</span> player' + (n !== 1 ? 's' : '') + ' online' + tooltip);
+      set('<span class="status-dot online"></span><span class="count">' + pad(n) + '/' + pad(MAX) + '</span> online' + tooltip);
     }
+    function offline() { set('<span class="status-dot offline"></span>Server offline'); }
     function update() {
       fetch(DYNMAP_URL).then(function(r) { return r.json(); }).then(handle)
         .catch(function() {
           fetch(PROXY_URL).then(function(r) { return r.json(); }).then(handle)
-            .catch(function() { set(''); });
+            .catch(offline);
         });
     }
     function set(html) { if (el) el.innerHTML = html; if (elM) elM.innerHTML = html; }
