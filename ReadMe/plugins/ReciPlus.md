@@ -9,34 +9,38 @@ You can craft **chainmail armor** using Iron Ingots and String!
 ## Custom Recipes
 
 ### Chainmail Helmet
-```
-[String] [Iron ] [String]
-[Iron ] [     ] [Iron  ]
-[     ] [     ] [      ]
+
+```crafting:chainmail_helmet
+string iron_ingot string
+iron_ingot _ iron_ingot
+_ _ _
 ```
 
 ### Chainmail Chestplate
-```
-[String] [     ] [String]
-[Iron  ] [String] [Iron ]
-[String] [Iron ] [String]
+
+```crafting:chainmail_chestplate
+string _ string
+iron_ingot string iron_ingot
+string iron_ingot string
 ```
 
 ### Chainmail Leggings
-```
-[String] [Iron ] [String]
-[Iron  ] [     ] [Iron  ]
-[String] [     ] [String]
+
+```crafting:chainmail_leggings
+string iron_ingot string
+iron_ingot _ iron_ingot
+string _ string
 ```
 
 ### Chainmail Boots
-```
-[String] [     ] [String]
-[Iron  ] [     ] [Iron  ]
-[     ] [     ] [      ]
+
+```crafting:chainmail_boots
+string _ string
+iron_ingot _ iron_ingot
+_ _ _
 ```
 
-**Materials:** Iron Ingot (ID 265) and String (ID 287).
+**Materials:** Iron Ingot and String.
 
 ## Notes
 - No commands needed — just use a crafting table as normal.
