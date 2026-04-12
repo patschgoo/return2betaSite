@@ -310,8 +310,29 @@
       color: #aaa;
       font-size: 0.7rem;
       letter-spacing: 0.04em;
+      position: relative;
+      cursor: default;
     }
     .player-count .count { color: #55ff55; }
+    .player-count .player-tooltip {
+      display: none;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: 100%;
+      margin-bottom: 6px;
+      background: rgba(0,0,0,0.85);
+      border: 1px solid rgba(85,255,85,0.35);
+      border-radius: 4px;
+      padding: 6px 10px;
+      white-space: nowrap;
+      font-size: 0.6rem;
+      color: #d8d8d8;
+      text-shadow: 1px 1px 0 rgba(0,0,0,0.8);
+      z-index: 20;
+      pointer-events: none;
+    }
+    .player-count:hover .player-tooltip { display: block; }
 
     /* Nav carousel */
     .nav-carousel { display: none; width: 100%; align-items: center; justify-content: center; height: 48px; }
@@ -551,19 +572,22 @@
   (function() {
     var el = document.getElementById('playerCount');
     var elM = document.getElementById('playerCountMobile');
+    function shuffle(a) { for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
     function update() {
-      fetch('https://api.mcsrvstat.us/3/mc.return2beta.com')
+      fetch('https://map.return2beta.com/up/world/world/')
         .then(function(r) { return r.json(); })
         .then(function(d) {
-          if (!d.online) { set('Server offline'); return; }
-          var n = d.players && d.players.online != null ? d.players.online : '?';
-          set('<span class="count">' + n + '</span> player' + (n !== 1 ? 's' : '') + ' online');
+          var players = d.players || [];
+          var n = players.length;
+          var names = shuffle(players.map(function(p) { return p.account || p.name; }));
+          var tooltip = n > 0 ? '<span class="player-tooltip">' + names.map(function(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }).join(', ') + '</span>' : '';
+          set('<span class="count">' + n + '</span> player' + (n !== 1 ? 's' : '') + ' online' + tooltip);
         })
         .catch(function() { set(''); });
     }
     function set(html) { if (el) el.innerHTML = html; if (elM) elM.innerHTML = html; }
     update();
-    setInterval(update, 60000);
+    setInterval(update, 30000);
   })();
   </script>
 
