@@ -576,12 +576,14 @@
     var PROXY_URL = 'https://corsproxy.io/?' + encodeURIComponent(DYNMAP_URL);
     function shuffle(a) { for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
     function esc(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+    function pad(n) { return n < 10 ? '0' + n : '' + n; }
     function handle(d) {
       var players = d.players || [];
       var n = players.length;
+      var MAX = 20;
       var names = shuffle(players.map(function(p) { return p.account || p.name; }));
       var tooltip = n > 0 ? '<span class="player-tooltip">' + names.map(esc).join(', ') + '</span>' : '';
-      set('<span class="count">' + n + '</span> player' + (n !== 1 ? 's' : '') + ' online' + tooltip);
+      set('<span class="count">' + pad(n) + '/' + pad(MAX) + '</span> player' + (n !== 1 ? 's' : '') + ' online' + tooltip);
     }
     function update() {
       fetch(DYNMAP_URL).then(function(r) { return r.json(); }).then(handle)
