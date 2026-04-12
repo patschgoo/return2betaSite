@@ -223,6 +223,61 @@
     .nav-carousel-items { display: flex; align-items: center; justify-content: center; gap: 20px; flex: 1; overflow: hidden; }
     .nav-carousel .nav-link { white-space: nowrap; }
     .nav-carousel .nav-link.nav-current { color: #55ff55; text-shadow: 0 0 8px rgba(85,255,85,0.4); }
+    details.foldout {
+      background: rgba(0,0,0,0.35);
+      border: 1px solid rgba(85,255,85,0.15);
+      border-radius: 6px;
+      margin: 10px 0;
+      overflow: hidden;
+    }
+    details.foldout summary {
+      cursor: pointer;
+      padding: 10px 16px;
+      color: #aaffaa;
+      font-size: clamp(0.75rem, 1.3vw, 0.95rem);
+      text-shadow: 1px 1px 0 rgba(0,0,0,0.7);
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    details.foldout summary::-webkit-details-marker { display: none; }
+    details.foldout summary::before {
+      content: '\25B6';
+      font-size: 0.65em;
+      transition: transform 0.2s;
+      display: inline-block;
+    }
+    details.foldout[open] summary::before { transform: rotate(90deg); }
+    details.foldout .foldout-body {
+      padding: 4px 16px 14px;
+    }
+    details.foldout .foldout-body code {
+      background: rgba(0,0,0,0.5);
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-family: 'Minecraft', monospace;
+      color: #ffff55;
+      font-size: 0.85em;
+      border: 1px solid rgba(85,255,85,0.15);
+    }
+    details.foldout .foldout-body table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 8px 0;
+      font-size: clamp(0.6rem, 1vw, 0.78rem);
+    }
+    details.foldout .foldout-body th,
+    details.foldout .foldout-body td {
+      text-align: left;
+      padding: 5px 10px;
+      border-bottom: 1px solid rgba(85,255,85,0.1);
+    }
+    details.foldout .foldout-body th {
+      color: #55ff55;
+      font-weight: normal;
+    }
+    details.foldout .foldout-body td { color: #ccc; }
     @media (max-width: 720px) {
       .header-band {
         min-height: 48px;
@@ -282,6 +337,8 @@
         <li><a href="#server-mods">Server Mods</a></li>
         <li><a href="#useful-mods">Useful Mods</a></li>
         <li><a href="#troubleshooting">Troubleshooting</a></li>
+        <li><a href="#connections">All Connection Methods</a></li>
+        <li><a href="#console">Console &amp; Mobile Guide</a></li>
       </ol>
     </div>
 
@@ -515,6 +572,185 @@
         <li>Beta 1.7.3 uses the old sound system. BetaCraft and LTS Launcher patch this automatically.</li>
         <li>For MultiMC/Prism, install <strong><a href="https://github.com/betacraftuk/legacyfix" target="_blank" rel="noopener noreferrer">LegacyFix</a></strong> — a mod that fixes sound, skins, and other legacy issues. Add it to your instance's mods folder.</li>
       </ul>
+    </div>
+
+    <!-- ─── All Connection Methods ─── -->
+    <h2 id="connections">12. All Connection Methods</h2>
+    <div class="launcher-section">
+      <p>Every way to connect to Return2Beta, grouped by edition.</p>
+
+      <details class="foldout" open>
+        <summary>Java Edition (1.7.2 – 1.21.x via ViaProxy)</summary>
+        <div class="foldout-body">
+          <table>
+            <tr><th>Address</th><th>Notes</th></tr>
+            <tr><td><code>mc.return2beta.com</code></td><td>SRV auto-redirects to port 25568</td></tr>
+            <tr><td><code>mc.return2beta.com:25568</code></td><td>Explicit ViaProxy port</td></tr>
+            <tr><td><code>beta.mildvanilla.org:25568</code></td><td>Explicit ViaProxy port</td></tr>
+            <tr><td><code>mc.mildbeta.world:25568</code></td><td>Explicit ViaProxy port</td></tr>
+            <tr><td><code>217.160.170.104:25568</code></td><td>Explicit ViaProxy port</td></tr>
+          </table>
+          <div class="note">The SRV record only exists for <code>mc.return2beta.com</code>. Other domains require <code>:25568</code> to be specified.</div>
+        </div>
+      </details>
+
+      <details class="foldout">
+        <summary>Bedrock Edition (Windows 10/11, Mobile)</summary>
+        <div class="foldout-body">
+          <table>
+            <tr><th>Address</th><th>Port</th></tr>
+            <tr><td><code>mc.return2beta.com</code></td><td>19132</td></tr>
+            <tr><td><code>beta.mildvanilla.org</code></td><td>19132</td></tr>
+            <tr><td><code>mc.mildbeta.world</code></td><td>19132</td></tr>
+            <tr><td><code>217.160.170.104</code></td><td>19132</td></tr>
+          </table>
+          <div class="note">Bedrock does not support SRV records — the port must be entered manually. Console players (Xbox/PS/Switch) see the <a href="#console">Console &amp; Mobile Guide</a> below.</div>
+        </div>
+      </details>
+
+      <details class="foldout">
+        <summary>EaglercraftX (Browser)</summary>
+        <div class="foldout-body">
+          <p>WebSocket address: <code>wss://mc.return2beta.com</code></p>
+          <p>Connect via an EaglercraftX client that supports custom WebSocket servers.</p>
+        </div>
+      </details>
+
+      <details class="foldout">
+        <summary>Beta 1.7.3 (Direct Connection)</summary>
+        <div class="foldout-body">
+          <table>
+            <tr><th>Address</th><th>Notes</th></tr>
+            <tr><td><code>5.9.123.120:50179</code></td><td>Direct to Gravelhost server</td></tr>
+            <tr><td><code>mc.return2beta.com</code></td><td>SRV → ViaProxy (works for Beta too)</td></tr>
+            <tr><td><code>mc.return2beta.com:25565</code></td><td>nginx stream → Gravelhost</td></tr>
+            <tr><td><code>beta.mildvanilla.org</code></td><td>Default port 25565 → Gravelhost</td></tr>
+            <tr><td><code>mc.mildbeta.world</code></td><td>Default port 25565 → Gravelhost</td></tr>
+            <tr><td><code>217.160.170.104</code></td><td>Default port 25565 → Gravelhost</td></tr>
+          </table>
+          <div class="note">Port 25565 is the Minecraft default, so it can be omitted.</div>
+        </div>
+      </details>
+    </div>
+
+    <!-- ─── Console & Mobile Guide ─── -->
+    <h2 id="console">13. Console &amp; Mobile Guide</h2>
+    <div class="launcher-section">
+      <p>How to join on platforms that use Bedrock Edition. Primary address: <code>mc.return2beta.com</code> port <code>19132</code></p>
+
+      <details class="foldout" open>
+        <summary>Windows 10/11, Android, iOS / iPadOS</summary>
+        <div class="foldout-body">
+          <ol>
+            <li>Open Minecraft (Bedrock Edition)</li>
+            <li>Play → Servers → scroll to bottom → <strong>Add Server</strong></li>
+            <li>Server Name: <code>Return2Beta</code></li>
+            <li>Server Address: <code>mc.return2beta.com</code></li>
+            <li>Port: <code>19132</code></li>
+            <li>Click Save, then click the server to join</li>
+          </ol>
+        </div>
+      </details>
+
+      <details class="foldout" open>
+        <summary>Xbox One / Xbox Series X|S</summary>
+        <div class="foldout-body">
+          <ol>
+            <li>Open Minecraft</li>
+            <li>Play → Servers → scroll to bottom → <strong>Add Server</strong></li>
+            <li>Server Name: <code>Return2Beta</code></li>
+            <li>Server Address: <code>mc.return2beta.com</code></li>
+            <li>Port: <code>19132</code></li>
+            <li>Click Save, then click the server to join</li>
+          </ol>
+        </div>
+      </details>
+
+      <details class="foldout">
+        <summary>PlayStation 4 / PlayStation 5</summary>
+        <div class="foldout-body">
+          <p>PlayStation does <strong>not</strong> have an "Add Server" button. Use one of these workarounds:</p>
+
+          <h3>Method 1: BedrockConnect (DNS trick)</h3>
+          <ol>
+            <li>Go to Settings → Network → Set Up Internet Connection</li>
+            <li>Select your connection (WiFi or LAN) → Custom setup</li>
+            <li>Set everything to Automatic <strong>except DNS</strong>:<br>Primary DNS: <code>104.238.130.180</code><br>Secondary DNS: <code>8.8.8.8</code></li>
+            <li>Save and connect</li>
+            <li>Open Minecraft → Play → Servers</li>
+            <li>Click on <strong>any</strong> featured server (e.g. The Hive, CubeCraft)</li>
+            <li>BedrockConnect intercepts and shows a "Connect to a Server" screen</li>
+            <li>Enter: <code>mc.return2beta.com</code> port <code>19132</code></li>
+            <li>Click Submit to connect</li>
+          </ol>
+          <div class="note">To revert: set DNS back to Automatic. While active, featured servers route through BedrockConnect.</div>
+
+          <h3>Method 2: Phantom (LAN proxy on PC)</h3>
+          <p>Requires a PC on the same network as the PlayStation.</p>
+          <ol>
+            <li>Download <a href="https://github.com/jhead/phantom/releases" target="_blank" rel="noopener noreferrer">Phantom</a></li>
+            <li>Run: <code>phantom -server mc.return2beta.com:19132</code></li>
+            <li>The server appears in Minecraft's Friends tab as a LAN game</li>
+          </ol>
+
+          <h3>Method 3: BedrockTogether (phone app)</h3>
+          <p>Requires an iOS or Android device on the same WiFi. No DNS changes needed.</p>
+          <ol>
+            <li>Download "BedrockTogether" from the App Store or Google Play (free)</li>
+            <li>Enter: <code>mc.return2beta.com</code> port <code>19132</code> → tap Start</li>
+            <li>On PlayStation: Play → Friends tab → server appears as LAN game</li>
+          </ol>
+        </div>
+      </details>
+
+      <details class="foldout">
+        <summary>Nintendo Switch</summary>
+        <div class="foldout-body">
+          <p>Nintendo Switch does <strong>not</strong> have an "Add Server" button. Use one of these workarounds:</p>
+
+          <h3>Method 1: BedrockConnect (DNS trick)</h3>
+          <ol>
+            <li>Go to System Settings → Internet → Internet Settings</li>
+            <li>Select your WiFi network → Change Settings</li>
+            <li>DNS Settings → Manual:<br>Primary DNS: <code>104.238.130.180</code><br>Secondary DNS: <code>8.8.8.8</code></li>
+            <li>Save</li>
+            <li>Open Minecraft → Play → Servers</li>
+            <li>Click on <strong>any</strong> featured server</li>
+            <li>Enter: <code>mc.return2beta.com</code> port <code>19132</code></li>
+            <li>Click Submit to connect</li>
+          </ol>
+          <div class="note">To revert: set DNS back to Automatic in Internet Settings.</div>
+
+          <h3>Method 2: Phantom (LAN proxy on PC)</h3>
+          <p>Requires a PC on the same network.</p>
+          <ol>
+            <li>Download <a href="https://github.com/jhead/phantom/releases" target="_blank" rel="noopener noreferrer">Phantom</a></li>
+            <li>Run: <code>phantom -server mc.return2beta.com:19132</code></li>
+            <li>The server appears in the Friends tab as a LAN game</li>
+          </ol>
+
+          <h3>Method 3: BedrockTogether (phone app)</h3>
+          <p>Requires an iOS or Android device on the same WiFi.</p>
+          <ol>
+            <li>Download "BedrockTogether" (free)</li>
+            <li>Enter: <code>mc.return2beta.com</code> port <code>19132</code> → tap Start</li>
+            <li>On Switch: Play → Friends tab → server appears as LAN game</li>
+          </ol>
+        </div>
+      </details>
+
+      <details class="foldout">
+        <summary>Incompatible Platforms</summary>
+        <div class="foldout-body">
+          <p>These platforms run Legacy Console Edition or discontinued versions and <strong>cannot</strong> connect:</p>
+          <ul>
+            <li>PS Vita, PS3, Xbox 360, Wii U — Legacy Console Edition</li>
+            <li>Nintendo 3DS — New Nintendo 3DS Edition</li>
+            <li>Apple TV — Minecraft discontinued</li>
+            <li>Fire TV, Gear VR — Bedrock but discontinued (may work if installed)</li>
+          </ul>
+        </div>
+      </details>
     </div>
 
     <p style="text-align:center; margin-top: 32px; color: #888; font-size: clamp(0.6rem, 1vw, 0.8rem);">Need more help? Ask in our <a href="https://discord.gg/vVvs7tN5p7" target="_blank" rel="noopener noreferrer">Discord</a> or use the <a href="/chat/">Chat</a>!</p>
