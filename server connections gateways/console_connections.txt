@@ -1,0 +1,232 @@
+Return2Beta Server - Console & Mobile Connection Guide
+=======================================================
+
+Server Address:  mc.return2beta.com
+Server Port:     19132 (Bedrock/UDP)
+
+Alternative addresses (all work the same):
+  beta.mildvanilla.org    port 19132
+  mc.mildbeta.world       port 19132
+  217.160.170.104         port 19132
+
+
+======================================================================
+                     PLATFORMS THAT CAN JOIN
+======================================================================
+
+
+=== Windows 10/11 (Bedrock Edition) ===
+
+  1. Open Minecraft (Bedrock Edition from Microsoft Store)
+  2. Play -> Servers -> scroll to bottom -> Add Server
+  3. Server Name:    Return2Beta
+     Server Address: mc.return2beta.com
+     Port:           19132
+  4. Click Save, then click the server to join
+
+
+=== Android (Phone/Tablet) ===
+
+  1. Open Minecraft
+  2. Play -> Servers -> scroll to bottom -> Add Server
+  3. Server Name:    Return2Beta
+     Server Address: mc.return2beta.com
+     Port:           19132
+  4. Click Save, then click the server to join
+
+
+=== iOS / iPadOS (iPhone / iPad) ===
+
+  iOS is standard Bedrock Edition and CAN add custom servers directly,
+  just like Android and Windows.
+
+  1. Open Minecraft
+  2. Play -> Servers -> scroll to bottom -> Add Server
+  3. Server Name:    Return2Beta
+     Server Address: mc.return2beta.com
+     Port:           19132
+  4. Click Save, then click the server to join
+
+  Alternative method: MC Server Connector (see below)
+
+
+=== Xbox One / Xbox Series X|S ===
+
+  Xbox CAN add custom servers directly.
+
+  1. Open Minecraft
+  2. Play -> Servers -> scroll to bottom -> Add Server
+  3. Server Name:    Return2Beta
+     Server Address: mc.return2beta.com
+     Port:           19132
+  4. Click Save, then click the server to join
+
+
+=== PlayStation 4 / PlayStation 5 ===
+
+  PlayStation does NOT have an "Add Server" button.
+  Use one of these workarounds:
+
+  --- Method 1: BedrockConnect (DNS trick) ---
+
+  1. Go to Settings -> Network -> Set Up Internet Connection
+  2. Select your connection (WiFi or LAN)
+  3. Choose Custom setup
+  4. Set everything to Automatic EXCEPT DNS:
+     Primary DNS:   104.238.130.180
+     Secondary DNS: 8.8.8.8
+  5. Save and connect
+  6. Open Minecraft -> Play -> Servers
+  7. Click on ANY featured server (e.g. The Hive, CubeCraft, etc.)
+  8. BedrockConnect will intercept and show a "Connect to a Server" screen
+  9. Enter:
+     Server Address: mc.return2beta.com
+     Port:           19132
+  10. Click Submit to connect
+
+  Note: You can also use the IP directly: 217.160.170.104 port 19132
+  Note: BedrockConnect is a free community service. If the DNS is down,
+        the featured servers won't work either until you revert DNS.
+  To revert: Set DNS back to Automatic in network settings.
+
+  --- Method 2: Phantom (LAN proxy on PC) ---
+
+  Requires a PC on the same network as the PlayStation.
+
+  1. Download Phantom from: https://github.com/jhead/phantom/releases
+  2. Run on your PC:
+     phantom -server mc.return2beta.com:19132
+  3. The server will appear in Minecraft's Friends tab as a LAN game
+  4. Click it to join
+
+  Note: The PC running Phantom must stay on while playing.
+
+  --- Method 3: BedrockTogether (phone app, no DNS changes) ---
+
+  Requires an iOS or Android phone/tablet on the same WiFi as the PlayStation.
+  No DNS changes needed — doesn't break featured servers.
+
+  1. Download "BedrockTogether" from the App Store or Google Play (free)
+  2. Open the app
+  3. Enter:
+     Server Address: mc.return2beta.com
+     Port:           19132
+  4. Tap Start
+  5. On the PlayStation, open Minecraft -> Play -> Friends tab
+  6. The server will appear as a LAN game — click it to join
+
+  Note: The phone must stay on the app while playing.
+
+
+=== Nintendo Switch ===
+
+  Nintendo Switch does NOT have an "Add Server" button.
+  Use one of these workarounds:
+
+  --- Method 1: BedrockConnect (DNS trick) ---
+
+  1. Go to System Settings -> Internet -> Internet Settings
+  2. Select your WiFi network -> Change Settings
+  3. DNS Settings -> Manual
+     Primary DNS:   104.238.130.180
+     Secondary DNS: 8.8.8.8
+  4. Save
+  5. Open Minecraft -> Play -> Servers
+  6. Click on ANY featured server (e.g. The Hive, CubeCraft, etc.)
+  7. BedrockConnect will intercept and show a "Connect to a Server" screen
+  8. Enter:
+     Server Address: mc.return2beta.com
+     Port:           19132
+  9. Click Submit to connect
+
+  To revert: Set DNS back to Automatic in Internet Settings.
+
+  --- Method 2: Phantom (LAN proxy on PC) ---
+
+  Requires a PC on the same network as the Switch.
+
+  1. Download Phantom from: https://github.com/jhead/phantom/releases
+  2. Run on your PC:
+     phantom -server mc.return2beta.com:19132
+  3. The server will appear in Minecraft's Friends tab as a LAN game
+  4. Click it to join
+
+  --- Method 3: BedrockTogether (phone app, no DNS changes) ---
+
+  Requires an iOS or Android phone/tablet on the same WiFi as the Switch.
+  No DNS changes needed — doesn't break featured servers.
+
+  1. Download "BedrockTogether" from the App Store or Google Play (free)
+  2. Open the app
+  3. Enter:
+     Server Address: mc.return2beta.com
+     Port:           19132
+  4. Tap Start
+  5. On the Switch, open Minecraft -> Play -> Friends tab
+  6. The server will appear as a LAN game — click it to join
+
+  Note: The phone must stay on the app while playing.
+
+
+=== Friend Method (All Consoles) ===
+
+  COMING SOON — A bot account may be set up in the future.
+
+  Once available, this will be the easiest way to join on any console:
+  1. Open Minecraft -> Play -> Friends tab
+  2. Press "Add Friend"
+  3. Add the bot account as a friend (name will be announced)
+  4. Go back to the Friends tab
+  5. The server will appear under "Joinable Friends" — click to join
+
+  This works on ALL Bedrock platforms (PS4/5, Switch, Xbox, Mobile, PC)
+  with no DNS changes, no extra apps, and no port needed.
+
+  Note: This requires a dedicated Microsoft/Xbox account to act as a
+  bot that stays permanently connected to the server.
+
+
+======================================================================
+                   PLATFORMS THAT CANNOT JOIN
+======================================================================
+
+  PS Vita          - Runs Legacy Console Edition (not Bedrock). Incompatible.
+  PS3              - Runs Legacy Console Edition (not Bedrock). Incompatible.
+  Xbox 360         - Runs Legacy Console Edition (not Bedrock). Incompatible.
+  Wii U            - Runs Legacy Console Edition (not Bedrock). Incompatible.
+  Nintendo 3DS     - Runs New Nintendo 3DS Edition (not Bedrock). Incompatible.
+  Apple TV         - Minecraft discontinued for Apple TV. Incompatible.
+  Fire TV          - Runs Bedrock but was discontinued. May work if installed.
+  Gear VR          - Runs Bedrock but was discontinued. May work if installed.
+
+  These platforms run Legacy Console Edition, a completely different game
+  developed by 4J Studios (not Mojang). It uses its own proprietary network
+  protocol that is incompatible with both Java and Bedrock editions.
+  Legacy Console Edition was discontinued in 2019 and no protocol
+  translator exists for it.
+
+
+======================================================================
+                        TROUBLESHOOTING
+======================================================================
+
+  "Unable to connect to world"
+  -> Check that port 19132/UDP is not blocked by your network/firewall
+  -> Try using the IP directly: 217.160.170.104 port 19132
+  -> School/corporate networks often block gaming ports
+
+  BedrockConnect not intercepting
+  -> Make sure DNS is set correctly (104.238.130.180)
+  -> Try a different featured server to click on
+  -> BedrockConnect service may be temporarily down
+  -> Alternative DNS: 173.82.100.84 (backup BedrockConnect server)
+
+  Phantom not showing server in Friends tab
+  -> Make sure the PC and console are on the same WiFi/LAN
+  -> Check that your router allows local device discovery
+  -> Try restarting Minecraft after starting Phantom
+
+  Kicked or disconnected after joining
+  -> Bedrock-to-Beta translation is experimental (Geyser + ViaBedrock)
+  -> Some features may not work correctly
+  -> Items, blocks, and UI may appear differently than expected
