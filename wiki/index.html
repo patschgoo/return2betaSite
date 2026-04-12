@@ -20,6 +20,7 @@
       background-image: url("../images/background.png");
       background-repeat: repeat;
       background-size: auto;
+      overflow-x: hidden;
     }
     body {
       display: flex;
@@ -375,6 +376,8 @@
       text-decoration: none; border-top: 1px solid rgba(85,255,85,0.12);
     }
     .cw-expand-link:hover { color: #55ff55; }
+    .cw-logout { background: none; border: none; color: #888; font-family: 'Minecraft', sans-serif; font-size: 0.55rem; cursor: pointer; margin-left: 6px; padding: 0; }
+    .cw-logout:hover { color: #ff5555; }
     .cw-resize-handle { display: none; position: absolute; top: 0; left: 0; width: 16px; height: 16px; cursor: nwse-resize; z-index: 12; }
     .cw-resize-handle::after { content: ''; position: absolute; top: 3px; left: 3px; width: 8px; height: 8px; border-top: 2px solid rgba(85,255,85,0.5); border-left: 2px solid rgba(85,255,85,0.5); }
     @media (min-width: 721px) {
@@ -392,7 +395,7 @@
     <div class="cw-resize-handle" id="cwResize"></div>
     <div class="cw-header">
       <span>Chat <span class="cw-status" id="cwStatus">Connecting...</span></span>
-      <button class="cw-close" id="cwClose">&times;</button>
+      <span><button class="cw-logout" id="cwLogout" title="Switch username" style="display:none">[switch]</button><button class="cw-close" id="cwClose">&times;</button></span>
     </div>
     <div class="cw-messages" id="cwMessages"></div>
     <div class="cw-input-area">
@@ -421,9 +424,10 @@
     var nameOverlay = document.getElementById('cwNameOverlay');
     var nameInput = document.getElementById('cwNameInput');
     var nameBtn = document.getElementById('cwNameBtn');
+    var logoutBtn = document.getElementById('cwLogout');
     var ws = null, username = localStorage.getItem('r2b_chat_username'), reconnectDelay = 1000, opened = false;
 
-    if (username) { nameOverlay.classList.add('hidden'); }
+    if (username) { nameOverlay.classList.add('hidden'); logoutBtn.style.display = ''; }
 
     toggle.addEventListener('click', function() {
       panel.classList.toggle('open');
@@ -451,7 +455,7 @@
       ws.onmessage = function(e) {
         var data; try{data=JSON.parse(e.data);}catch(x){return;}
         if (data.type==='history' && data.messages) { data.messages.forEach(renderChat); return; }
-        if (data.type==='username_set') { nameOverlay.classList.add('hidden'); input.disabled=false; sendBtn.disabled=false; input.focus(); return; }
+        if (data.type==='username_set') { nameOverlay.classList.add('hidden'); logoutBtn.style.display = ''; input.disabled=false; sendBtn.disabled=false; input.focus(); return; }
         if (data.type==='error') { addSys(data.message); return; }
         if (data.type==='chat') renderChat(data);
       };
@@ -476,6 +480,12 @@
       if(ws&&ws.readyState===1) ws.send(JSON.stringify({type:'set_username',username:n}));
     });
     nameInput.addEventListener('keydown', function(e){if(e.key==='Enter')nameBtn.click();});
+    logoutBtn.addEventListener('click', function(){
+      username = null; localStorage.removeItem('r2b_chat_username');
+      nameOverlay.classList.remove('hidden'); logoutBtn.style.display = 'none';
+      input.disabled = true; sendBtn.disabled = true;
+      nameInput.value = ''; nameInput.focus();
+    });
   })();
   </script>
   <script>

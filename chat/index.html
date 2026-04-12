@@ -135,6 +135,18 @@
     .popup-btn:hover {
       background: rgba(85,255,85,0.3);
     }
+    .switch-btn {
+      padding: 4px 12px;
+      background: none;
+      border: 1px solid rgba(85,255,85,0.25);
+      border-radius: 3px;
+      color: #888;
+      font-family: 'Minecraft', sans-serif;
+      font-size: 0.6rem;
+      cursor: pointer;
+      transition: color 0.15s;
+    }
+    .switch-btn:hover { color: #ff5555; }
     .chat-messages {
       flex: 1;
       overflow-y: auto;
@@ -290,7 +302,10 @@
     <div class="chat-box">
       <div class="chat-header">
         <span class="chat-status" id="status">Connecting...</span>
-        <button class="popup-btn" id="popupBtn" title="Open chat in popup">Pop out</button>
+        <span>
+          <button class="switch-btn" id="switchBtn" title="Switch username" style="display:none">Switch</button>
+          <button class="popup-btn" id="popupBtn" title="Open chat in popup">Pop out</button>
+        </span>
       </div>
       <div class="chat-messages" id="messages"></div>
       <div class="chat-input-area">
@@ -320,6 +335,7 @@
     const sendBtn    = document.getElementById('sendBtn');
     const statusEl   = document.getElementById('status');
     const popupBtn   = document.getElementById('popupBtn');
+    const switchBtn  = document.getElementById('switchBtn');
     const overlay    = document.getElementById('usernameOverlay');
     const nameInput  = document.getElementById('usernameInput');
     const nameBtn    = document.getElementById('usernameBtn');
@@ -331,6 +347,7 @@
 
     if (username) {
       overlay.classList.add('hidden');
+      switchBtn.style.display = '';
     }
 
     function addMessage(html) {
@@ -396,6 +413,7 @@
 
         if (data.type === 'username_set') {
           overlay.classList.add('hidden');
+          switchBtn.style.display = '';
           chatInput.disabled = false;
           sendBtn.disabled = false;
           chatInput.focus();
@@ -461,6 +479,17 @@
     });
     nameInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') nameBtn.click();
+    });
+
+    switchBtn.addEventListener('click', () => {
+      username = null;
+      localStorage.removeItem('r2b_chat_username');
+      overlay.classList.remove('hidden');
+      switchBtn.style.display = 'none';
+      chatInput.disabled = true;
+      sendBtn.disabled = true;
+      nameInput.value = '';
+      nameInput.focus();
     });
 
     // Pop-out button
