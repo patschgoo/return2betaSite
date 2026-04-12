@@ -215,6 +215,23 @@
     .toc a {
       font-size: clamp(0.65rem, 1.1vw, 0.82rem);
     }
+    .toc-category {
+      color: #55ff55;
+      font-size: clamp(0.7rem, 1.1vw, 0.85rem);
+      margin: 10px 0 4px;
+      padding: 0;
+    }
+    .toc-category:first-child { margin-top: 0; }
+    .toc ul {
+      list-style: none;
+      padding-left: 14px;
+      margin: 0 0 4px;
+    }
+    .toc ul li::before {
+      content: '›';
+      color: #55ff55;
+      margin-right: 6px;
+    }
     /* Nav carousel */
     .nav-carousel { display: none; width: 100%; align-items: center; justify-content: center; height: 48px; }
     .nav-caret { background: none; border: none; color: rgba(255,255,255,0.8); font-size: 1.1rem; cursor: pointer; padding: 0 14px; height: 48px; display: flex; align-items: center; flex-shrink: 0; transition: color 0.15s; }
@@ -323,259 +340,319 @@
       <span class="ip">217.160.170.104</span>
     </div>
 
-    <div class="toc" style="margin: 24px auto; display: block; max-width: 360px;">
+    <div class="toc" style="margin: 24px auto; display: block; max-width: 400px;">
       <h3>Table of Contents</h3>
-      <ol>
+      <p class="toc-category">Java Edition (PC Launchers)</p>
+      <ul>
         <li><a href="#betacraft">BetaCraft Launcher</a></li>
         <li><a href="#multimc">MultiMC</a></li>
         <li><a href="#prism">Prism Launcher</a></li>
         <li><a href="#ultimmc">UltimMC</a></li>
         <li><a href="#retrowrapper">RetroWrapper</a></li>
         <li><a href="#lts">Minecraft-LTS-Launcher</a></li>
+      </ul>
+      <p class="toc-category">Java Edition (Mobile)</p>
+      <ul>
         <li><a href="#pojav">PojavLauncher (Android)</a></li>
-        <li><a href="#eaglercraft">Eaglercraft (Browser)</a></li>
+      </ul>
+      <p class="toc-category">Browser</p>
+      <ul>
+        <li><a href="#eaglercraft">Eaglercraft</a></li>
+      </ul>
+      <p class="toc-category">Bedrock Edition</p>
+      <ul>
+        <li><a href="#bedrock-easy">Windows 10/11, Android, iOS, Xbox</a></li>
+        <li><a href="#playstation">PlayStation 4 / 5</a></li>
+        <li><a href="#switch">Nintendo Switch</a></li>
+      </ul>
+      <p class="toc-category">Reference</p>
+      <ul>
+        <li><a href="#connections">All Server Addresses</a></li>
         <li><a href="#server-mods">Server Mods</a></li>
         <li><a href="#useful-mods">Useful Mods</a></li>
         <li><a href="#troubleshooting">Troubleshooting</a></li>
-        <li><a href="#connections">All Connection Methods</a></li>
-        <li><a href="#console">Console &amp; Mobile Guide</a></li>
-      </ol>
+        <li><a href="#incompatible">Incompatible Platforms</a></li>
+      </ul>
     </div>
 
     <div class="note">All launchers listed below are free and support offline/cracked mode. You do <strong>not</strong> need a Mojang or Microsoft account to play on Return2Beta.</div>
 
+    <!-- ════════════════════════════════════════ -->
+    <!--         JAVA EDITION (PC LAUNCHERS)      -->
+    <!-- ════════════════════════════════════════ -->
+    <h2 style="border-bottom: none; padding-bottom: 0; margin-bottom: 4px;">Java Edition — PC Launchers</h2>
+    <p style="color: #aaa; font-size: clamp(0.6rem, 1vw, 0.78rem); margin-bottom: 16px;">For playing Beta 1.7.3 on Windows, macOS, or Linux. Use <code>mc.return2beta.com</code> as the server address.</p>
+
     <!-- ─── BetaCraft ─── -->
-    <h2 id="betacraft">1. BetaCraft Launcher</h2>
-    <div class="launcher-section">
-      <p>BetaCraft is the most popular launcher for legacy Minecraft versions. It comes with Beta 1.7.3 built in and handles authentication automatically.</p>
-
-      <h3>Download</h3>
-      <p>Get BetaCraft from the official site: <a href="https://betacraft.uk" target="_blank" rel="noopener noreferrer">betacraft.uk</a></p>
-
-      <h3>Setup</h3>
-      <ol>
-        <li>Install and open BetaCraft Launcher.</li>
-        <li>Click <strong>"Edit instances"</strong> (or the <strong>+</strong> button) to create a new instance.</li>
-        <li>In the version list, find and select <code>b1.7.3</code>.</li>
-        <li>Name the instance (e.g. "Return2Beta") and click <strong>OK</strong>.</li>
-        <li>In the main window, enter your desired username in the username field.</li>
-        <li>Select your new instance and click <strong>Play</strong>.</li>
-        <li>Once Minecraft opens, go to <strong>Multiplayer</strong> → <strong>Add Server</strong> or <strong>Direct Connect</strong>.</li>
-        <li>Enter the server address: <code>mc.return2beta.com</code></li>
-        <li>Click <strong>Connect</strong> and enjoy!</li>
-      </ol>
-
-      <div class="note">BetaCraft automatically patches Beta 1.7.3 to work with modern server lists. No extra setup needed.</div>
-    </div>
+    <details class="foldout" open id="betacraft">
+      <summary>BetaCraft Launcher</summary>
+      <div class="foldout-body">
+        <p>The most popular launcher for legacy Minecraft versions. Comes with Beta 1.7.3 built in.</p>
+        <p><strong>Download:</strong> <a href="https://betacraft.uk" target="_blank" rel="noopener noreferrer">betacraft.uk</a></p>
+        <h3>Setup</h3>
+        <ol>
+          <li>Install and open BetaCraft Launcher.</li>
+          <li>Click <strong>"Edit instances"</strong> (or the <strong>+</strong> button) to create a new instance.</li>
+          <li>In the version list, find and select <code>b1.7.3</code>.</li>
+          <li>Name the instance (e.g. "Return2Beta") and click <strong>OK</strong>.</li>
+          <li>In the main window, enter your desired username in the username field.</li>
+          <li>Select your new instance and click <strong>Play</strong>.</li>
+          <li>Once Minecraft opens, go to <strong>Multiplayer</strong> → <strong>Add Server</strong> or <strong>Direct Connect</strong>.</li>
+          <li>Enter the server address: <code>mc.return2beta.com</code></li>
+          <li>Click <strong>Connect</strong> and enjoy!</li>
+        </ol>
+        <div class="note">BetaCraft automatically patches Beta 1.7.3 to work with modern server lists. No extra setup needed.</div>
+      </div>
+    </details>
 
     <!-- ─── MultiMC ─── -->
-    <h2 id="multimc">2. MultiMC</h2>
-    <div class="launcher-section">
-      <p>MultiMC is an advanced instance-based launcher that supports legacy Minecraft versions.</p>
-
-      <h3>Download</h3>
-      <p>Get MultiMC from: <a href="https://multimc.org" target="_blank" rel="noopener noreferrer">multimc.org</a></p>
-
-      <h3>Setup</h3>
-      <ol>
-        <li>Install and open MultiMC.</li>
-        <li>Click <strong>"Add Instance"</strong> in the top toolbar.</li>
-        <li>In the version selection, expand <strong>Old Beta</strong> and select <code>b1.7.3</code>.</li>
-        <li>Name the instance (e.g. "Return2Beta") and click <strong>OK</strong>.</li>
-        <li>Go to <strong>Profiles</strong> (top-right) → <strong>Manage Accounts</strong>.</li>
-        <li>Add an <strong>offline account</strong> with your desired username.</li>
-        <li>Select the offline account as your active profile.</li>
-        <li>Double-click the instance to launch.</li>
-        <li>In-game, go to <strong>Multiplayer</strong> → enter <code>mc.return2beta.com</code> and connect.</li>
-      </ol>
-
-      <div class="note">If you don't see Old Beta versions, go to <strong>Settings</strong> → <strong>Minecraft</strong> and check <strong>"Show old versions"</strong>.</div>
-    </div>
+    <details class="foldout" id="multimc">
+      <summary>MultiMC</summary>
+      <div class="foldout-body">
+        <p>An advanced instance-based launcher that supports legacy Minecraft versions.</p>
+        <p><strong>Download:</strong> <a href="https://multimc.org" target="_blank" rel="noopener noreferrer">multimc.org</a></p>
+        <h3>Setup</h3>
+        <ol>
+          <li>Install and open MultiMC.</li>
+          <li>Click <strong>"Add Instance"</strong> in the top toolbar.</li>
+          <li>In the version selection, expand <strong>Old Beta</strong> and select <code>b1.7.3</code>.</li>
+          <li>Name the instance (e.g. "Return2Beta") and click <strong>OK</strong>.</li>
+          <li>Go to <strong>Profiles</strong> (top-right) → <strong>Manage Accounts</strong>.</li>
+          <li>Add an <strong>offline account</strong> with your desired username.</li>
+          <li>Select the offline account as your active profile.</li>
+          <li>Double-click the instance to launch.</li>
+          <li>In-game, go to <strong>Multiplayer</strong> → enter <code>mc.return2beta.com</code> and connect.</li>
+        </ol>
+        <div class="note">If you don't see Old Beta versions, go to <strong>Settings</strong> → <strong>Minecraft</strong> and check <strong>"Show old versions"</strong>.</div>
+      </div>
+    </details>
 
     <!-- ─── Prism Launcher ─── -->
-    <h2 id="prism">3. Prism Launcher</h2>
-    <div class="launcher-section">
-      <p>Prism Launcher is a modern, open-source fork of MultiMC with additional features and active development.</p>
-
-      <h3>Download</h3>
-      <p>Get Prism Launcher from: <a href="https://prismlauncher.org" target="_blank" rel="noopener noreferrer">prismlauncher.org</a></p>
-
-      <h3>Setup</h3>
-      <ol>
-        <li>Install and open Prism Launcher.</li>
-        <li>On first launch, it will ask you to set up an account. Choose <strong>"Add Offline"</strong> and enter your username.</li>
-        <li>Click <strong>"Add Instance"</strong> in the top toolbar.</li>
-        <li>In the version filter on the left, check <strong>"Old Beta"</strong>.</li>
-        <li>Select <code>b1.7.3</code> from the version list.</li>
-        <li>Name the instance (e.g. "Return2Beta") and click <strong>OK</strong>.</li>
-        <li>Make sure your offline account is selected (top-right corner).</li>
-        <li>Double-click the instance to launch.</li>
-        <li>In-game, go to <strong>Multiplayer</strong> → enter <code>mc.return2beta.com</code> and connect.</li>
-      </ol>
-
-      <div class="note">Prism Launcher may need Java 8 for Beta 1.7.3. If it doesn't launch, go to <strong>Settings</strong> → <strong>Java</strong> and select a Java 8 installation.</div>
-    </div>
+    <details class="foldout" id="prism">
+      <summary>Prism Launcher</summary>
+      <div class="foldout-body">
+        <p>A modern, open-source fork of MultiMC with additional features and active development.</p>
+        <p><strong>Download:</strong> <a href="https://prismlauncher.org" target="_blank" rel="noopener noreferrer">prismlauncher.org</a></p>
+        <h3>Setup</h3>
+        <ol>
+          <li>Install and open Prism Launcher.</li>
+          <li>On first launch, it will ask you to set up an account. Choose <strong>"Add Offline"</strong> and enter your username.</li>
+          <li>Click <strong>"Add Instance"</strong> in the top toolbar.</li>
+          <li>In the version filter on the left, check <strong>"Old Beta"</strong>.</li>
+          <li>Select <code>b1.7.3</code> from the version list.</li>
+          <li>Name the instance (e.g. "Return2Beta") and click <strong>OK</strong>.</li>
+          <li>Make sure your offline account is selected (top-right corner).</li>
+          <li>Double-click the instance to launch.</li>
+          <li>In-game, go to <strong>Multiplayer</strong> → enter <code>mc.return2beta.com</code> and connect.</li>
+        </ol>
+        <div class="note">Prism Launcher may need Java 8 for Beta 1.7.3. If it doesn't launch, go to <strong>Settings</strong> → <strong>Java</strong> and select a Java 8 installation.</div>
+      </div>
+    </details>
 
     <!-- ─── UltimMC ─── -->
-    <h2 id="ultimmc">4. UltimMC</h2>
-    <div class="launcher-section">
-      <p>UltimMC is a fork of MultiMC with built-in offline/cracked account support — no need to manually configure offline mode.</p>
-
-      <h3>Download</h3>
-      <p>Get UltimMC from GitHub: <a href="https://github.com/UltimMC/Launcher" target="_blank" rel="noopener noreferrer">github.com/UltimMC/Launcher</a></p>
-
-      <h3>Setup</h3>
-      <ol>
-        <li>Download the latest release and extract it.</li>
-        <li>Open UltimMC.</li>
-        <li>Click <strong>"Profiles"</strong> (top-right) and add an <strong>offline account</strong> with your desired username.</li>
-        <li>Click <strong>"Add Instance"</strong> in the top toolbar.</li>
-        <li>Expand <strong>Old Beta</strong> and select <code>b1.7.3</code>.</li>
-        <li>Name the instance (e.g. "Return2Beta") and click <strong>OK</strong>.</li>
-        <li>Double-click the instance to launch.</li>
-        <li>In-game, go to <strong>Multiplayer</strong> → enter <code>mc.return2beta.com</code> and connect.</li>
-      </ol>
-
-      <div class="note">UltimMC works like MultiMC but with easier offline account management. If you don't see Old Beta versions, go to <strong>Settings</strong> → <strong>Minecraft</strong> and check <strong>"Show old versions"</strong>.</div>
-    </div>
+    <details class="foldout" id="ultimmc">
+      <summary>UltimMC</summary>
+      <div class="foldout-body">
+        <p>A fork of MultiMC with built-in offline/cracked account support — no need to manually configure offline mode.</p>
+        <p><strong>Download:</strong> <a href="https://github.com/UltimMC/Launcher" target="_blank" rel="noopener noreferrer">github.com/UltimMC/Launcher</a></p>
+        <h3>Setup</h3>
+        <ol>
+          <li>Download the latest release and extract it.</li>
+          <li>Open UltimMC.</li>
+          <li>Click <strong>"Profiles"</strong> (top-right) and add an <strong>offline account</strong> with your desired username.</li>
+          <li>Click <strong>"Add Instance"</strong> in the top toolbar.</li>
+          <li>Expand <strong>Old Beta</strong> and select <code>b1.7.3</code>.</li>
+          <li>Name the instance (e.g. "Return2Beta") and click <strong>OK</strong>.</li>
+          <li>Double-click the instance to launch.</li>
+          <li>In-game, go to <strong>Multiplayer</strong> → enter <code>mc.return2beta.com</code> and connect.</li>
+        </ol>
+        <div class="note">UltimMC works like MultiMC but with easier offline account management. If you don't see Old Beta versions, go to <strong>Settings</strong> → <strong>Minecraft</strong> and check <strong>"Show old versions"</strong>.</div>
+      </div>
+    </details>
 
     <!-- ─── RetroWrapper ─── -->
-    <h2 id="retrowrapper">5. RetroWrapper</h2>
-    <div class="launcher-section">
-      <p>RetroWrapper is a lightweight wrapper that patches legacy Minecraft versions to work with modern Java and fixes common issues like sound, skins, and multiplayer. It works with any MultiMC-based launcher.</p>
+    <details class="foldout" id="retrowrapper">
+      <summary>RetroWrapper</summary>
+      <div class="foldout-body">
+        <p>A lightweight wrapper that patches legacy Minecraft versions to work with modern Java. Works with any MultiMC-based launcher.</p>
+        <p><strong>Download:</strong> <a href="https://github.com/AltronMaxX/RetroWrapper" target="_blank" rel="noopener noreferrer">github.com/AltronMaxX/RetroWrapper</a></p>
+        <h3>Setup</h3>
+        <ol>
+          <li>Download the latest RetroWrapper <code>.jar</code> from the GitHub releases page.</li>
+          <li>In your MultiMC-based launcher, create a <code>b1.7.3</code> instance.</li>
+          <li>Right-click the instance → <strong>Edit Instance</strong> → <strong>Version</strong>.</li>
+          <li>Click <strong>"Add to Minecraft.jar"</strong> and select the RetroWrapper jar.</li>
+          <li>Launch the instance and connect to <code>mc.return2beta.com</code>.</li>
+        </ol>
+        <div class="note">RetroWrapper automatically fixes sound, skins, and online functionality for Beta 1.7.3. It's a jar mod — add it directly to the Minecraft jar, not the mods folder.</div>
+      </div>
+    </details>
 
-      <h3>Download</h3>
-      <p>Get RetroWrapper from GitHub: <a href="https://github.com/AltronMaxX/RetroWrapper" target="_blank" rel="noopener noreferrer">github.com/AltronMaxX/RetroWrapper</a></p>
+    <!-- ─── LTS Launcher ─── -->
+    <details class="foldout" id="lts">
+      <summary>Minecraft-LTS-Launcher</summary>
+      <div class="foldout-body">
+        <p>A lightweight launcher specifically designed for playing legacy Minecraft versions with modern fixes.</p>
+        <p><strong>Download:</strong> <a href="https://github.com/AiDSl/Minecraft-LTS-Launcher" target="_blank" rel="noopener noreferrer">github.com/AiDSl/Minecraft-LTS-Launcher</a></p>
+        <h3>Setup</h3>
+        <ol>
+          <li>Download the latest release from the GitHub releases page.</li>
+          <li>Extract the archive and run the launcher.</li>
+          <li>Enter your desired username in the username field.</li>
+          <li>Select version <code>b1.7.3</code> from the version dropdown.</li>
+          <li>Click <strong>Play</strong> to launch the game.</li>
+          <li>In-game, go to <strong>Multiplayer</strong> → enter <code>mc.return2beta.com</code> and connect.</li>
+        </ol>
+        <div class="note">The LTS Launcher automatically applies legacy fixes for Beta 1.7.3 including sound, skins, and server list support.</div>
+      </div>
+    </details>
 
-      <h3>Setup</h3>
-      <ol>
-        <li>Download the latest RetroWrapper <code>.jar</code> from the GitHub releases page.</li>
-        <li>In your MultiMC-based launcher, create a <code>b1.7.3</code> instance.</li>
-        <li>Right-click the instance → <strong>Edit Instance</strong> → <strong>Version</strong>.</li>
-        <li>Click <strong>"Add to Minecraft.jar"</strong> and select the RetroWrapper jar.</li>
-        <li>Launch the instance and connect to <code>mc.return2beta.com</code>.</li>
-      </ol>
-
-      <div class="note">RetroWrapper automatically fixes sound, skins, and online functionality for Beta 1.7.3. It's a jar mod — add it directly to the Minecraft jar, not the mods folder.</div>
-    </div>
-
-    <!-- ─── Minecraft-LTS-Launcher ─── -->
-    <h2 id="lts">6. Minecraft-LTS-Launcher</h2>
-    <div class="launcher-section">
-      <p>The Minecraft-LTS-Launcher (Long-Term Support) is a lightweight launcher specifically designed for playing legacy Minecraft versions with modern fixes.</p>
-
-      <h3>Download</h3>
-      <p>Get the LTS Launcher from GitHub: <a href="https://github.com/AiDSl/Minecraft-LTS-Launcher" target="_blank" rel="noopener noreferrer">github.com/AiDSl/Minecraft-LTS-Launcher</a></p>
-
-      <h3>Setup</h3>
-      <ol>
-        <li>Download the latest release from the GitHub releases page.</li>
-        <li>Extract the archive and run the launcher.</li>
-        <li>Enter your desired username in the username field.</li>
-        <li>Select version <code>b1.7.3</code> from the version dropdown.</li>
-        <li>Click <strong>Play</strong> to launch the game.</li>
-        <li>In-game, go to <strong>Multiplayer</strong> → enter <code>mc.return2beta.com</code> and connect.</li>
-      </ol>
-
-      <div class="note">The LTS Launcher automatically applies legacy fixes for Beta 1.7.3 including sound, skins, and server list support.</div>
-    </div>
+    <!-- ════════════════════════════════════════ -->
+    <!--         JAVA EDITION (MOBILE)            -->
+    <!-- ════════════════════════════════════════ -->
+    <h2 style="border-bottom: none; padding-bottom: 0; margin-bottom: 4px;">Java Edition — Mobile</h2>
+    <p style="color: #aaa; font-size: clamp(0.6rem, 1vw, 0.78rem); margin-bottom: 16px;">Play Java Edition Beta 1.7.3 on your phone or tablet.</p>
 
     <!-- ─── PojavLauncher ─── -->
-    <h2 id="pojav">7. PojavLauncher (Android)</h2>
-    <div class="launcher-section">
-      <p>PojavLauncher is a Minecraft: Java Edition launcher for Android that runs Java over Android, allowing you to play Beta 1.7.3 on your phone or tablet.</p>
+    <details class="foldout" open id="pojav">
+      <summary>PojavLauncher (Android)</summary>
+      <div class="foldout-body">
+        <p>Runs Minecraft Java Edition on Android devices by running Java over Android.</p>
+        <p><strong>Download:</strong> <a href="https://github.com/pojavlauncherteam/pojavlauncher" target="_blank" rel="noopener noreferrer">github.com/pojavlauncherteam/pojavlauncher</a></p>
+        <h3>Setup</h3>
+        <ol>
+          <li>Install PojavLauncher on your Android device.</li>
+          <li>Open the launcher and set your username.</li>
+          <li>Select version <code>b1.7.3</code> from the version list.</li>
+          <li>Launch the game and connect to <code>mc.return2beta.com</code>.</li>
+        </ol>
+        <div class="note">PojavLauncher runs Java on Android — performance varies by device. A relatively modern phone is recommended.</div>
+      </div>
+    </details>
 
-      <h3>Download</h3>
-      <p>Get PojavLauncher from GitHub: <a href="https://github.com/pojavlauncherteam/pojavlauncher" target="_blank" rel="noopener noreferrer">github.com/pojavlauncherteam/pojavlauncher</a></p>
-
-      <h3>Setup</h3>
-      <ol>
-        <li>Install PojavLauncher on your Android device.</li>
-        <li>Open the launcher and set your username.</li>
-        <li>Select version <code>b1.7.3</code> from the version list.</li>
-        <li>Launch the game and connect to <code>mc.return2beta.com</code>.</li>
-      </ol>
-
-      <div class="note">PojavLauncher runs Java on Android — performance varies by device. A relatively modern phone is recommended.</div>
-    </div>
+    <!-- ════════════════════════════════════════ -->
+    <!--               BROWSER                    -->
+    <!-- ════════════════════════════════════════ -->
+    <h2 style="border-bottom: none; padding-bottom: 0; margin-bottom: 4px;">Browser</h2>
+    <p style="color: #aaa; font-size: clamp(0.6rem, 1vw, 0.78rem); margin-bottom: 16px;">No download needed — play directly in your browser.</p>
 
     <!-- ─── Eaglercraft ─── -->
-    <h2 id="eaglercraft">8. Eaglercraft (Browser)</h2>
-    <div class="launcher-section">
-      <p>Eaglercraft lets you play Minecraft Beta 1.7.3 directly in your web browser — no download or Java required.</p>
+    <details class="foldout" open id="eaglercraft">
+      <summary>Eaglercraft</summary>
+      <div class="foldout-body">
+        <p>Play Minecraft Beta 1.7.3 directly in your web browser — no download or Java required.</p>
+        <p><strong>Play:</strong> <a href="https://eaglercraft.com/play/?version=b1.7.3" target="_blank" rel="noopener noreferrer">eaglercraft.com/play/?version=b1.7.3</a></p>
+        <h3>How to Connect</h3>
+        <ol>
+          <li>Open the link above in a modern browser (Chrome, Firefox, Edge).</li>
+          <li>Enter your desired username.</li>
+          <li>Go to <strong>Multiplayer</strong> → enter <code>mc.return2beta.com</code> and connect.</li>
+        </ol>
+        <p style="margin-top: 12px; font-size: clamp(0.6rem, 1vw, 0.78rem); color: #aaa;">Also check out <a href="https://yee.pages.dev/" target="_blank" rel="noopener noreferrer">Yee Launcher</a> — another browser-based option.</p>
+      </div>
+    </details>
 
-      <h3>Play</h3>
-      <p>Open Eaglercraft in your browser: <a href="https://eaglercraft.com/play/?version=b1.7.3" target="_blank" rel="noopener noreferrer">eaglercraft.com/play/?version=b1.7.3</a></p>
+    <!-- ════════════════════════════════════════ -->
+    <!--           BEDROCK EDITION                -->
+    <!-- ════════════════════════════════════════ -->
+    <h2 style="border-bottom: none; padding-bottom: 0; margin-bottom: 4px;">Bedrock Edition</h2>
+    <p style="color: #aaa; font-size: clamp(0.6rem, 1vw, 0.78rem); margin-bottom: 16px;">For Windows 10/11, Android, iOS, Xbox, PlayStation, and Nintendo Switch. Server address: <code>mc.return2beta.com</code> port <code>19132</code></p>
 
-      <h3>How to Connect</h3>
-      <ol>
-        <li>Open the link above in a modern browser (Chrome, Firefox, Edge).</li>
-        <li>Enter your desired username.</li>
-        <li>Go to <strong>Multiplayer</strong> → enter <code>mc.return2beta.com</code> and connect.</li>
-      </ol>
+    <!-- ─── Easy platforms ─── -->
+    <details class="foldout" open id="bedrock-easy">
+      <summary>Windows 10/11, Android, iOS / iPadOS, Xbox</summary>
+      <div class="foldout-body">
+        <p>These platforms can add servers directly:</p>
+        <ol>
+          <li>Open Minecraft (Bedrock Edition)</li>
+          <li>Play → Servers → scroll to bottom → <strong>Add Server</strong></li>
+          <li>Server Name: <code>Return2Beta</code></li>
+          <li>Server Address: <code>mc.return2beta.com</code></li>
+          <li>Port: <code>19132</code></li>
+          <li>Click Save, then click the server to join</li>
+        </ol>
+      </div>
+    </details>
 
-      <p style="margin-top: 12px; font-size: clamp(0.6rem, 1vw, 0.78rem); color: #aaa;">Also check out <a href="https://yee.pages.dev/" target="_blank" rel="noopener noreferrer">Yee Launcher</a> — another browser-based option.</p>
-    </div>
+    <!-- ─── PlayStation ─── -->
+    <details class="foldout" id="playstation">
+      <summary>PlayStation 4 / PlayStation 5</summary>
+      <div class="foldout-body">
+        <p>PlayStation does <strong>not</strong> have an "Add Server" button. Use one of these workarounds:</p>
 
-    <!-- ─── Server Mods ─── -->
-    <h2 id="server-mods">9. Server Mods</h2>
-    <div class="launcher-section">
-      <p>These are client-side mods required to experience server features that need a matching mod on your end. Install them by placing the files into your <code>.minecraft/mods</code> folder (create it if it doesn't exist). Risugami's ModLoader is required.</p>
+        <h3>Method 1: BedrockConnect (DNS trick)</h3>
+        <ol>
+          <li>Go to Settings → Network → Set Up Internet Connection</li>
+          <li>Select your connection (WiFi or LAN) → Custom setup</li>
+          <li>Set everything to Automatic <strong>except DNS</strong>:<br>Primary DNS: <code>104.238.130.180</code><br>Secondary DNS: <code>8.8.8.8</code></li>
+          <li>Save and connect</li>
+          <li>Open Minecraft → Play → Servers</li>
+          <li>Click on <strong>any</strong> featured server (e.g. The Hive, CubeCraft)</li>
+          <li>BedrockConnect intercepts and shows a "Connect to a Server" screen</li>
+          <li>Enter: <code>mc.return2beta.com</code> port <code>19132</code></li>
+          <li>Click Submit to connect</li>
+        </ol>
+        <div class="note">To revert: set DNS back to Automatic. While active, featured servers route through BedrockConnect.</div>
 
-      <h3>Seasons Client</h3>
-      <p>The server runs the <strong>Seasons</strong> plugin, which cycles between Winter and Summer with different weather patterns. The client mod visually changes rain on the server to snow if it is winter season and mutes the sound.</p>
-      <p><a href="/Server%20Mods/SeasonsClient.zip" download>Download SeasonsClient.zip</a></p>
-    </div>
+        <h3>Method 2: Phantom (LAN proxy on PC)</h3>
+        <p>Requires a PC on the same network as the PlayStation.</p>
+        <ol>
+          <li>Download <a href="https://github.com/jhead/phantom/releases" target="_blank" rel="noopener noreferrer">Phantom</a></li>
+          <li>Run: <code>phantom -server mc.return2beta.com:19132</code></li>
+          <li>The server appears in Minecraft's Friends tab as a LAN game</li>
+        </ol>
 
-    <!-- ─── Useful Mods ─── -->
-    <h2 id="useful-mods">10. Useful Mods</h2>
-    <div class="launcher-section">
-      <p>These optional mods enhance your Beta 1.7.3 experience. All require <strong>Risugami's ModLoader</strong> (see below).</p>
+        <h3>Method 3: BedrockTogether (phone app)</h3>
+        <p>Requires an iOS or Android device on the same WiFi. No DNS changes needed.</p>
+        <ol>
+          <li>Download "BedrockTogether" from the App Store or Google Play (free)</li>
+          <li>Enter: <code>mc.return2beta.com</code> port <code>19132</code> → tap Start</li>
+          <li>On PlayStation: Play → Friends tab → server appears as LAN game</li>
+        </ol>
+      </div>
+    </details>
 
-      <h3>Risugami's ModLoader</h3>
-      <p>The classic mod loader for Beta 1.7.3 — required by most mods listed here. It lets the game load mods from the <code>mods</code> folder without modifying the jar directly.</p>
-      <p><a href="https://github.com/coffeenotfound/ModloaderFix-b1.7.3" target="_blank" rel="noopener noreferrer">Download ModLoaderFix for b1.7.3</a></p>
+    <!-- ─── Nintendo Switch ─── -->
+    <details class="foldout" id="switch">
+      <summary>Nintendo Switch</summary>
+      <div class="foldout-body">
+        <p>Nintendo Switch does <strong>not</strong> have an "Add Server" button. Use one of these workarounds:</p>
 
-      <h3>OptiFine</h3>
-      <p>The essential performance mod — boosts FPS, adds HD texture support, fog control, and many visual options. Highly recommended even on modern hardware.</p>
-      <p><a href="https://mcarchive.net/mods/optifine?gvsn=b1.7.3" target="_blank" rel="noopener noreferrer">Download OptiFine for b1.7.3</a></p>
+        <h3>Method 1: BedrockConnect (DNS trick)</h3>
+        <ol>
+          <li>Go to System Settings → Internet → Internet Settings</li>
+          <li>Select your WiFi network → Change Settings</li>
+          <li>DNS Settings → Manual:<br>Primary DNS: <code>104.238.130.180</code><br>Secondary DNS: <code>8.8.8.8</code></li>
+          <li>Save</li>
+          <li>Open Minecraft → Play → Servers</li>
+          <li>Click on <strong>any</strong> featured server</li>
+          <li>Enter: <code>mc.return2beta.com</code> port <code>19132</code></li>
+          <li>Click Submit to connect</li>
+        </ol>
+        <div class="note">To revert: set DNS back to Automatic in Internet Settings.</div>
 
-      <h3>LegacyVoiceChat</h3>
-      <p>Adds proximity-based voice chat — talk to nearby players (within 48 blocks) using your microphone instead of typing. The server runs LegacyVoiceChat version <strong>0.1.0</strong> on port <code>25566</code>. See the <a href="/plugins/">Plugins page</a> for server-side details.</p>
-      <p><a href="https://legacyvoicechat.com/" target="_blank" rel="noopener noreferrer">Download LegacyVoiceChat</a></p>
-      <div class="note"><strong>Caution:</strong> You can connect to a server with LegacyVoiceChat without the mod installed, but you can't join a server without the plugin if you have the mod installed.</div>
+        <h3>Method 2: Phantom (LAN proxy on PC)</h3>
+        <p>Requires a PC on the same network.</p>
+        <ol>
+          <li>Download <a href="https://github.com/jhead/phantom/releases" target="_blank" rel="noopener noreferrer">Phantom</a></li>
+          <li>Run: <code>phantom -server mc.return2beta.com:19132</code></li>
+          <li>The server appears in the Friends tab as a LAN game</li>
+        </ol>
 
-      <h3>Beta 1.7.3 Custom Sounds Fix</h3>
-      <p>Fixes broken sound effects in Beta 1.7.3 by replacing the outdated sound system. Restores all missing or silent sounds.</p>
-      <p><a href="https://www.minecraftforum.net/forums/mapping-and-modding-java-edition/minecraft-mods/2479033-beta-1-7-3-custom-sounds-fix" target="_blank" rel="noopener noreferrer">Download Custom Sounds Fix</a></p>
-      <div class="note">This is a <strong>jar mod</strong> — in MultiMC/Prism, right-click your instance → <strong>Edit Instance</strong> → <strong>Version</strong> → <strong>Add to Minecraft.jar</strong> and select the downloaded file. Do <em>not</em> place it in the mods folder.</div>
-    </div>
+        <h3>Method 3: BedrockTogether (phone app)</h3>
+        <p>Requires an iOS or Android device on the same WiFi.</p>
+        <ol>
+          <li>Download "BedrockTogether" (free)</li>
+          <li>Enter: <code>mc.return2beta.com</code> port <code>19132</code> → tap Start</li>
+          <li>On Switch: Play → Friends tab → server appears as LAN game</li>
+        </ol>
+      </div>
+    </details>
 
-    <!-- ─── Troubleshooting ─── -->
-    <h2 id="troubleshooting">11. Troubleshooting</h2>
-    <div class="launcher-section">
-      <h3>Can't connect to the server?</h3>
-      <ul>
-        <li>Make sure you're using version <code>b1.7.3</code> exactly — not 1.7.3 (Release) or b1.7.2.</li>
-        <li>Check that you entered the server address correctly: <code>mc.return2beta.com</code></li>
-        <li>If using a firewall, ensure outgoing connections on port <code>25565</code> are allowed.</li>
-      </ul>
-
-      <h3>Game crashes on launch?</h3>
-      <ul>
-        <li>Beta 1.7.3 requires <strong>Java 8</strong>. If you have a newer Java version, configure your launcher to use Java 8 specifically. <a href="https://www.java.com/de/download/manual.jsp" target="_blank" rel="noopener noreferrer">Download Java 8 here</a>.</li>
-        <li>Try allocating less RAM (512 MB–1 GB is enough for Beta).</li>
-      </ul>
-
-      <h3>No sound?</h3>
-      <ul>
-        <li>Beta 1.7.3 uses the old sound system. BetaCraft and LTS Launcher patch this automatically.</li>
-        <li>For MultiMC/Prism, install <strong><a href="https://github.com/betacraftuk/legacyfix" target="_blank" rel="noopener noreferrer">LegacyFix</a></strong> — a mod that fixes sound, skins, and other legacy issues. Add it to your instance's mods folder.</li>
-      </ul>
-    </div>
-
-    <!-- ─── All Connection Methods ─── -->
-    <h2 id="connections">12. All Connection Methods</h2>
+    <!-- ════════════════════════════════════════ -->
+    <!--              REFERENCE                   -->
+    <!-- ════════════════════════════════════════ -->
+    <h2 id="connections">All Server Addresses</h2>
     <div class="launcher-section">
       <p>Every way to connect to Return2Beta, grouped by edition.</p>
 
@@ -595,7 +672,7 @@
       </details>
 
       <details class="foldout">
-        <summary>Bedrock Edition (Windows 10/11, Mobile)</summary>
+        <summary>Bedrock Edition</summary>
         <div class="foldout-body">
           <table>
             <tr><th>Address</th><th>Port</th></tr>
@@ -604,7 +681,7 @@
             <tr><td><code>mc.mildbeta.world</code></td><td>19132</td></tr>
             <tr><td><code>217.160.170.104</code></td><td>19132</td></tr>
           </table>
-          <div class="note">Bedrock does not support SRV records — the port must be entered manually. Console players (Xbox/PS/Switch) see the <a href="#console">Console &amp; Mobile Guide</a> below.</div>
+          <div class="note">Bedrock does not support SRV records — the port must be entered manually.</div>
         </div>
       </details>
 
@@ -633,124 +710,73 @@
       </details>
     </div>
 
-    <!-- ─── Console & Mobile Guide ─── -->
-    <h2 id="console">13. Console &amp; Mobile Guide</h2>
+    <!-- ─── Server Mods ─── -->
+    <h2 id="server-mods">Server Mods</h2>
     <div class="launcher-section">
-      <p>How to join on platforms that use Bedrock Edition. Primary address: <code>mc.return2beta.com</code> port <code>19132</code></p>
+      <p>These are client-side mods required to experience server features that need a matching mod on your end. Install them by placing the files into your <code>.minecraft/mods</code> folder (create it if it doesn't exist). Risugami's ModLoader is required.</p>
 
-      <details class="foldout" open>
-        <summary>Windows 10/11, Android, iOS / iPadOS</summary>
-        <div class="foldout-body">
-          <ol>
-            <li>Open Minecraft (Bedrock Edition)</li>
-            <li>Play → Servers → scroll to bottom → <strong>Add Server</strong></li>
-            <li>Server Name: <code>Return2Beta</code></li>
-            <li>Server Address: <code>mc.return2beta.com</code></li>
-            <li>Port: <code>19132</code></li>
-            <li>Click Save, then click the server to join</li>
-          </ol>
-        </div>
-      </details>
+      <h3>Seasons Client</h3>
+      <p>The server runs the <strong>Seasons</strong> plugin, which cycles between Winter and Summer with different weather patterns. The client mod visually changes rain on the server to snow if it is winter season and mutes the sound.</p>
+      <p><a href="/Server%20Mods/SeasonsClient.zip" download>Download SeasonsClient.zip</a></p>
+    </div>
 
-      <details class="foldout" open>
-        <summary>Xbox One / Xbox Series X|S</summary>
-        <div class="foldout-body">
-          <ol>
-            <li>Open Minecraft</li>
-            <li>Play → Servers → scroll to bottom → <strong>Add Server</strong></li>
-            <li>Server Name: <code>Return2Beta</code></li>
-            <li>Server Address: <code>mc.return2beta.com</code></li>
-            <li>Port: <code>19132</code></li>
-            <li>Click Save, then click the server to join</li>
-          </ol>
-        </div>
-      </details>
+    <!-- ─── Useful Mods ─── -->
+    <h2 id="useful-mods">Useful Mods</h2>
+    <div class="launcher-section">
+      <p>These optional mods enhance your Beta 1.7.3 experience. All require <strong>Risugami's ModLoader</strong> (see below).</p>
 
-      <details class="foldout">
-        <summary>PlayStation 4 / PlayStation 5</summary>
-        <div class="foldout-body">
-          <p>PlayStation does <strong>not</strong> have an "Add Server" button. Use one of these workarounds:</p>
+      <h3>Risugami's ModLoader</h3>
+      <p>The classic mod loader for Beta 1.7.3 — required by most mods listed here. It lets the game load mods from the <code>mods</code> folder without modifying the jar directly.</p>
+      <p><a href="https://github.com/coffeenotfound/ModloaderFix-b1.7.3" target="_blank" rel="noopener noreferrer">Download ModLoaderFix for b1.7.3</a></p>
 
-          <h3>Method 1: BedrockConnect (DNS trick)</h3>
-          <ol>
-            <li>Go to Settings → Network → Set Up Internet Connection</li>
-            <li>Select your connection (WiFi or LAN) → Custom setup</li>
-            <li>Set everything to Automatic <strong>except DNS</strong>:<br>Primary DNS: <code>104.238.130.180</code><br>Secondary DNS: <code>8.8.8.8</code></li>
-            <li>Save and connect</li>
-            <li>Open Minecraft → Play → Servers</li>
-            <li>Click on <strong>any</strong> featured server (e.g. The Hive, CubeCraft)</li>
-            <li>BedrockConnect intercepts and shows a "Connect to a Server" screen</li>
-            <li>Enter: <code>mc.return2beta.com</code> port <code>19132</code></li>
-            <li>Click Submit to connect</li>
-          </ol>
-          <div class="note">To revert: set DNS back to Automatic. While active, featured servers route through BedrockConnect.</div>
+      <h3>OptiFine</h3>
+      <p>The essential performance mod — boosts FPS, adds HD texture support, fog control, and many visual options. Highly recommended even on modern hardware.</p>
+      <p><a href="https://mcarchive.net/mods/optifine?gvsn=b1.7.3" target="_blank" rel="noopener noreferrer">Download OptiFine for b1.7.3</a></p>
 
-          <h3>Method 2: Phantom (LAN proxy on PC)</h3>
-          <p>Requires a PC on the same network as the PlayStation.</p>
-          <ol>
-            <li>Download <a href="https://github.com/jhead/phantom/releases" target="_blank" rel="noopener noreferrer">Phantom</a></li>
-            <li>Run: <code>phantom -server mc.return2beta.com:19132</code></li>
-            <li>The server appears in Minecraft's Friends tab as a LAN game</li>
-          </ol>
+      <h3>LegacyVoiceChat</h3>
+      <p>Adds proximity-based voice chat — talk to nearby players (within 48 blocks) using your microphone instead of typing. The server runs LegacyVoiceChat version <strong>0.1.0</strong> on port <code>25566</code>. See the <a href="/plugins/">Plugins page</a> for server-side details.</p>
+      <p><a href="https://legacyvoicechat.com/" target="_blank" rel="noopener noreferrer">Download LegacyVoiceChat</a></p>
+      <div class="note"><strong>Caution:</strong> You can connect to a server with LegacyVoiceChat without the mod installed, but you can't join a server without the plugin if you have the mod installed.</div>
 
-          <h3>Method 3: BedrockTogether (phone app)</h3>
-          <p>Requires an iOS or Android device on the same WiFi. No DNS changes needed.</p>
-          <ol>
-            <li>Download "BedrockTogether" from the App Store or Google Play (free)</li>
-            <li>Enter: <code>mc.return2beta.com</code> port <code>19132</code> → tap Start</li>
-            <li>On PlayStation: Play → Friends tab → server appears as LAN game</li>
-          </ol>
-        </div>
-      </details>
+      <h3>Beta 1.7.3 Custom Sounds Fix</h3>
+      <p>Fixes broken sound effects in Beta 1.7.3 by replacing the outdated sound system. Restores all missing or silent sounds.</p>
+      <p><a href="https://www.minecraftforum.net/forums/mapping-and-modding-java-edition/minecraft-mods/2479033-beta-1-7-3-custom-sounds-fix" target="_blank" rel="noopener noreferrer">Download Custom Sounds Fix</a></p>
+      <div class="note">This is a <strong>jar mod</strong> — in MultiMC/Prism, right-click your instance → <strong>Edit Instance</strong> → <strong>Version</strong> → <strong>Add to Minecraft.jar</strong> and select the downloaded file. Do <em>not</em> place it in the mods folder.</div>
+    </div>
 
-      <details class="foldout">
-        <summary>Nintendo Switch</summary>
-        <div class="foldout-body">
-          <p>Nintendo Switch does <strong>not</strong> have an "Add Server" button. Use one of these workarounds:</p>
+    <!-- ─── Troubleshooting ─── -->
+    <h2 id="troubleshooting">Troubleshooting</h2>
+    <div class="launcher-section">
+      <h3>Can't connect to the server?</h3>
+      <ul>
+        <li>Make sure you're using version <code>b1.7.3</code> exactly — not 1.7.3 (Release) or b1.7.2.</li>
+        <li>Check that you entered the server address correctly: <code>mc.return2beta.com</code></li>
+        <li>If using a firewall, ensure outgoing connections on port <code>25565</code> are allowed.</li>
+      </ul>
 
-          <h3>Method 1: BedrockConnect (DNS trick)</h3>
-          <ol>
-            <li>Go to System Settings → Internet → Internet Settings</li>
-            <li>Select your WiFi network → Change Settings</li>
-            <li>DNS Settings → Manual:<br>Primary DNS: <code>104.238.130.180</code><br>Secondary DNS: <code>8.8.8.8</code></li>
-            <li>Save</li>
-            <li>Open Minecraft → Play → Servers</li>
-            <li>Click on <strong>any</strong> featured server</li>
-            <li>Enter: <code>mc.return2beta.com</code> port <code>19132</code></li>
-            <li>Click Submit to connect</li>
-          </ol>
-          <div class="note">To revert: set DNS back to Automatic in Internet Settings.</div>
+      <h3>Game crashes on launch?</h3>
+      <ul>
+        <li>Beta 1.7.3 requires <strong>Java 8</strong>. If you have a newer Java version, configure your launcher to use Java 8 specifically. <a href="https://www.java.com/de/download/manual.jsp" target="_blank" rel="noopener noreferrer">Download Java 8 here</a>.</li>
+        <li>Try allocating less RAM (512 MB–1 GB is enough for Beta).</li>
+      </ul>
 
-          <h3>Method 2: Phantom (LAN proxy on PC)</h3>
-          <p>Requires a PC on the same network.</p>
-          <ol>
-            <li>Download <a href="https://github.com/jhead/phantom/releases" target="_blank" rel="noopener noreferrer">Phantom</a></li>
-            <li>Run: <code>phantom -server mc.return2beta.com:19132</code></li>
-            <li>The server appears in the Friends tab as a LAN game</li>
-          </ol>
+      <h3>No sound?</h3>
+      <ul>
+        <li>Beta 1.7.3 uses the old sound system. BetaCraft and LTS Launcher patch this automatically.</li>
+        <li>For MultiMC/Prism, install <strong><a href="https://github.com/betacraftuk/legacyfix" target="_blank" rel="noopener noreferrer">LegacyFix</a></strong> — a mod that fixes sound, skins, and other legacy issues. Add it to your instance's mods folder.</li>
+      </ul>
+    </div>
 
-          <h3>Method 3: BedrockTogether (phone app)</h3>
-          <p>Requires an iOS or Android device on the same WiFi.</p>
-          <ol>
-            <li>Download "BedrockTogether" (free)</li>
-            <li>Enter: <code>mc.return2beta.com</code> port <code>19132</code> → tap Start</li>
-            <li>On Switch: Play → Friends tab → server appears as LAN game</li>
-          </ol>
-        </div>
-      </details>
-
-      <details class="foldout">
-        <summary>Incompatible Platforms</summary>
-        <div class="foldout-body">
-          <p>These platforms run Legacy Console Edition or discontinued versions and <strong>cannot</strong> connect:</p>
-          <ul>
-            <li>PS Vita, PS3, Xbox 360, Wii U — Legacy Console Edition</li>
-            <li>Nintendo 3DS — New Nintendo 3DS Edition</li>
-            <li>Apple TV — Minecraft discontinued</li>
-            <li>Fire TV, Gear VR — Bedrock but discontinued (may work if installed)</li>
-          </ul>
-        </div>
-      </details>
+    <!-- ─── Incompatible Platforms ─── -->
+    <h2 id="incompatible">Incompatible Platforms</h2>
+    <div class="launcher-section">
+      <p>These platforms run Legacy Console Edition or discontinued versions and <strong>cannot</strong> connect:</p>
+      <ul>
+        <li>PS Vita, PS3, Xbox 360, Wii U — Legacy Console Edition</li>
+        <li>Nintendo 3DS — New Nintendo 3DS Edition</li>
+        <li>Apple TV — Minecraft discontinued</li>
+        <li>Fire TV, Gear VR — Bedrock but discontinued (may work if installed)</li>
+      </ul>
     </div>
 
     <p style="text-align:center; margin-top: 32px; color: #888; font-size: clamp(0.6rem, 1vw, 0.8rem);">Need more help? Ask in our <a href="https://discord.gg/vVvs7tN5p7" target="_blank" rel="noopener noreferrer">Discord</a> or use the <a href="/chat/">Chat</a>!</p>
