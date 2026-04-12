@@ -91,6 +91,14 @@
       border: none;
       display: block;
     }
+    /* Nav carousel */
+    .nav-carousel { display: none; width: 100%; align-items: center; justify-content: center; height: 48px; }
+    .nav-caret { background: none; border: none; color: rgba(255,255,255,0.8); font-size: 1.1rem; cursor: pointer; padding: 0 14px; height: 48px; display: flex; align-items: center; flex-shrink: 0; transition: color 0.15s; }
+    .nav-caret:hover { color: #fff; }
+    .nav-caret:disabled { opacity: 0.2; cursor: default; }
+    .nav-carousel-items { display: flex; align-items: center; justify-content: center; gap: 20px; flex: 1; overflow: hidden; }
+    .nav-carousel .nav-link { white-space: nowrap; }
+    .nav-carousel .nav-link.nav-current { color: #55ff55; text-shadow: 0 0 8px rgba(85,255,85,0.4); }
     @media (max-width: 720px) {
       .header-band {
         min-height: 48px;
@@ -106,14 +114,6 @@
       .nav-caret { padding: 0 10px; }
       .nav-carousel-items { gap: 8px; }
     }
-    /* Nav carousel */
-    .nav-carousel { display: none; width: 100%; align-items: center; justify-content: center; height: 48px; }
-    .nav-caret { background: none; border: none; color: rgba(255,255,255,0.8); font-size: 1.1rem; cursor: pointer; padding: 0 14px; height: 48px; display: flex; align-items: center; flex-shrink: 0; transition: color 0.15s; }
-    .nav-caret:hover { color: #fff; }
-    .nav-caret:disabled { opacity: 0.2; cursor: default; }
-    .nav-carousel-items { display: flex; align-items: center; justify-content: center; gap: 20px; flex: 1; overflow: hidden; }
-    .nav-carousel .nav-link { white-space: nowrap; }
-    .nav-carousel .nav-link.nav-current { color: #55ff55; text-shadow: 0 0 8px rgba(85,255,85,0.4); }
   </style>
 </head>
 <body>
