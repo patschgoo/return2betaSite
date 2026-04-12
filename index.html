@@ -586,6 +586,7 @@
     function shuffle(a) { for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
     function esc(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
     function pad(n) { return n < 10 ? '0' + n : '' + n; }
+    var mp = document.getElementById('mapPanel');
     function handle(d) {
       var players = d.players || [];
       var n = players.length;
@@ -593,8 +594,12 @@
       var names = shuffle(players.map(function(p) { return p.account || p.name; }));
       var tooltip = n > 0 ? '<span class="player-tooltip">' + names.map(esc).join(', ') + '</span>' : '';
       set('<span class="status-dot online"></span><span class="count">' + pad(n) + '/' + pad(MAX) + '</span> online' + tooltip);
+      if (mp) mp.style.display = '';
     }
-    function offline() { set('<span class="status-dot offline"></span>Server offline'); }
+    function offline() {
+      set('<span class="status-dot offline"></span>Server offline');
+      if (mp) mp.style.display = 'none';
+    }
     function ok(r) { if (!r.ok) throw new Error(r.status); return r.json(); }
     function update() {
       fetch(DYNMAP_URL).then(ok).then(handle)
