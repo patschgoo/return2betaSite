@@ -339,6 +339,38 @@
       color: #55ff55;
     }
 
+    /* ── Crafting widget ──────────────────────────────────── */
+    .crafting-widget {
+      display: inline-block;
+      margin: 12px 0 16px;
+    }
+    .crafting-bg {
+      position: relative;
+      width: 300px;
+      height: 155px;
+      overflow: hidden;
+      background-image: url('../images/minecraft/crafting_bench.png');
+      background-size: 512px 512px;
+      background-repeat: no-repeat;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+    .craft-item {
+      position: absolute;
+      width: 32px;
+      height: 32px;
+      background-repeat: no-repeat;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+    .crafting-label {
+      font-size: 0.72rem;
+      color: #aaa;
+      text-transform: capitalize;
+      margin: 4px 0 0;
+      text-shadow: 1px 1px 0 rgba(0,0,0,0.8);
+    }
+
     /* ── Responsive ──────────────────────────────────────── */
     /* Nav carousel */
     .nav-carousel { display: none; width: 100%; align-items: center; justify-content: center; height: 48px; }
@@ -408,6 +440,88 @@
 
   <script src="https://cdn.jsdelivr.net/npm/marked@9/marked.min.js"></script>
   <script>
+    // ── Crafting recipe renderer ───────────────────────────
+    (function () {
+      var SCALE  = 2;
+      var SPRITE = 16 * SCALE;   // 32px display size per sprite
+      var SHEET  = 256 * SCALE;  // items.png displayed at 512×512
+
+      // [col, row] in items.png (16×16 sprite grid)
+      // Verified from pixel analysis of the Beta 1.7.3 items.png
+      var ITEM_MAP = {
+        iron_ingot:           [10, 1],
+        string:               [ 8, 1],
+        chainmail_helmet:     [ 1, 0],
+        chainmail_chestplate: [ 1, 1],
+        chainmail_leggings:   [ 1, 2],
+        chainmail_boots:      [ 1, 3],
+      };
+
+      // Slot interior pixel positions in crafting_bench.png (1× = 256px image)
+      // Measured: col c, row r → x = 30 + c*18, y = 17 + r*18  (16px interior + 2px border)
+      // Output slot interior: x=120, y=31, size 24×24px
+      var GRID_X0 = 30 * SCALE;   // 60
+      var GRID_Y0 = 17 * SCALE;   // 34
+      var GRID_S  = 18 * SCALE;   // 36  (step per slot)
+      var OUT_X = 120 * SCALE + (24 * SCALE - SPRITE) / 2;  // centre SPRITE in 48px output slot
+      var OUT_Y =  31 * SCALE + (24 * SCALE - SPRITE) / 2;
+
+      function makeItem(name, left, top) {
+        var div = document.createElement('div');
+        div.className = 'craft-item';
+        div.style.left = left + 'px';
+        div.style.top  = top  + 'px';
+        if (!name || name === '_') return div;
+        var pos = ITEM_MAP[name];
+        if (pos) {
+          div.style.backgroundImage    = "url('../images/minecraft/items.png')";
+          div.style.backgroundSize     = SHEET + 'px ' + SHEET + 'px';
+          div.style.backgroundPosition = (-pos[0] * SPRITE) + 'px ' + (-pos[1] * SPRITE) + 'px';
+        } else {
+          div.style.cssText += 'display:flex;align-items:center;justify-content:center;font-size:8px;color:#f88;';
+          div.textContent = '?';
+        }
+        div.title = name.replace(/_/g, ' ');
+        return div;
+      }
+
+      function buildWidget(grid, result) {
+        var wrap = document.createElement('div');
+        wrap.className = 'crafting-widget';
+        var bg = document.createElement('div');
+        bg.className = 'crafting-bg';
+        for (var i = 0; i < 9; i++) {
+          var c = i % 3, r = Math.floor(i / 3);
+          bg.appendChild(makeItem(grid[i], GRID_X0 + c * GRID_S, GRID_Y0 + r * GRID_S));
+        }
+        bg.appendChild(makeItem(result, OUT_X, OUT_Y));
+        wrap.appendChild(bg);
+        var lbl = document.createElement('p');
+        lbl.className = 'crafting-label';
+        lbl.textContent = result.replace(/_/g, ' ');
+        wrap.appendChild(lbl);
+        return wrap;
+      }
+
+      window.renderCraftingBlocks = function (container) {
+        container.querySelectorAll('pre > code').forEach(function (code) {
+          var m = (code.className || '').match(/language-crafting:(\S+)/);
+          if (!m) return;
+          var result = m[1];
+          var lines  = code.textContent.trim().split('\n').map(function (l) { return l.trim(); });
+          var grid   = [];
+          for (var r = 0; r < 3; r++) {
+            var cells = (lines[r] || '').split(/\s+/);
+            for (var c = 0; c < 3; c++) grid.push(cells[c] || '_');
+          }
+          var pre = code.parentElement;
+          pre.parentNode.insertBefore(buildWidget(grid, result), pre);
+          pre.remove();
+        });
+      };
+    }());
+  </script>
+  <script>
     // ── Plugin list ────────────────────────────────────────
     const PLUGINS = [
       "AcceptRules","AntiNetherRoof","AuthMe","Backup","BetaExtraGen",
@@ -461,6 +575,7 @@
         readme.innerHTML = marked.parse(await res.text());
         var firstH1 = readme.querySelector('h1');
         if (firstH1) firstH1.remove();
+        renderCraftingBlocks(readme);
       } catch {
         readme.innerHTML = '<p class="readme-loading">Could not load server info.</p>';
       }
@@ -481,6 +596,7 @@
         if (!res.ok) throw new Error('HTTP ' + res.status);
         const text = await res.text();
         readme.innerHTML = marked.parse(text);
+        renderCraftingBlocks(readme);
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } catch {
         readme.innerHTML = '<p class="readme-loading">Could not load plugin info.</p>';
