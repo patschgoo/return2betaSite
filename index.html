@@ -595,10 +595,11 @@
       set('<span class="status-dot online"></span><span class="count">' + pad(n) + '/' + pad(MAX) + '</span> online' + tooltip);
     }
     function offline() { set('<span class="status-dot offline"></span>Server offline'); }
+    function ok(r) { if (!r.ok) throw new Error(r.status); return r.json(); }
     function update() {
-      fetch(DYNMAP_URL).then(function(r) { return r.json(); }).then(handle)
+      fetch(DYNMAP_URL).then(ok).then(handle)
         .catch(function() {
-          fetch(PROXY_URL).then(function(r) { return r.json(); }).then(handle)
+          fetch(PROXY_URL).then(ok).then(handle)
             .catch(offline);
         });
     }
