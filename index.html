@@ -595,10 +595,12 @@
       var tooltip = n > 0 ? '<span class="player-tooltip">' + names.map(esc).join(', ') + '</span>' : '';
       set('<span class="status-dot online"></span><span class="count">' + pad(n) + '/' + pad(MAX) + '</span> online' + tooltip);
       if (mp) mp.style.display = '';
+      document.body.classList.remove('map-hidden');
     }
     function offline() {
       set('<span class="status-dot offline"></span>Server offline');
       if (mp) mp.style.display = 'none';
+      document.body.classList.add('map-hidden');
     }
     function ok(r) { if (!r.ok) throw new Error(r.status); return r.json(); }
     function update() {
@@ -643,6 +645,7 @@
     .cw-resize-handle{display:none;position:absolute;top:0;left:0;width:16px;height:16px;cursor:nwse-resize;z-index:12}
     .cw-resize-handle::after{content:'';position:absolute;top:3px;left:3px;width:8px;height:8px;border-top:2px solid rgba(85,255,85,0.5);border-left:2px solid rgba(85,255,85,0.5)}
     @media(min-width:721px){.chat-widget-btn{bottom:320px;right:24px}.chat-widget-panel{bottom:380px;right:24px}.cw-resize-handle{display:block}}
+    @media(min-width:721px){body.map-hidden .chat-widget-btn{bottom:20px}body.map-hidden .chat-widget-panel{bottom:80px}}
     @media(max-width:720px){.chat-widget-btn{bottom:16px;right:16px}.chat-widget-panel{bottom:76px;right:8px;width:290px;height:370px}}
   </style>
   <button class="chat-widget-btn" id="cwToggle" title="Open chat"><img src="images/chat_icon.png" alt="Chat"></button>
