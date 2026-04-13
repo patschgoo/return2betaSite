@@ -509,6 +509,78 @@
     }());
   </script>
 
+  <!-- ── Site-wide high scores via WS ────────────────────── -->
+  <script>
+  var R2BScores = (function () {
+    var WS_URL = 'wss://chat.return2beta.com';
+    var GAMES = ['flappy', 'tetris', 'hatch', 'mine', 'bcrush'];
+    var scores = {};
+    var listeners = [];
+    var ws = null;
+    var ready = false;
+    var reconnectDelay = 2000;
+
+    // Init from localStorage as instant fallback
+    GAMES.forEach(function (g) {
+      scores[g] = parseInt(localStorage.getItem('r2b_' + g + '_site') || '0', 10);
+    });
+
+    function connect() {
+      try { ws = new WebSocket(WS_URL); } catch (e) { return; }
+      ws.onopen = function () {
+        ready = true;
+        reconnectDelay = 2000;
+        ws.send(JSON.stringify({ type: 'get_scores' }));
+      };
+      ws.onmessage = function (e) {
+        var d; try { d = JSON.parse(e.data); } catch (x) { return; }
+        if (d.type === 'scores' && d.scores) {
+          GAMES.forEach(function (g) {
+            if (typeof d.scores[g] === 'number' && d.scores[g] > scores[g]) {
+              scores[g] = d.scores[g];
+              localStorage.setItem('r2b_' + g + '_site', scores[g]);
+            }
+          });
+          fire();
+        }
+        if (d.type === 'score_updated' && d.game && typeof d.score === 'number') {
+          if (d.score > (scores[d.game] || 0)) {
+            scores[d.game] = d.score;
+            localStorage.setItem('r2b_' + d.game + '_site', d.score);
+            fire();
+          }
+        }
+      };
+      ws.onclose = function () {
+        ready = false;
+        setTimeout(connect, reconnectDelay);
+        reconnectDelay = Math.min(reconnectDelay * 2, 30000);
+      };
+      ws.onerror = function () { ws.close(); };
+    }
+
+    function fire() { listeners.forEach(function (fn) { fn(scores); }); }
+
+    function get(game) { return scores[game] || 0; }
+
+    function submit(game, score) {
+      if (score <= (scores[game] || 0)) return;
+      scores[game] = score;
+      localStorage.setItem('r2b_' + game + '_site', score);
+      fire();
+      if (ws && ready) {
+        ws.send(JSON.stringify({ type: 'submit_score', game: game, score: score }));
+      }
+    }
+
+    function onChange(fn) { listeners.push(fn); }
+
+    connect();
+
+    return { get: get, submit: submit, onChange: onChange };
+  })();
+  </script>
+
   <!-- ── Game engine ─────────────────────────────────────── -->
   <script>
   (function () {
@@ -666,11 +738,12 @@
       var pipes = [];
       var gap = 130, pipeW = 48, pipeSpeed = 2, gravity = 0.45, flapForce = -7;
       var score = 0, best = parseInt(localStorage.getItem('r2b_flappy_best') || '0', 10);
-      var siteBest = parseInt(localStorage.getItem('r2b_flappy_site') || '0', 10);
+      var siteBest = R2BScores.get('flappy');
       var state = 'idle';
       var frame = 0;
       var groundY = H - 48;
       var wingFrame = 0;
+      R2BScores.onChange(function (s) { if (s.flappy > siteBest) { siteBest = s.flappy; sbEl.textContent = siteBest; } });
 
       var T = 16;
       var TILE_GRASS_TOP = [0, 0];
@@ -818,7 +891,8 @@
       function die() {
         state = 'dead';
         if (score > best) { best = score; localStorage.setItem('r2b_flappy_best', best); bEl.textContent = best; }
-        if (score > siteBest) { siteBest = score; localStorage.setItem('r2b_flappy_site', siteBest); sbEl.textContent = siteBest; }
+        if (score > siteBest) { siteBest = score; sbEl.textContent = siteBest; }
+        R2BScores.submit('flappy', score);
         hEl.textContent = '';
       }
 
@@ -1055,7 +1129,7 @@
       }
 
       var board = [], score = 0, best = parseInt(localStorage.getItem('r2b_tetris_best') || '0', 10);
-      var siteBest = parseInt(localStorage.getItem('r2b_tetris_site') || '0', 10);
+      var siteBest = R2BScores.get('tetris');
       var current = null, nextPiece = null;
       var dropTimer = 0, dropInterval = 45;
       var state = 'idle';
@@ -1063,6 +1137,7 @@
 
       bEl.textContent = best;
       sbEl.textContent = siteBest;
+      R2BScores.onChange(function (s) { if (s.tetris > siteBest) { siteBest = s.tetris; sbEl.textContent = siteBest; } });
 
       function clearBoard() {
         board = [];
@@ -1149,7 +1224,8 @@
       function die() {
         state = 'dead';
         if (score > best) { best = score; localStorage.setItem('r2b_tetris_best', best); bEl.textContent = best; }
-        if (score > siteBest) { siteBest = score; localStorage.setItem('r2b_tetris_site', siteBest); sbEl.textContent = siteBest; }
+        if (score > siteBest) { siteBest = score; sbEl.textContent = siteBest; }
+        R2BScores.submit('tetris', score);
         hEl.textContent = '';
       }
 
@@ -1381,9 +1457,10 @@
       var W = cvs.width, H = cvs.height;
       var OX = BORDER, OY = BORDER;
       var score = 0, best = parseInt(localStorage.getItem('r2b_hatch_best') || '0', 10);
-      var siteBest = parseInt(localStorage.getItem('r2b_hatch_site') || '0', 10);
+      var siteBest = R2BScores.get('hatch');
       bEl.textContent = best;
       sbEl.textContent = siteBest;
+      R2BScores.onChange(function (s) { if (s.hatch > siteBest) { siteBest = s.hatch; sbEl.textContent = siteBest; } });
 
       var snake, dir, nextDir, egg, state, moveTimer, moveInterval, frame;
 
@@ -1538,7 +1615,8 @@
       function die() {
         state = 'dead';
         if (score > best) { best = score; localStorage.setItem('r2b_hatch_best', best); bEl.textContent = best; }
-        if (score > siteBest) { siteBest = score; localStorage.setItem('r2b_hatch_site', siteBest); sbEl.textContent = siteBest; }
+        if (score > siteBest) { siteBest = score; sbEl.textContent = siteBest; }
+        R2BScores.submit('hatch', score);
         hEl.textContent = '';
       }
 
@@ -1680,9 +1758,10 @@
       var OX = BORDER, OY = BORDER;
 
       var score = 0, best = parseInt(localStorage.getItem('r2b_mine_best') || '0', 10);
-      var siteBest = parseInt(localStorage.getItem('r2b_mine_site') || '0', 10);
+      var siteBest = R2BScores.get('mine');
       bEl.textContent = best;
       sbEl.textContent = siteBest;
+      R2BScores.onChange(function (s) { if (s.mine > siteBest) { siteBest = s.mine; sbEl.textContent = siteBest; } });
 
       var TILE_STONE = [1, 0];
       var TILE_COBBLE = [0, 1];
@@ -1780,7 +1859,8 @@
         if (score >= totalSafe) {
           state = 'won';
           if (score > best) { best = score; localStorage.setItem('r2b_mine_best', best); bEl.textContent = best; }
-          if (score > siteBest) { siteBest = score; localStorage.setItem('r2b_mine_site', siteBest); sbEl.textContent = siteBest; }
+          if (score > siteBest) { siteBest = score; sbEl.textContent = siteBest; }
+          R2BScores.submit('mine', score);
           hEl.textContent = 'You win! Click to play again.';
         }
       }
@@ -1822,7 +1902,8 @@
           }
         }
         if (score > best) { best = score; localStorage.setItem('r2b_mine_best', best); bEl.textContent = best; }
-        if (score > siteBest) { siteBest = score; localStorage.setItem('r2b_mine_site', siteBest); sbEl.textContent = siteBest; }
+        if (score > siteBest) { siteBest = score; sbEl.textContent = siteBest; }
+        R2BScores.submit('mine', score);
         hEl.textContent = '';
         playCreeperHiss();
       }
@@ -2093,9 +2174,10 @@
       var grid, score, combo, state, selected, phase, gaveUp;
       var swapAnim, swapT, clearCells, clearT, fallCells, fallT, frameN;
       var best = +localStorage.getItem('r2b_bcrush_best') || 0;
-      var siteBest = +localStorage.getItem('r2b_bcrush_site') || 0;
+      var siteBest = R2BScores.get('bcrush');
       bEl.textContent = best;
       sbEl.textContent = siteBest;
+      R2BScores.onChange(function (s) { if (s.bcrush > siteBest) { siteBest = s.bcrush; sbEl.textContent = siteBest; } });
 
       function dt(tile, dx, dy, dw, dh, tnt) { drawTileTinted(c, tile, dx, dy, dw, dh, tnt); }
 
@@ -2187,7 +2269,8 @@
       function endGame() {
         state = 'dead';
         if (score > best) { best = score; localStorage.setItem('r2b_bcrush_best', best); bEl.textContent = best; }
-        if (score > siteBest) { siteBest = score; localStorage.setItem('r2b_bcrush_site', siteBest); sbEl.textContent = siteBest; }
+        if (score > siteBest) { siteBest = score; sbEl.textContent = siteBest; }
+        R2BScores.submit('bcrush', score);
       }
 
       function ease(t) { return t < 1 ? t * t * (3 - 2 * t) : 1; }
