@@ -26,8 +26,9 @@ Players can enter dimensions through commands (`/dd join`, `/dd creative`) or by
 - Chat messages from DD players show a purple **[DD]** tag
 
 #### Creative Dimension (CD)
-- You can use **item and building commands** like `/i`, `/give`, `/mc`, `/time`, etc.
-- **Dangerous commands are blocked** — you cannot use server management, permissions, bans, economy, WorldEdit region commands, or other risky commands
+- You can use **item and building commands** like `/i`, `/give`, `/mc`, etc.
+- **Dangerous commands are blocked** — you cannot use server management, permissions, bans, economy, or other risky commands
+- Extra permissions are **automatically granted** when you enter and **revoked** when you leave — including WorldEdit building tools, Essentials navigation (`/back`, `/top`, `/up`, `/jump`), co-building (`/tpa`, `/tpahere`, `/tpaccept`, `/tpdeny`), and utilities (`/getpos`, `/clearinventory`, `/near`, `/me`)
 - Your position and inventory are separate from both the main world and the survival dimension
 - You can enter through `/dd creative` or by right-clicking a **[CD]** portal sign
 - Chat messages from CD players show a yellow **[CD]** tag
@@ -189,6 +190,37 @@ Located at `plugins/DifferentDimension/config.yml`.
 | `chat.main-message-color` | String | *(empty)* | Color for main world player chat text (e.g. `&f`) |
 | `separate-inventories` | Boolean | `true` | Separate inventories between worlds |
 | `whitelisted-commands` | List | `["/dd"]` | Additional commands allowed in the dimension |
+| `creative-dimension.enabled` | Boolean | `true` | Enable or disable the Creative Dimension |
+| `creative-dimension.world-name` | String | `creative_dimension` | Folder name for the creative world |
+| `creative-dimension.separate-inventories` | Boolean | `true` | Separate CD inventory from both main world and DD |
+| `creative-dimension.blacklisted-commands` | List | *(see config)* | Commands blocked in the Creative Dimension |
+| `creative-dimension.granted-permissions` | List | *(see below)* | Permissions granted when entering CD, revoked on leave |
+
+**Default `granted-permissions` list:**
+
+| Permission | What It Enables |
+|---|---|
+| `creativity.all` | Creative mode flight and item spawning (Creativity plugin) |
+| `instabuild.use` | Instant block breaking in creative (Instabuild plugin) |
+| `worldedit.wand` | WorldEdit selection wand (`//wand`) |
+| `worldedit.selection.*` | All WorldEdit selection commands (`//pos1`, `//pos2`, `//expand`, etc.) |
+| `worldedit.region.*` | WorldEdit region operations (`//set`, `//replace`, `//fill`, etc.) |
+| `worldedit.clipboard.*` | WorldEdit clipboard (`//copy`, `//paste`, `//cut`, `//flip`, `//rotate`) |
+| `worldedit.history.*` | WorldEdit undo/redo (`//undo`, `//redo`) |
+| `worldedit.navigation.*` | WorldEdit navigation (`//up`, `//thru`, `//ceil`, etc.) |
+| `worldedit.generation.*` | WorldEdit generation commands (`//sphere`, `//cyl`, `//pyramid`, etc.) |
+| `essentials.back` | `/back` — teleport to previous location |
+| `essentials.top` | `/top` — teleport to the top of the current column |
+| `essentials.up` | `/up` — teleport up a set number of blocks |
+| `essentials.jump` | `/jump` — teleport to where you're looking |
+| `essentials.tpa` | `/tpa` — request to teleport to a player |
+| `essentials.tpahere` | `/tpahere` — request a player teleport to you |
+| `essentials.tpaccept` | `/tpaccept` — accept a teleport request |
+| `essentials.tpdeny` | `/tpdeny` — deny a teleport request |
+| `essentials.getpos` | `/getpos` — display your exact coordinates |
+| `essentials.clearinventory` | `/clearinventory` — clear your own inventory |
+| `essentials.near` | `/near` — list nearby players |
+| `essentials.me` | `/me` — action message |
 
 ---
 
