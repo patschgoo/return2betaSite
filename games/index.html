@@ -150,16 +150,16 @@
     }
     /* Scale up on desktop / iPad */
     @media (min-width: 721px) {
-      .game-container {
+      .game-container.scaled-canvas {
         transform: scale(1.45);
         transform-origin: top center;
-        margin-bottom: 160px;
+        margin-bottom: 200px;
       }
     }
     @media (min-width: 721px) and (max-width: 1024px) {
-      .game-container {
+      .game-container.scaled-canvas {
         transform: scale(1.25);
-        margin-bottom: 100px;
+        margin-bottom: 130px;
       }
     }
     .game-hint {
@@ -211,6 +211,20 @@
     }
     .version-switcher .version-label {
       color: #ffdd55;
+    }
+    .mineblocks-link {
+      display: none;
+      margin-top: 10px;
+      font-size: clamp(0.55rem, 0.9vw, 0.7rem);
+    }
+    .mineblocks-link a {
+      color: #55ff55;
+      text-decoration: none;
+      text-shadow: 1px 1px 0 rgba(0,0,0,0.8);
+    }
+    .mineblocks-link a:hover {
+      text-decoration: underline;
+      color: #aaff88;
     }
     .nav-carousel { display: none; width: 100%; align-items: center; justify-content: center; height: 48px; }
     .nav-caret { background: none; border: none; color: rgba(255,255,255,0.8); font-size: 1.1rem; cursor: pointer; padding: 0 14px; height: 48px; display: flex; align-items: center; flex-shrink: 0; transition: color 0.15s; }
@@ -273,9 +287,10 @@
     </div>
     <div class="version-switcher" id="versionSwitcher">
       <button class="version-arrow" id="versionPrev" title="Previous version">&#9664;</button>
-      <span class="version-label" id="versionLabel">Version 11.7</span>
+      <span class="version-label" id="versionLabel">Mine Blocks</span>
       <button class="version-arrow" id="versionNext" title="Next version">&#9654;</button>
     </div>
+    <div class="mineblocks-link" id="mineblocksLink"><a href="https://mineblocks.com/" target="_blank" rel="noopener noreferrer">mineblocks.com</a></div>
   </main>
 
   <script>
@@ -361,7 +376,7 @@
     var prevBtn = document.getElementById('gamePrev');
     var nextBtn = document.getElementById('gameNext');
 
-    var games = ['Flappy Chicken', 'Blocktris', 'Mineblocks'];
+    var games = ['Flappy Chicken', 'Blocktris', 'Mine Blocks'];
     var currentGame = 0;
     var activeGame = null;
     var animId = null;
@@ -372,9 +387,12 @@
     var versionPrevBtn = document.getElementById('versionPrev');
     var versionNextBtn = document.getElementById('versionNext');
 
+    var mineblocksLink = document.getElementById('mineblocksLink');
+    var gameContainer = document.getElementById('gameContainer');
+
     var mineblocksVersions = [
-      { label: 'Mineblocks', url: 'https://mineblocks.com/1/embed' },
-      { label: 'Mineblocks 2', url: 'https://zanzlanz.com/Games/embed/MineBlocks2' }
+      { label: 'Mine Blocks', url: 'https://mineblocks.com/1/embed', w: 552, h: 414 },
+      { label: 'Mine Blocks 2', url: 'https://zanzlanz.com/Games/embed/MineBlocks2', w: 552, h: 414 }
     ];
     var currentMineblocksVersion = 0;
 
@@ -429,21 +447,27 @@
       scoresEl.style.display = '';
       hintEl.style.display = '';
       versionSwitcherEl.style.display = 'none';
+      mineblocksLink.style.display = 'none';
+      gameContainer.classList.add('scaled-canvas');
 
       if (idx === 0) {
         activeGame = flappyBird(canvas, ctx, scoreEl, bestEl, siteBestEl, hintEl, function (id) { animId = id; });
       } else if (idx === 1) {
         activeGame = tetris(canvas, ctx, scoreEl, bestEl, siteBestEl, hintEl, function (id) { animId = id; });
       } else if (idx === 2) {
-        // Mineblocks — embed
+        // Mine Blocks — embed
         canvas.style.display = 'none';
         scoresEl.style.display = 'none';
         hintEl.style.display = 'none';
         versionSwitcherEl.style.display = 'flex';
+        mineblocksLink.style.display = 'block';
+        gameContainer.classList.remove('scaled-canvas');
         iframeEl.style.display = 'block';
-        iframeEl.width = 552;
-        iframeEl.height = 414;
-        iframeEl.src = mineblocksVersions[currentMineblocksVersion].url;
+        var ver = mineblocksVersions[currentMineblocksVersion];
+        iframeEl.width = ver.w;
+        iframeEl.height = ver.h;
+        iframeEl.src = ver.url;
+        versionLabelEl.textContent = ver.label;
       }
     }
 
@@ -454,18 +478,23 @@
       startGame((currentGame + 1) % games.length);
     });
 
-    // Version switcher for Mineblocks
+    // Version switcher for Mine Blocks
+    function loadMineblocksVersion() {
+      var ver = mineblocksVersions[currentMineblocksVersion];
+      iframeEl.width = ver.w;
+      iframeEl.height = ver.h;
+      iframeEl.src = ver.url;
+      versionLabelEl.textContent = ver.label;
+    }
     versionPrevBtn.addEventListener('click', function () {
       if (currentGame !== 2) return;
       currentMineblocksVersion = (currentMineblocksVersion - 1 + mineblocksVersions.length) % mineblocksVersions.length;
-      iframeEl.src = mineblocksVersions[currentMineblocksVersion].url;
-      versionLabelEl.textContent = mineblocksVersions[currentMineblocksVersion].label;
+      loadMineblocksVersion();
     });
     versionNextBtn.addEventListener('click', function () {
       if (currentGame !== 2) return;
       currentMineblocksVersion = (currentMineblocksVersion + 1) % mineblocksVersions.length;
-      iframeEl.src = mineblocksVersions[currentMineblocksVersion].url;
-      versionLabelEl.textContent = mineblocksVersions[currentMineblocksVersion].label;
+      loadMineblocksVersion();
     });
 
     /* ================================================================
