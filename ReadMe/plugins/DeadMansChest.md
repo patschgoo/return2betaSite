@@ -8,7 +8,7 @@ Members have access to death chests. When you die, your items are placed in a ch
 
 ## Features
 - A **chest spawns automatically** at your death location with all your dropped items inside.
-- A **sign is placed on the chest** showing your name and death info.
+- A **sign is placed on the chest** showing your rank and name on separate lines, followed by "Deathpile".
 - A **death message** is broadcast: *"[player] died. Deploying death chest."*
 - Death chests are **automatically removed after 150 seconds** (2.5 minutes), dropping the remaining items on the ground.
 - If you die in liquid (water/lava), the chest replaces the liquid so your items don't burn or float away.
