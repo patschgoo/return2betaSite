@@ -104,7 +104,9 @@
       display: block;
     }
     .nav-dropdown-menu .dropdown-link {
-      display: block;
+      display: flex;
+      align-items: center;
+      gap: 8px;
       padding: 6px 16px;
       color: #ccc;
       text-decoration: none;
@@ -112,6 +114,12 @@
       font-family: 'Minecraft', sans-serif;
       text-shadow: 1px 1px 0 rgba(0,0,0,0.7);
       white-space: nowrap;
+    }
+    .nav-dropdown-menu .dropdown-link img {
+      width: 18px;
+      height: 18px;
+      object-fit: contain;
+      image-rendering: pixelated;
     }
     .nav-dropdown-menu .dropdown-link:hover {
       background: rgba(85,255,85,0.1);
@@ -337,9 +345,10 @@
     <div class="nav-dropdown" id="gamesDropdown">
       <a class="nav-link" href="/games/"><img src="../images/game_icon.png" alt="Games icon" />Games</a>
       <div class="nav-dropdown-menu">
-        <a class="dropdown-link" href="/games/?game=0">Flappy Chicken</a>
-        <a class="dropdown-link" href="/games/?game=1">Blocktris</a>
-        <a class="dropdown-link" href="/games/?game=2">Mine Blocks</a>
+        <a class="dropdown-link" href="/games/?game=0"><img src="../images/Game%20Links/flappy-chicken.png" alt="" />Flappy Chicken</a>
+        <a class="dropdown-link" href="/games/?game=1"><img src="../images/Game%20Links/blocktris.png" alt="" />Blocktris</a>
+        <a class="dropdown-link" href="/games/?game=2"><img src="../images/Game%20Links/mine-blocks.png" alt="" />Mine Blocks</a>
+        <a class="dropdown-link" href="/games/?game=3"><img src="../images/Game%20Links/mine-blocks-2.png" alt="" />Mine Blocks 2</a>
         <hr />
         <a class="dropdown-more" href="/games/more-links/">More Links &#8250;</a>
       </div>
@@ -1249,7 +1258,11 @@
     // Start with game from URL param or default to Flappy Chicken
     var urlParams = new URLSearchParams(window.location.search);
     var gameParam = parseInt(urlParams.get('game'), 10);
-    if (gameParam >= 0 && gameParam < games.length) {
+    if (gameParam === 3) {
+      // Mine Blocks 2 → open Mine Blocks with version 2 pre-selected
+      currentMineblocksVersion = 1;
+      startGame(2);
+    } else if (gameParam >= 0 && gameParam < games.length) {
       startGame(gameParam);
     } else {
       startGame(0);
