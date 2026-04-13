@@ -361,7 +361,7 @@
     var prevBtn = document.getElementById('gamePrev');
     var nextBtn = document.getElementById('gameNext');
 
-    var games = ['Flappy Chicken', 'Blocktris', 'Paper Minecraft'];
+    var games = ['Flappy Chicken', 'Blocktris', 'Mineblocks'];
     var currentGame = 0;
     var activeGame = null;
     var animId = null;
@@ -372,11 +372,11 @@
     var versionPrevBtn = document.getElementById('versionPrev');
     var versionNextBtn = document.getElementById('versionNext');
 
-    var paperVersions = [
-      { label: 'Version 11.7', url: 'https://scratch.mit.edu/projects/10128407/embed' },
-      { label: 'Version 1.21', url: 'https://albertcancode.itch.io/paper-minecraft-121-update/embed' }
+    var mineblocksVersions = [
+      { label: 'Mineblocks', url: 'https://mineblocks.com/1/embed' },
+      { label: 'Mineblocks 2', url: 'https://zanzlanz.com/Games/embed/MineBlocks2' }
     ];
-    var currentPaperVersion = 0;
+    var currentMineblocksVersion = 0;
 
     // Load Minecraft terrain spritesheet
     var terrainImg = new Image();
@@ -428,20 +428,22 @@
       canvas.style.display = 'block';
       scoresEl.style.display = '';
       hintEl.style.display = '';
+      versionSwitcherEl.style.display = 'none';
 
       if (idx === 0) {
         activeGame = flappyBird(canvas, ctx, scoreEl, bestEl, siteBestEl, hintEl, function (id) { animId = id; });
       } else if (idx === 1) {
         activeGame = tetris(canvas, ctx, scoreEl, bestEl, siteBestEl, hintEl, function (id) { animId = id; });
       } else if (idx === 2) {
-        // Paper Minecraft — Scratch embed
+        // Mineblocks — embed
         canvas.style.display = 'none';
         scoresEl.style.display = 'none';
         hintEl.style.display = 'none';
+        versionSwitcherEl.style.display = 'flex';
         iframeEl.style.display = 'block';
-        iframeEl.width = 480;
-        iframeEl.height = 360;
-        iframeEl.src = 'https://scratch.mit.edu/projects/10128407/embed';
+        iframeEl.width = 552;
+        iframeEl.height = 414;
+        iframeEl.src = mineblocksVersions[currentMineblocksVersion].url;
       }
     }
 
@@ -452,18 +454,18 @@
       startGame((currentGame + 1) % games.length);
     });
 
-    // Version switcher for Paper Minecraft
+    // Version switcher for Mineblocks
     versionPrevBtn.addEventListener('click', function () {
       if (currentGame !== 2) return;
-      currentPaperVersion = (currentPaperVersion - 1 + paperVersions.length) % paperVersions.length;
-      iframeEl.src = paperVersions[currentPaperVersion].url;
-      versionLabelEl.textContent = paperVersions[currentPaperVersion].label;
+      currentMineblocksVersion = (currentMineblocksVersion - 1 + mineblocksVersions.length) % mineblocksVersions.length;
+      iframeEl.src = mineblocksVersions[currentMineblocksVersion].url;
+      versionLabelEl.textContent = mineblocksVersions[currentMineblocksVersion].label;
     });
     versionNextBtn.addEventListener('click', function () {
       if (currentGame !== 2) return;
-      currentPaperVersion = (currentPaperVersion + 1) % paperVersions.length;
-      iframeEl.src = paperVersions[currentPaperVersion].url;
-      versionLabelEl.textContent = paperVersions[currentPaperVersion].label;
+      currentMineblocksVersion = (currentMineblocksVersion + 1) % mineblocksVersions.length;
+      iframeEl.src = mineblocksVersions[currentMineblocksVersion].url;
+      versionLabelEl.textContent = mineblocksVersions[currentMineblocksVersion].label;
     });
 
     /* ================================================================
