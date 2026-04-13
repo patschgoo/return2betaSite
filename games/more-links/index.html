@@ -84,7 +84,8 @@
     .nav-dropdown { position: relative; }
     .nav-dropdown-menu { display: none; position: absolute; top: 48px; left: 50%; transform: translateX(-50%); background: rgba(10,16,10,0.96); border: 2px solid rgba(85,255,85,0.3); border-radius: 4px; padding: 8px 0; min-width: 180px; z-index: 100; box-shadow: 0 6px 20px rgba(0,0,0,0.7); }
     .nav-dropdown:hover .nav-dropdown-menu, .nav-dropdown.open .nav-dropdown-menu { display: block; }
-    .nav-dropdown-menu .dropdown-link { display: block; padding: 6px 16px; color: #ccc; text-decoration: none; font-size: 0.75rem; font-family: 'Minecraft', sans-serif; text-shadow: 1px 1px 0 rgba(0,0,0,0.7); white-space: nowrap; }
+    .nav-dropdown-menu .dropdown-link { display: flex; align-items: center; gap: 8px; padding: 6px 16px; color: #ccc; text-decoration: none; font-size: 0.75rem; font-family: 'Minecraft', sans-serif; text-shadow: 1px 1px 0 rgba(0,0,0,0.7); white-space: nowrap; }
+    .nav-dropdown-menu .dropdown-link img { width: 18px; height: 18px; object-fit: contain; image-rendering: pixelated; }
     .nav-dropdown-menu .dropdown-link:hover { background: rgba(85,255,85,0.1); color: #fff; }
     .nav-dropdown-menu hr { border: none; border-top: 1px solid rgba(85,255,85,0.12); margin: 4px 10px; }
     .nav-dropdown-menu .dropdown-more { display: block; padding: 6px 16px; color: #55ff55; text-decoration: none; font-size: 0.7rem; font-family: 'Minecraft', sans-serif; text-shadow: 1px 1px 0 rgba(0,0,0,0.7); white-space: nowrap; }
@@ -178,6 +179,13 @@
       border-color: rgba(85,255,85,0.5);
       background: rgba(14,24,14,0.9);
     }
+    .link-card-img {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      object-fit: cover;
+      display: block;
+      image-rendering: auto;
+    }
     .link-card-body {
       padding: 12px 14px;
     }
@@ -212,9 +220,10 @@
     <div class="nav-dropdown" id="gamesDropdown">
       <a class="nav-link" href="/games/"><img src="../../images/game_icon.png" alt="Games icon" />Games</a>
       <div class="nav-dropdown-menu">
-        <a class="dropdown-link" href="/games/?game=0">Flappy Chicken</a>
-        <a class="dropdown-link" href="/games/?game=1">Blocktris</a>
-        <a class="dropdown-link" href="/games/?game=2">Mine Blocks</a>
+        <a class="dropdown-link" href="/games/?game=0"><img src="../../images/Game%20Links/flappy-chicken.png" alt="" />Flappy Chicken</a>
+        <a class="dropdown-link" href="/games/?game=1"><img src="../../images/Game%20Links/blocktris.png" alt="" />Blocktris</a>
+        <a class="dropdown-link" href="/games/?game=2"><img src="../../images/Game%20Links/mine-blocks.png" alt="" />Mine Blocks</a>
+        <a class="dropdown-link" href="/games/?game=3"><img src="../../images/Game%20Links/mine-blocks-2.png" alt="" />Mine Blocks 2</a>
         <hr />
         <a class="dropdown-more" href="/games/more-links/">More Links &#8250;</a>
       </div>
@@ -237,6 +246,7 @@
     <h2 class="section-heading">Website Games</h2>
     <div class="link-grid">
       <a class="link-card" href="https://mine-craft.io/" target="_blank" rel="noopener noreferrer">
+        <img class="link-card-img" src="../../images/Game%20Links/Website%20Games/mine-craft-io.jpg" alt="mine-craft.io screenshot" />
         <div class="link-card-body">
           <div class="link-card-title">mine-craft.io</div>
           <div class="link-card-desc">A free multiplayer Minecraft-style voxel game that runs in the browser. Build, mine, and survive with other players online.</div>
@@ -244,6 +254,7 @@
         </div>
       </a>
       <a class="link-card" href="https://classic.minecraft.net/" target="_blank" rel="noopener noreferrer">
+        <img class="link-card-img" src="../../images/Game%20Links/Website%20Games/minecraft-classic.jpg" alt="Minecraft Classic screenshot" />
         <div class="link-card-body">
           <div class="link-card-title">Minecraft Classic</div>
           <div class="link-card-desc">The official Minecraft Classic creative mode, free in your browser. Place and break blocks in a shared world — just like the 2009 original.</div>
@@ -255,6 +266,7 @@
     <h2 class="section-heading">Downloadable Games</h2>
     <div class="link-grid">
       <a class="link-card" href="https://creative-alchemy.itch.io/creactris" target="_blank" rel="noopener noreferrer">
+        <img class="link-card-img" src="../../images/Game%20Links/Downloadable%20Games/c-reactris.gif" alt="C::Reactris preview" />
         <div class="link-card-body">
           <div class="link-card-title">C::Reactris</div>
           <div class="link-card-desc">A Tetris-style puzzle game with a creative twist. Stack and clear blocks in this polished indie title.</div>
@@ -262,6 +274,7 @@
         </div>
       </a>
       <a class="link-card" href="https://tonoisern.itch.io/mine-souls-3" target="_blank" rel="noopener noreferrer">
+        <img class="link-card-img" src="../../images/Game%20Links/Downloadable%20Games/mine-souls-3.png" alt="Mine Souls 3 preview" />
         <div class="link-card-body">
           <div class="link-card-title">Mine Souls 3</div>
           <div class="link-card-desc">A Dark Souls-inspired action game set in a Minecraft-style world. Fight challenging bosses with blocky weapons and armour.</div>
