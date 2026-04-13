@@ -1,0 +1,623 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Worlds – Return2Beta</title>
+  <link rel="icon" type="image/png" href="../images/icon.png" />
+  <style>
+    @font-face {
+      font-family: 'Minecraft';
+      src: url('https://cdn.jsdelivr.net/gh/IdreesInc/Minecraft-Font@main/Minecraft.otf') format('opentype');
+      font-weight: normal;
+      font-style: normal;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; }
+
+    body {
+      min-height: 100vh;
+      padding-top: 48px;
+      font-family: 'Minecraft', sans-serif;
+      background-image: url("../images/background.png");
+      background-repeat: repeat;
+      background-size: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header-band {
+      min-height: 48px;
+      width: 100%;
+      background-image: url("../images/header.png");
+      background-repeat: repeat-x;
+      background-position: top left;
+      background-size: auto 48px;
+      flex-shrink: 0;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0 48px;
+      padding: 0 48px;
+      position: fixed;
+      top: 0;
+      z-index: 10;
+    }
+    .header-band::after {
+      content: '';
+      position: absolute;
+      top: 48px;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image: url("../images/header.png");
+      background-repeat: repeat-x;
+      background-size: auto 48px;
+      transform: scaleY(-1);
+      z-index: 0;
+      pointer-events: none;
+    }
+    .header-band > * { position: relative; z-index: 1; }
+    .header-band.wrapped .howto-link { flex-direction: row-reverse; }
+    .howto-text { font-size: 0.65rem; font-weight: 600; line-height: 1.1; text-align: right; max-width: 80px; }
+    .howto-link { flex-direction: row-reverse; }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      height: 48px;
+      text-decoration: none;
+      color: #fff;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+    }
+    .nav-link img { height: 32px; width: 32px; object-fit: contain; }
+    .nav-spacer { flex: 1; }
+
+    .nav-carousel { display: none; width: 100%; align-items: center; justify-content: center; height: 48px; }
+    .nav-caret { background: none; border: none; color: rgba(255,255,255,0.8); font-size: 1.1rem; cursor: pointer; padding: 0 14px; height: 48px; display: flex; align-items: center; flex-shrink: 0; transition: color 0.15s; }
+    .nav-caret:hover { color: #fff; }
+    .nav-caret:disabled { opacity: 0.2; cursor: default; }
+    .nav-carousel-items { display: flex; align-items: center; justify-content: center; gap: 20px; flex: 1; overflow: hidden; }
+    .nav-carousel .nav-link { white-space: nowrap; }
+    .nav-carousel .nav-link.nav-current { color: #c8e8c8; text-shadow: 0 0 6px rgba(255,255,255,0.2); }
+    .header-band > .nav-link.nav-current,
+    .header-band > .nav-dropdown > .nav-link.nav-current { color: #c8e8c8; text-shadow: 0 0 6px rgba(255,255,255,0.2); }
+    .nav-carousel .howto-link { white-space: normal; }
+
+    .nav-dropdown { position: relative; }
+    .nav-dropdown-menu { display: none; position: absolute; top: 48px; left: 50%; transform: translateX(-50%); background: rgba(10,16,10,0.96); border: 2px solid rgba(85,255,85,0.3); border-radius: 4px; padding: 8px 0; min-width: 180px; z-index: 100; box-shadow: 0 6px 20px rgba(0,0,0,0.7); }
+    .nav-dropdown:hover .nav-dropdown-menu, .nav-dropdown.open .nav-dropdown-menu { display: block; }
+    .nav-dropdown-menu .dropdown-link { display: flex; align-items: center; gap: 8px; padding: 6px 16px; color: #ccc; text-decoration: none; font-size: 0.75rem; font-family: 'Minecraft', sans-serif; text-shadow: 1px 1px 0 rgba(0,0,0,0.7); white-space: nowrap; }
+    .nav-dropdown-menu .dropdown-link img { width: 18px; height: 18px; object-fit: contain; image-rendering: pixelated; }
+    .nav-dropdown-menu .dropdown-link:hover { background: rgba(85,255,85,0.1); color: #fff; }
+    .nav-dropdown-menu hr { border: none; border-top: 1px solid rgba(85,255,85,0.12); margin: 4px 10px; }
+    .nav-dropdown-menu .dropdown-more { display: block; padding: 6px 16px; color: #55ff55; text-decoration: none; font-size: 0.7rem; font-family: 'Minecraft', sans-serif; text-shadow: 1px 1px 0 rgba(0,0,0,0.7); white-space: nowrap; }
+    .nav-dropdown-menu .dropdown-more:hover { background: rgba(85,255,85,0.1); color: #aaff88; }
+
+    @media (max-width: 720px) {
+      .header-band { min-height: 48px; gap: 0 24px; padding: 0 16px; }
+      .nav-link { font-size: 0.8rem; }
+      .nav-link img { height: 28px; width: 28px; }
+      .howto-text { font-size: 0.5rem; max-width: 60px; line-height: 1.15; text-align: right; }
+      .header-band > .nav-link,
+      .header-band > .nav-dropdown,
+      .header-band > .nav-spacer { display: none; }
+      .nav-carousel { display: flex; }
+      .nav-caret { padding: 0 10px; }
+      .nav-carousel-items { gap: 8px; }
+      .nav-dropdown.open { display: block !important; position: fixed; top: 48px; left: 0; right: 0; z-index: 100; }
+      .nav-dropdown.open > .nav-link { display: none !important; }
+      .nav-dropdown.open .nav-dropdown-menu { position: static; transform: none; width: 100%; border-radius: 0; border-left: none; border-right: none; }
+    }
+
+    /* Page content */
+    .content {
+      flex: 1;
+      padding: 18px 24px 24px;
+      max-width: 960px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .page-title {
+      color: #55ff55;
+      font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+      text-align: center;
+      margin: 16px 0 6px;
+      text-shadow: 3px 3px 0 rgba(0,0,0,0.7);
+    }
+
+    .page-subtitle {
+      color: #aaa;
+      font-size: 0.68rem;
+      text-align: center;
+      margin: 0 0 20px;
+      text-shadow: 1px 1px 0 rgba(0,0,0,0.7);
+    }
+
+    /* Tabs */
+    .world-tabs {
+      display: flex;
+      justify-content: center;
+      gap: 4px;
+      margin-bottom: 20px;
+    }
+
+    .world-tab {
+      padding: 10px 22px;
+      background: rgba(0,0,0,0.45);
+      border: 2px solid rgba(85,255,85,0.15);
+      border-bottom: none;
+      border-radius: 6px 6px 0 0;
+      color: #888;
+      font-family: 'Minecraft', sans-serif;
+      font-size: 0.72rem;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+      text-shadow: 1px 1px 0 rgba(0,0,0,0.7);
+    }
+
+    .world-tab:hover {
+      color: #ccc;
+      background: rgba(0,0,0,0.55);
+    }
+
+    .world-tab.active {
+      background: rgba(0,0,0,0.65);
+      border-color: rgba(85,255,85,0.35);
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .world-tab[data-world="server"].active { color: #55ff55; }
+    .world-tab[data-world="creative"].active { color: #ffdd55; }
+    .world-tab[data-world="survival"].active { color: #dd5555; }
+
+    @media (max-width: 720px) {
+      .world-tab { padding: 8px 14px; font-size: 0.62rem; }
+    }
+
+    /* Panels */
+    .world-panel {
+      display: none;
+      background: rgba(0,0,0,0.55);
+      border: 2px solid rgba(85,255,85,0.25);
+      border-radius: 0 0 8px 8px;
+      padding: 24px 28px;
+      color: #d8d8d8;
+      font-size: 0.72rem;
+      line-height: 1.8;
+      text-shadow: 1px 1px 0 rgba(0,0,0,0.7);
+    }
+
+    .world-panel.active { display: block; }
+
+    .world-panel h2 {
+      margin: 0 0 6px;
+      font-size: 1rem;
+      text-shadow: 2px 2px 0 rgba(0,0,0,0.7);
+    }
+
+    .world-panel .world-tagline {
+      color: #aaa;
+      font-size: 0.65rem;
+      margin: 0 0 18px;
+      font-style: italic;
+    }
+
+    .world-panel h3 {
+      color: #55ff55;
+      font-size: 0.8rem;
+      margin: 22px 0 8px;
+      text-shadow: 2px 2px 0 rgba(0,0,0,0.7);
+      border-bottom: 1px solid rgba(85,255,85,0.18);
+      padding-bottom: 4px;
+    }
+
+    .world-panel h3:first-of-type { margin-top: 0; }
+
+    .world-panel ul {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .world-panel ul li {
+      padding: 2px 0;
+    }
+
+    .world-panel ul li::before {
+      content: '\25B8 ';
+      color: #55ff55;
+    }
+
+    .world-panel .cmd {
+      display: inline-block;
+      background: rgba(0,0,0,0.4);
+      border: 1px solid rgba(255,170,0,0.3);
+      border-radius: 3px;
+      padding: 1px 7px;
+      color: #ffaa00;
+      font-size: 0.68rem;
+    }
+
+    .world-panel .note {
+      color: #888;
+      font-size: 0.62rem;
+      margin-top: 14px;
+      font-style: italic;
+    }
+
+    .cmd-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 8px 0 4px;
+      font-size: 0.65rem;
+    }
+
+    .cmd-table th {
+      text-align: left;
+      color: #55ff55;
+      border-bottom: 1px solid rgba(85,255,85,0.25);
+      padding: 4px 8px;
+      font-weight: normal;
+    }
+
+    .cmd-table td {
+      padding: 4px 8px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      color: #ccc;
+    }
+
+    .cmd-table td:first-child { color: #ffaa00; white-space: nowrap; }
+
+    .back-link {
+      display: block;
+      text-align: center;
+      margin-top: 24px;
+      color: #55ff55;
+      font-size: 0.65rem;
+      text-decoration: none;
+    }
+    .back-link:hover { color: #aaff88; text-decoration: underline; }
+
+    @media (max-width: 720px) {
+      .content { padding: 12px 14px 20px; }
+      .world-panel { padding: 16px 14px; font-size: 0.65rem; }
+      .cmd-table { font-size: 0.58rem; }
+    }
+  </style>
+</head>
+<body>
+  <header class="header-band" aria-label="Header">
+    <a class="nav-link" href="/"><img src="../images/home_icon.png" alt="Home icon" />Home</a>
+    <a class="nav-link" href="/map/"><img src="../images/map_icon.webp" alt="Map icon" />Map</a>
+    <a class="nav-link" href="/plugins/"><img src="../images/plugins_icon.png" alt="Plugins icon" />Plugins</a>
+    <a class="nav-link" href="/wiki/"><img src="../images/wiki_icon.png" alt="Wiki icon" />Wiki</a>
+    <a class="nav-link" href="/chat/"><img src="../images/chat_icon.png" alt="Chat icon" />Chat</a>
+    <a class="nav-link" href="https://discord.gg/vVvs7tN5p7" target="_blank" rel="noopener noreferrer"><img src="../images/discord_icon.png" alt="Discord icon" />Discord</a>
+    <div class="nav-spacer"></div>
+    <a class="nav-link" href="https://eaglercraft.com/play/?version=b1.7.3" target="_blank" rel="noopener noreferrer" title="Eaglercraft"><img src="../images/eaglercraft-icon.png" alt="Eaglercraft" /></a>
+    <div class="nav-dropdown" id="gamesDropdown">
+      <a class="nav-link" href="/games/"><img src="../images/game_icon.png" alt="Games icon" />Games</a>
+      <div class="nav-dropdown-menu">
+        <a class="dropdown-link" href="/games/?game=0"><img src="../images/Game%20Links/flappy-chicken.png" alt="" />Flappy Chicken</a>
+        <a class="dropdown-link" href="/games/?game=1"><img src="../images/Game%20Links/blocktris.png" alt="" />Blocktris</a>
+        <a class="dropdown-link" href="/games/?game=2"><img src="../images/Game%20Links/hatch-snake.webp" alt="" />Hatch (Snake)</a>
+        <a class="dropdown-link" href="/games/?game=3"><img src="../images/Game%20Links/minecreeper.png" alt="" />Minecreeper</a>
+        <a class="dropdown-link" href="/games/?game=4"><img src="../images/Game%20Links/block-crush.png" alt="" />Block Crush</a>
+        <a class="dropdown-link" href="/games/?game=5"><img src="../images/Game%20Links/mine-blocks.png" alt="" />Mine Blocks</a>
+        <a class="dropdown-link" href="/games/?game=6"><img src="../images/Game%20Links/mine-blocks-2.png" alt="" />Mine Blocks 2</a>
+        <hr />
+        <a class="dropdown-more" href="/games/more-links/">More Links &#8250;</a>
+      </div>
+    </div>
+    <a class="nav-link howto-link" href="/how-to/"><span class="howto-text">How to Join &amp; more</span><img src="../images/how-to_icon.gif" alt="How to icon" /></a>
+    <div class="nav-carousel" id="navCarousel">
+      <button class="nav-caret" id="navPrev" aria-label="Previous pages">&#9664;</button>
+      <div class="nav-carousel-items" id="navCarouselItems"></div>
+      <button class="nav-caret" id="navNext" aria-label="Next pages">&#9654;</button>
+    </div>
+  </header>
+
+  <main class="content">
+    <h1 class="page-title">Server Worlds</h1>
+    <p class="page-subtitle">Three worlds, one server &mdash; pick your play style</p>
+
+    <div class="world-tabs">
+      <button class="world-tab active" data-world="server" onclick="switchWorld('server')">Server World</button>
+      <button class="world-tab" data-world="creative" onclick="switchWorld('creative')">Creative World</button>
+      <button class="world-tab" data-world="survival" onclick="switchWorld('survival')">Survival World</button>
+    </div>
+
+    <!-- Server World -->
+    <div class="world-panel active" id="panel-server">
+      <h2 style="color:#55ff55">Server World</h2>
+      <p class="world-tagline">The full Return2Beta experience &mdash; all plugins, all features</p>
+
+      <h3>Overview</h3>
+      <p>The Server World is the main world and default spawn. This is where everything happens: economy, land protection, warps, homes, chat features, and every quality-of-life enhancement the server offers. All plugins are active and all commands are available.</p>
+
+      <h3>What&rsquo;s Available</h3>
+      <ul>
+        <li>Full <strong style="color:#ffaa00">economy</strong> &mdash; earn and spend with iConomy, shops via Showcase</li>
+        <li><strong style="color:#ffaa00">Land protection</strong> &mdash; protect your builds with PreciousStones and LWC chests</li>
+        <li><strong style="color:#ffaa00">Homes &amp; warps</strong> &mdash; set homes, create warps, teleport to players</li>
+        <li><strong style="color:#ffaa00">Chat features</strong> &mdash; colored chat, Discord bridge, web chat</li>
+        <li><strong style="color:#ffaa00">Quality-of-life plugins</strong> &mdash; Timber, Stackable, InventorySort, Pickup, and more</li>
+        <li><strong style="color:#ffaa00">Quests &amp; clans</strong> &mdash; QuestPlus objectives and SimpleClans groups</li>
+        <li><strong style="color:#ffaa00">Redstone &amp; rails</strong> &mdash; WirelessRedstone, FalseBook, TrainCarts</li>
+        <li><strong style="color:#ffaa00">Live map</strong> &mdash; Dynmap with mob tracking</li>
+        <li><strong style="color:#ffaa00">Voting rewards</strong> &mdash; Vote plugin + RankUp system</li>
+      </ul>
+
+      <h3>Key Commands</h3>
+      <table class="cmd-table">
+        <tr><th>Command</th><th>Description</th></tr>
+        <tr><td>/sethome</td><td>Set your home location</td></tr>
+        <tr><td>/home</td><td>Teleport to your home</td></tr>
+        <tr><td>/spawn</td><td>Teleport to server spawn</td></tr>
+        <tr><td>/tpa &lt;player&gt;</td><td>Request teleport to another player</td></tr>
+        <tr><td>/warp &lt;name&gt;</td><td>Teleport to a named warp</td></tr>
+        <tr><td>/money</td><td>Check your balance</td></tr>
+        <tr><td>/pay &lt;player&gt; &lt;amount&gt;</td><td>Send money to another player</td></tr>
+        <tr><td>/lwc</td><td>Chest &amp; door protection</td></tr>
+        <tr><td>/dd creative</td><td>Travel to the Creative World</td></tr>
+        <tr><td>/dd survival</td><td>Travel to the Survival World</td></tr>
+      </table>
+
+      <h3>Active Plugins</h3>
+      <p>All <a href="/plugins/" style="color:#55ff55">80+ plugins</a> are active in this world, including Essentials, iConomy, LWC, PreciousStones, WorldGuard, Dynmap, HeroicDeath, Timber, TrainCarts, and many more. Visit the <a href="/plugins/" style="color:#55ff55">Plugins page</a> for the full list and documentation.</p>
+
+      <h3>Nether</h3>
+      <p>Nether portals work normally with vanilla behavior. Build a portal, light it, and travel to the Nether as usual.</p>
+
+      <p class="note">This is the default world &mdash; you spawn here when joining the server.</p>
+    </div>
+
+    <!-- Creative World -->
+    <div class="world-panel" id="panel-creative">
+      <h2 style="color:#ffdd55">Creative World</h2>
+      <p class="world-tagline">Build freely &mdash; item spawning, WorldEdit, flight, instant breaking</p>
+
+      <h3>Overview</h3>
+      <p>The Creative World is a building paradise adjusted to work like creative mode. When you enter, you get creative flight, instant block breaking, item spawning, and access to WorldEdit tools. Build whatever you can imagine without gathering a single resource.</p>
+
+      <h3>How to Enter</h3>
+      <ul>
+        <li>Type <span class="cmd">/dd creative</span> from the Server World</li>
+        <li>Or right-click a <strong style="color:#ffdd55">[CD]</strong> portal sign</li>
+        <li>Type <span class="cmd">/dd leave</span> to return to the Server World</li>
+      </ul>
+
+      <h3>What You Can Do</h3>
+      <ul>
+        <li><strong style="color:#ffaa00">Spawn items</strong> &mdash; use <span class="cmd">/i &lt;item&gt;</span> or <span class="cmd">/give</span> to get any block or item</li>
+        <li><strong style="color:#ffaa00">Creative flight</strong> &mdash; fly freely, enabled automatically on enter</li>
+        <li><strong style="color:#ffaa00">Instant breaking</strong> &mdash; break any block instantly with Instabuild</li>
+        <li><strong style="color:#ffaa00">WorldEdit tools</strong> &mdash; selection, region fill, clipboard, undo/redo, shapes</li>
+        <li><strong style="color:#ffaa00">Navigation</strong> &mdash; /back, /top, /up, /jump for quick movement</li>
+        <li><strong style="color:#ffaa00">Co-building</strong> &mdash; /tpa, /tpahere to invite friends to your build</li>
+        <li><strong style="color:#ffaa00">Utilities</strong> &mdash; /getpos, /clearinventory, /near, /me</li>
+      </ul>
+
+      <h3>Available Commands</h3>
+      <table class="cmd-table">
+        <tr><th>Command</th><th>Description</th></tr>
+        <tr><td>/i &lt;item&gt; [amount]</td><td>Spawn an item</td></tr>
+        <tr><td>/give &lt;item&gt;</td><td>Give yourself items</td></tr>
+        <tr><td>/mc</td><td>Magic Carpet &mdash; flying glass platform</td></tr>
+        <tr><td>//wand</td><td>Get the WorldEdit selection wand</td></tr>
+        <tr><td>//set &lt;block&gt;</td><td>Fill your selection with a block</td></tr>
+        <tr><td>//copy / //paste</td><td>Copy and paste selections</td></tr>
+        <tr><td>//undo / //redo</td><td>Undo or redo WorldEdit actions</td></tr>
+        <tr><td>//sphere &lt;block&gt; &lt;r&gt;</td><td>Create a sphere</td></tr>
+        <tr><td>//cyl &lt;block&gt; &lt;r&gt; &lt;h&gt;</td><td>Create a cylinder</td></tr>
+        <tr><td>/back</td><td>Return to your previous position</td></tr>
+        <tr><td>/top</td><td>Teleport to the highest block</td></tr>
+        <tr><td>/clearinventory</td><td>Clear your inventory</td></tr>
+        <tr><td>/dd leave</td><td>Return to the Server World</td></tr>
+      </table>
+
+      <h3>What&rsquo;s Blocked</h3>
+      <p>Dangerous commands are blocked to keep the server safe. You cannot use:</p>
+      <ul>
+        <li>Server management &mdash; /stop, /reload, /op, /deop, /whitelist</li>
+        <li>Permissions &mdash; /pex, /permissions, /rank, /rankup</li>
+        <li>Moderation &mdash; /ban, /kick, /mute, /jail</li>
+        <li>Economy &mdash; /eco, /money, /pay, /balance</li>
+        <li>Region protection &mdash; /wg, /region, /lwc, /cprivate</li>
+        <li>Other dangerous &mdash; /sudo, /god, /enchant, /vanish</li>
+      </ul>
+
+      <h3>Nether</h3>
+      <p>Nether portals are <strong style="color:#dd5555">disabled</strong> in the Creative World. You cannot light or enter nether portals here.</p>
+
+      <h3>Important Notes</h3>
+      <ul>
+        <li>Your inventory is <strong>completely separate</strong> from the Server World and Survival World</li>
+        <li>Your position is saved &mdash; leave and return later to the exact same spot</li>
+        <li>Creative permissions are granted on entry and revoked on exit automatically</li>
+        <li>Chat messages show a yellow <strong style="color:#ffdd55">[CD]</strong> tag</li>
+      </ul>
+    </div>
+
+    <!-- Survival World -->
+    <div class="world-panel" id="panel-survival">
+      <h2 style="color:#dd5555">Survival World</h2>
+      <p class="world-tagline">Raw, old-school survival &mdash; no plugins, no commands, nothing</p>
+
+      <h3>Overview</h3>
+      <p>The Survival World is a pure, unfiltered survival experience inspired by servers like 2b2t. There are no plugins, no commands, no teleports, no homes &mdash; nothing. Just you, the terrain, and whatever you can mine and craft. Not even server operators can run commands inside.</p>
+
+      <h3>How to Enter</h3>
+      <ul>
+        <li>Type <span class="cmd">/dd survival</span> from the Server World</li>
+        <li>Or right-click a <strong style="color:#dd5555">[DD]</strong> portal sign</li>
+        <li>Type <span class="cmd">/dd leave</span> &mdash; the <strong>only</strong> command that works inside</li>
+      </ul>
+
+      <h3>The Rules</h3>
+      <ul>
+        <li><strong style="color:#dd5555">Every command is blocked</strong> &mdash; no /home, /tp, /gamemode, /give, nothing</li>
+        <li>Being OP does <strong>not</strong> bypass the block</li>
+        <li>The <strong>only</strong> commands that work: <span class="cmd">/dd leave</span> and <span class="cmd">/dd help</span></li>
+        <li>No plugins of any kind &mdash; no protection, no economy, no kits</li>
+        <li>Pure survival &mdash; mine, craft, build, fight, explore</li>
+      </ul>
+
+      <h3>Commands</h3>
+      <table class="cmd-table">
+        <tr><th>Command</th><th>Description</th></tr>
+        <tr><td>/dd leave</td><td>Return to the Server World</td></tr>
+        <tr><td>/dd help</td><td>Show available commands</td></tr>
+      </table>
+      <p style="color:#888;font-size:0.62rem;margin-top:4px">That&rsquo;s it. Those are the only two commands.</p>
+
+      <h3>Nether</h3>
+      <p>The Survival World has its own <strong style="color:#ffaa00">separate nether</strong>. Nether portals work normally &mdash; build a portal and light it to travel. The nether is private to this world (not shared with the Server World). Command blocking still applies in the nether. Dying in the nether respawns you at the Survival World overworld spawn.</p>
+
+      <h3>Important Notes</h3>
+      <ul>
+        <li>Your inventory is <strong>completely separate</strong> from the Server World and Creative World</li>
+        <li>Your position is saved &mdash; leave and return later to the exact same spot</li>
+        <li>If you leave from the nether and return later, you&rsquo;ll be placed back at your nether position</li>
+        <li>Chat messages show a purple <strong style="color:#bb55ff">[DD]</strong> tag</li>
+        <li>Inventory carries between the overworld and nether (same survival experience)</li>
+      </ul>
+
+      <p class="note">This world is for players who want the raw, unassisted Minecraft experience. No safety nets.</p>
+    </div>
+
+    <a class="back-link" href="/">&larr; Back to Home</a>
+  </main>
+
+  <script>
+    function switchWorld(world) {
+      document.querySelectorAll('.world-tab').forEach(function(t) {
+        t.classList.toggle('active', t.getAttribute('data-world') === world);
+      });
+      document.querySelectorAll('.world-panel').forEach(function(p) {
+        p.classList.toggle('active', p.id === 'panel-' + world);
+      });
+      history.replaceState(null, '', '#' + world);
+    }
+
+    // Activate tab from hash on load
+    (function() {
+      var hash = location.hash.replace('#', '');
+      if (['server', 'creative', 'survival'].indexOf(hash) !== -1) {
+        switchWorld(hash);
+      }
+    })();
+  </script>
+
+  <!-- Header resize observer -->
+  <script>
+    (function() {
+      var header = document.querySelector('.header-band');
+      if (!header) return;
+      function check() {
+        header.classList.toggle('wrapped', header.scrollHeight > 48);
+        document.body.classList.toggle('header-wrapped', header.scrollHeight > 48);
+      }
+      new ResizeObserver(check).observe(header);
+      check();
+    })();
+  </script>
+
+  <!-- Nav carousel -->
+  <script>
+    (function () {
+      var header = document.querySelector('.header-band');
+      if (!header) return;
+      var allLinks = Array.from(header.querySelectorAll(':scope > .nav-link, :scope > .nav-dropdown > .nav-link'));
+      var spacer = header.querySelector(':scope > .nav-spacer');
+      var carousel = document.getElementById('navCarousel');
+      var prevBtn = document.getElementById('navPrev');
+      var nextBtn = document.getElementById('navNext');
+      var itemsEl = document.getElementById('navCarouselItems');
+      if (!carousel || !prevBtn || !nextBtn || !itemsEl || !allLinks.length) return;
+      var N = 3, page = 0;
+      var total = Math.ceil(allLinks.length / N);
+      var cp = location.pathname.replace(/\/$/, '') || '/';
+      for (var i = 0; i < allLinks.length; i++) {
+        var lh = (allLinks[i].getAttribute('href') || '').replace(/\/$/, '') || '/';
+        if (lh === cp) { allLinks[i].classList.add('nav-current'); page = Math.floor(i / N); break; }
+      }
+      function render() {
+        itemsEl.innerHTML = '';
+        allLinks.slice(page * N, (page + 1) * N).forEach(function (a) {
+          var cl = a.cloneNode(true);
+          var lh = (a.getAttribute('href') || '').replace(/\/$/, '') || '/';
+          if (lh === cp) cl.classList.add('nav-current');
+          itemsEl.appendChild(cl);
+        });
+        prevBtn.disabled = page === 0;
+        nextBtn.disabled = page >= total - 1;
+      }
+      prevBtn.addEventListener('click', function () { if (page > 0) { page--; render(); } });
+      nextBtn.addEventListener('click', function () { if (page < total - 1) { page++; render(); } });
+      render();
+      itemsEl.addEventListener('click', function(e) {
+        var link = e.target.closest('a[href$="/games/"]');
+        if (link) { e.preventDefault(); var dd = document.getElementById('gamesDropdown'); if (dd) dd.classList.toggle('open'); }
+      });
+      document.addEventListener('click', function(e) {
+        if (!e.target.closest('.nav-dropdown') && !e.target.closest('#navCarouselItems')) {
+          var dd = document.getElementById('gamesDropdown'); if (dd) dd.classList.remove('open');
+        }
+      });
+      var forced = false;
+      var dropdown = header.querySelector(':scope > .nav-dropdown');
+      function forceOn() {
+        if (forced) return; forced = true;
+        allLinks.forEach(function (a) { a.style.display = 'none'; });
+        if (dropdown) dropdown.style.display = 'none';
+        if (spacer) spacer.style.display = 'none';
+        carousel.style.display = 'flex';
+      }
+      function forceOff() {
+        if (!forced) return; forced = false;
+        allLinks.forEach(function (a) { a.style.display = ''; });
+        if (dropdown) dropdown.style.display = '';
+        if (spacer) spacer.style.display = '';
+        if (window.innerWidth > 720) carousel.style.display = 'none';
+      }
+      if (window.innerWidth > 720 && header.scrollHeight > 100) forceOn();
+      var rt;
+      window.addEventListener('resize', function () {
+        clearTimeout(rt);
+        rt = setTimeout(function () {
+          if (window.innerWidth <= 720) { forceOff(); return; }
+          forceOff();
+          requestAnimationFrame(function () { if (header.scrollHeight > 100) forceOn(); });
+        }, 150);
+      });
+    }());
+  </script>
+
+  <!-- Legal footer -->
+  <div style="text-align:center;padding:12px 0 4px;font-family:'Minecraft',sans-serif;font-size:.5rem">
+    <a href="/legal/" style="color:#666;text-decoration:none">Legal Notice</a>
+    <span style="color:#444"> | </span>
+    <a href="/privacy/" style="color:#666;text-decoration:none">Privacy Policy</a>
+  </div>
+  <!-- Visitor counter -->
+  <style>
+    .visitor-counter{position:fixed;top:52px;left:8px;z-index:9;font-family:'Minecraft',sans-serif;font-size:.55rem;color:rgba(255,255,255,0.45);text-shadow:1px 1px 0 rgba(0,0,0,0.6);pointer-events:none;transition:opacity .3s}
+    .visitor-counter .vc-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#55ff55;box-shadow:0 0 4px #55ff55;margin-right:4px;vertical-align:middle}
+    @media(max-width:720px){.visitor-counter{top:52px;left:6px;font-size:.5rem}}
+  </style>
+  <div class="visitor-counter" id="visitorCounter"></div>
+  <script>
+  (function(){var el=document.getElementById('visitorCounter');var ws,delay=2000;function connect(){try{ws=new WebSocket('wss://chat.return2beta.com');}catch(e){return;}ws.onopen=function(){delay=2000;ws.send(JSON.stringify({type:'presence'}));};ws.onmessage=function(e){var d;try{d=JSON.parse(e.data);}catch(x){return;}if(d.type==='visitor_count'&&typeof d.count==='number'){el.innerHTML='<span class="vc-dot"></span>'+d.count+' online now';}};ws.onclose=function(){setTimeout(connect,delay);delay=Math.min(delay*2,30000);};ws.onerror=function(){ws.close();};}connect();})();
+  </script>
+</body>
+</html>
