@@ -91,43 +91,85 @@
       top: 48px;
       left: 50%;
       transform: translateX(-50%);
-      background: rgba(10,16,10,0.95);
+      background: rgba(10,16,10,0.96);
       border: 2px solid rgba(85,255,85,0.3);
       border-radius: 4px;
-      padding: 8px 0;
-      min-width: 200px;
+      padding: 10px 12px 12px;
+      width: 320px;
       z-index: 100;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.7);
     }
     .nav-dropdown:hover .nav-dropdown-menu {
       display: block;
     }
-    .nav-dropdown-menu .dropdown-heading {
+    .nav-dropdown-menu .dropdown-title {
       color: #55ff55;
-      font-size: 0.65rem;
-      padding: 6px 14px 2px;
+      font-size: 0.8rem;
+      text-align: center;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(85,255,85,0.15);
+      margin-bottom: 8px;
+      text-shadow: 1px 1px 0 rgba(0,0,0,0.8);
+    }
+    .nav-dropdown-menu .dropdown-heading {
+      color: #ffdd55;
+      font-size: 0.6rem;
+      padding: 6px 0 4px;
       text-transform: uppercase;
       letter-spacing: 0.5px;
       text-shadow: 1px 1px 0 rgba(0,0,0,0.8);
     }
-    .nav-dropdown-menu .dropdown-link {
-      display: block;
-      padding: 5px 14px;
-      color: #ccc;
+    .nav-dropdown-menu .dropdown-card {
+      display: flex;
+      gap: 10px;
+      padding: 6px 8px;
+      border-radius: 3px;
       text-decoration: none;
-      font-size: 0.75rem;
+      transition: background 0.15s;
+      align-items: flex-start;
+    }
+    .nav-dropdown-menu .dropdown-card:hover {
+      background: rgba(85,255,85,0.08);
+    }
+    .nav-dropdown-menu .dropdown-card img {
+      width: 56px;
+      height: 42px;
+      object-fit: cover;
+      border-radius: 3px;
+      border: 1px solid rgba(255,255,255,0.1);
+      flex-shrink: 0;
+      background: rgba(0,0,0,0.3);
+    }
+    .nav-dropdown-menu .dropdown-card-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .nav-dropdown-menu .dropdown-card-name {
+      color: #fff;
+      font-size: 0.72rem;
       font-family: 'Minecraft', sans-serif;
       text-shadow: 1px 1px 0 rgba(0,0,0,0.7);
-      white-space: nowrap;
     }
-    .nav-dropdown-menu .dropdown-link:hover {
-      background: rgba(85,255,85,0.1);
-      color: #fff;
+    .nav-dropdown-menu .dropdown-card-desc {
+      color: #999;
+      font-size: 0.55rem;
+      line-height: 1.3;
+      margin-top: 2px;
+      text-shadow: 1px 1px 0 rgba(0,0,0,0.6);
+    }
+    .nav-dropdown-menu .dropdown-card-tag {
+      display: inline-block;
+      font-size: 0.45rem;
+      color: #aaa;
+      background: rgba(255,255,255,0.06);
+      border-radius: 2px;
+      padding: 1px 4px;
+      margin-top: 3px;
     }
     .nav-dropdown-menu hr {
       border: none;
-      border-top: 1px solid rgba(85,255,85,0.15);
-      margin: 6px 10px;
+      border-top: 1px solid rgba(85,255,85,0.12);
+      margin: 6px 0;
     }
     .nav-spacer { flex: 1; }
     .content {
@@ -330,13 +372,42 @@
     <div class="nav-dropdown">
       <a class="nav-link" href="/games/"><img src="../images/game_icon.png" alt="Games icon" />Games</a>
       <div class="nav-dropdown-menu">
-        <div class="dropdown-heading">Website Games</div>
-        <a class="dropdown-link" href="https://mine-craft.io/" target="_blank" rel="noopener noreferrer">mine-craft.io</a>
-        <a class="dropdown-link" href="https://classic.minecraft.net/" target="_blank" rel="noopener noreferrer">Minecraft Classic</a>
+        <div class="dropdown-title">More Links</div>
+        <div class="dropdown-heading">&#127760; Website Games</div>
+        <a class="dropdown-card" href="https://mine-craft.io/" target="_blank" rel="noopener noreferrer">
+          <img src="https://mine-craft.io/favicon.ico" alt="mine-craft.io" />
+          <div class="dropdown-card-info">
+            <div class="dropdown-card-name">mine-craft.io</div>
+            <div class="dropdown-card-desc">Multiplayer Minecraft-inspired browser game. Build, mine and survive online with others.</div>
+            <span class="dropdown-card-tag">Free • Browser</span>
+          </div>
+        </a>
+        <a class="dropdown-card" href="https://classic.minecraft.net/" target="_blank" rel="noopener noreferrer">
+          <img src="https://classic.minecraft.net/favicon.ico" alt="Minecraft Classic" />
+          <div class="dropdown-card-info">
+            <div class="dropdown-card-name">Minecraft Classic</div>
+            <div class="dropdown-card-desc">The original 2009 Minecraft Creative mode in your browser. 32 blocks, multiplayer support.</div>
+            <span class="dropdown-card-tag">Free • Browser • Official</span>
+          </div>
+        </a>
         <hr />
-        <div class="dropdown-heading">itch.io Downloads</div>
-        <a class="dropdown-link" href="https://hdms.itch.io/c4r" target="_blank" rel="noopener noreferrer">C::Reactris</a>
-        <a class="dropdown-link" href="https://dakharr.itch.io/mine-souls-3" target="_blank" rel="noopener noreferrer">Mine Souls 3</a>
+        <div class="dropdown-heading">&#127918; itch.io Downloads</div>
+        <a class="dropdown-card" href="https://hdms.itch.io/c4r" target="_blank" rel="noopener noreferrer">
+          <img src="https://img.itch.zone/aW1nLzE4NzMwNjQ1LnBuZw==/315x250%23c/DKqFxa.png" alt="C::Reactris" />
+          <div class="dropdown-card-info">
+            <div class="dropdown-card-name">C::Reactris</div>
+            <div class="dropdown-card-desc">A falling-block puzzle game with a retro twist. Cascade chain reactions for massive combos.</div>
+            <span class="dropdown-card-tag">Free • Download</span>
+          </div>
+        </a>
+        <a class="dropdown-card" href="https://dakharr.itch.io/mine-souls-3" target="_blank" rel="noopener noreferrer">
+          <img src="https://img.itch.zone/aW1nLzE1OTE2MzMzLnBuZw==/315x250%23c/aN7wS3.png" alt="Mine Souls 3" />
+          <div class="dropdown-card-info">
+            <div class="dropdown-card-name">Mine Souls 3</div>
+            <div class="dropdown-card-desc">Dark Souls meets Minecraft. A challenging action RPG with voxel graphics and souls-like combat.</div>
+            <span class="dropdown-card-tag">Free • Download</span>
+          </div>
+        </a>
       </div>
     </div>
     <a class="nav-link" href="https://discord.gg/vVvs7tN5p7" target="_blank" rel="noopener noreferrer"><img src="../images/discord_icon.png" alt="Discord icon" />Discord</a>
