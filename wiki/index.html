@@ -582,8 +582,10 @@
       ws.onerror = function() { ws.close(); };
     }
 
+    var lastSend=0;
     function send() {
       var t=input.value.trim(); if(!t||!ws||ws.readyState!==1)return;
+      var now=Date.now(); if(now-lastSend<1500)return; lastSend=now;
       ws.send(JSON.stringify({type:'chat',text:t})); input.value=''; input.focus();
     }
     sendBtn.addEventListener('click', send);
