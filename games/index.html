@@ -245,6 +245,9 @@
       .game-container.scaled-canvas.minesweeper-game {
         margin-bottom: 200px;
       }
+      .game-container.scaled-canvas.blockcrush-game {
+        margin-bottom: 200px;
+      }
       .game-container.embed-game {
         width: min(552px, 80vw);
       }
@@ -263,6 +266,9 @@
         margin-bottom: 110px;
       }
       .game-container.scaled-canvas.minesweeper-game {
+        margin-bottom: 110px;
+      }
+      .game-container.scaled-canvas.blockcrush-game {
         margin-bottom: 110px;
       }
     }
@@ -379,7 +385,8 @@
         <a class="dropdown-link" href="/games/?game=2"><img src="../images/Game%20Links/hatch-snake.webp" alt="" />Hatch (Snake)</a>
         <a class="dropdown-link" href="/games/?game=3"><img src="../images/Game%20Links/minecreeper.png" alt="" />Minecreeper</a>
         <a class="dropdown-link" href="/games/?game=4"><img src="../images/Game%20Links/mine-blocks.png" alt="" />Mine Blocks</a>
-        <a class="dropdown-link" href="/games/?game=5"><img src="../images/Game%20Links/mine-blocks-2.png" alt="" />Mine Blocks 2</a>
+        <a class="dropdown-link" href="/games/?game=5"><img src="../images/Game%20Links/block-crush.png" alt="" />Block Crush</a>
+        <a class="dropdown-link" href="/games/?game=6"><img src="../images/Game%20Links/mine-blocks-2.png" alt="" />Mine Blocks 2</a>
         <hr />
         <a class="dropdown-more" href="/games/more-links/">More Links &#8250;</a>
       </div>
@@ -512,7 +519,7 @@
     var prevBtn = document.getElementById('gamePrev');
     var nextBtn = document.getElementById('gameNext');
 
-    var games = ['Flappy Chicken', 'Blocktris', 'Hatch (Snake)', 'Minecreeper', 'Mine Blocks'];
+    var games = ['Flappy Chicken', 'Blocktris', 'Hatch (Snake)', 'Minecreeper', 'Mine Blocks', 'Block Crush'];
     var currentGame = 0;
     var activeGame = null;
     var animId = null;
@@ -614,6 +621,9 @@
         var ver = mineblocksVersions[currentMineblocksVersion];
         iframeEl.src = ver.url;
         versionLabelEl.textContent = ver.label;
+      } else if (idx === 5) {
+        gameContainer.classList.add('blockcrush-game');
+        activeGame = blockCrush(canvas, ctx, scoreEl, bestEl, siteBestEl, hintEl, function (id) { animId = id; });
       }
     }
 
@@ -2055,10 +2065,315 @@
       };
     }
 
+    /* ================================================================
+       BLOCK CRUSH — Bejeweled with Minecraft blocks
+       ================================================================ */
+    function blockCrush(cvs, c, sEl, bEl, sbEl, hEl, setAnim) {
+      var COLS = 8, ROWS = 8, CELL = 36;
+      cvs.width = 320; cvs.height = 340;
+      hEl.textContent = 'Click to select, swap adjacent to match 3+';
+      var OX = 16, OY = 40;
+      var W = cvs.width, H = cvs.height;
+      var pad = 2, sz = CELL - pad * 2;
+
+      var TYPES = [
+        { tile: [8, 1], tint: null },   // diamond block
+        { tile: [7, 1], tint: null },   // gold block
+        { tile: [7, 0], tint: null },   // brick
+        { tile: [4, 0], tint: null },   // wooden planks
+        { tile: [2, 1], tint: null },   // sand
+        { tile: [0, 1], tint: null },   // cobblestone
+        { tile: [5, 2], tint: null }    // obsidian
+      ];
+      var NT = TYPES.length;
+
+      var grid, score, combo, state, selected, phase;
+      var swapAnim, swapT, clearCells, clearT, fallCells, fallT, frameN;
+      var best = +localStorage.getItem('r2b_bcrush_best') || 0;
+      var siteBest = +localStorage.getItem('r2b_bcrush_site') || 0;
+      bEl.textContent = best;
+      sbEl.textContent = siteBest;
+
+      function dt(tile, dx, dy, dw, dh, tnt) { drawTileTinted(c, tile, dx, dy, dw, dh, tnt); }
+
+      function init() {
+        grid = [];
+        for (var r = 0; r < ROWS; r++) {
+          grid[r] = [];
+          for (var cl = 0; cl < COLS; cl++) {
+            var t;
+            do { t = (Math.random() * NT) | 0; } while (
+              (cl >= 2 && grid[r][cl - 1] === t && grid[r][cl - 2] === t) ||
+              (r >= 2 && grid[r - 1][cl] === t && grid[r - 2][cl] === t)
+            );
+            grid[r][cl] = t;
+          }
+        }
+        score = 0; combo = 0; selected = null; frameN = 0;
+        phase = 'idle'; state = 'playing';
+        swapAnim = null; clearCells = []; fallCells = [];
+        sEl.textContent = '0';
+      }
+
+      function findMatches() {
+        var m = [];
+        for (var r = 0; r < ROWS; r++) { m[r] = []; for (var cl = 0; cl < COLS; cl++) m[r][cl] = false; }
+        for (var r = 0; r < ROWS; r++) {
+          var cl = 0;
+          while (cl < COLS) {
+            var t = grid[r][cl], len = 1;
+            while (cl + len < COLS && grid[r][cl + len] === t) len++;
+            if (t >= 0 && len >= 3) for (var i = 0; i < len; i++) m[r][cl + i] = true;
+            cl += len;
+          }
+        }
+        for (var cl = 0; cl < COLS; cl++) {
+          var r = 0;
+          while (r < ROWS) {
+            var t = grid[r][cl], len = 1;
+            while (r + len < ROWS && grid[r + len][cl] === t) len++;
+            if (t >= 0 && len >= 3) for (var i = 0; i < len; i++) m[r + i][cl] = true;
+            r += len;
+          }
+        }
+        var res = [];
+        for (var r = 0; r < ROWS; r++) for (var cl = 0; cl < COLS; cl++) if (m[r][cl]) res.push({ r: r, c: cl });
+        return res;
+      }
+
+      function swG(r1, c1, r2, c2) { var t = grid[r1][c1]; grid[r1][c1] = grid[r2][c2]; grid[r2][c2] = t; }
+
+      function hasValidMoves() {
+        for (var r = 0; r < ROWS; r++) for (var cl = 0; cl < COLS; cl++) {
+          if (cl < COLS - 1) { swG(r, cl, r, cl + 1); if (findMatches().length) { swG(r, cl, r, cl + 1); return true; } swG(r, cl, r, cl + 1); }
+          if (r < ROWS - 1) { swG(r, cl, r + 1, cl); if (findMatches().length) { swG(r, cl, r + 1, cl); return true; } swG(r, cl, r + 1, cl); }
+        }
+        return false;
+      }
+
+      function doClears() {
+        var matches = findMatches();
+        if (!matches.length) return false;
+        combo++;
+        score += matches.length * 50 * combo;
+        sEl.textContent = score;
+        clearCells = [];
+        for (var i = 0; i < matches.length; i++) {
+          clearCells.push({ r: matches[i].r, c: matches[i].c, tp: grid[matches[i].r][matches[i].c] });
+          grid[matches[i].r][matches[i].c] = -1;
+        }
+        clearT = 0;
+        return true;
+      }
+
+      function gravity() {
+        fallCells = []; fallT = 0;
+        for (var cl = 0; cl < COLS; cl++) {
+          var e = 0;
+          for (var r = ROWS - 1; r >= 0; r--) {
+            if (grid[r][cl] < 0) e++;
+            else if (e) { grid[r + e][cl] = grid[r][cl]; grid[r][cl] = -1; fallCells.push({ r: r + e, c: cl, from: r }); }
+          }
+          for (var r = 0; r < e; r++) {
+            grid[r][cl] = (Math.random() * NT) | 0;
+            fallCells.push({ r: r, c: cl, from: r - e });
+          }
+        }
+      }
+
+      function endGame() {
+        state = 'dead';
+        if (score > best) { best = score; localStorage.setItem('r2b_bcrush_best', best); bEl.textContent = best; }
+        if (score > siteBest) { siteBest = score; localStorage.setItem('r2b_bcrush_site', siteBest); sbEl.textContent = siteBest; }
+      }
+
+      function ease(t) { return t < 1 ? t * t * (3 - 2 * t) : 1; }
+
+      function update() {
+        if (state !== 'playing') return;
+        if (phase === 'swapping') {
+          swapT += 0.1;
+          if (swapT >= 1) {
+            swG(swapAnim.r1, swapAnim.c1, swapAnim.r2, swapAnim.c2);
+            if (swapAnim.fwd) {
+              if (findMatches().length) { swapAnim = null; combo = 0; phase = 'clearing'; doClears(); }
+              else { swG(swapAnim.r1, swapAnim.c1, swapAnim.r2, swapAnim.c2); swapAnim.fwd = false; swapT = 0; }
+            } else { swapAnim = null; phase = 'idle'; }
+          }
+        }
+        if (phase === 'clearing') {
+          clearT += 0.08;
+          if (clearT >= 1) { clearCells = []; gravity(); phase = 'falling'; }
+        }
+        if (phase === 'falling') {
+          fallT += 0.1;
+          if (fallT >= 1) {
+            fallCells = [];
+            if (findMatches().length) { phase = 'clearing'; doClears(); }
+            else { phase = 'idle'; if (!hasValidMoves()) endGame(); }
+          }
+        }
+      }
+
+      function drawFrame() {
+        c.clearRect(0, 0, W, H);
+        c.fillStyle = '#1a1a2e';
+        c.fillRect(0, 0, W, H);
+        // Stone board background
+        for (var r = 0; r < ROWS; r++) for (var cl = 0; cl < COLS; cl++)
+          dt([1, 0], OX + cl * CELL, OY + r * CELL, CELL, CELL);
+        c.fillStyle = 'rgba(0,0,0,0.45)';
+        c.fillRect(OX, OY, COLS * CELL, ROWS * CELL);
+        // Grid lines
+        c.strokeStyle = 'rgba(50,50,50,0.5)'; c.lineWidth = 1;
+        for (var r = 0; r <= ROWS; r++) { c.beginPath(); c.moveTo(OX, OY + r * CELL); c.lineTo(OX + COLS * CELL, OY + r * CELL); c.stroke(); }
+        for (var cl = 0; cl <= COLS; cl++) { c.beginPath(); c.moveTo(OX + cl * CELL, OY); c.lineTo(OX + cl * CELL, OY + ROWS * CELL); c.stroke(); }
+
+        // Build skip set
+        var skip = {};
+        if (swapAnim) { skip[swapAnim.r1 + ',' + swapAnim.c1] = 1; skip[swapAnim.r2 + ',' + swapAnim.c2] = 1; }
+        for (var i = 0; i < clearCells.length; i++) skip[clearCells[i].r + ',' + clearCells[i].c] = 1;
+        for (var i = 0; i < fallCells.length; i++) skip[fallCells[i].r + ',' + fallCells[i].c] = 1;
+
+        // Static blocks
+        for (var r = 0; r < ROWS; r++) for (var cl = 0; cl < COLS; cl++) {
+          if (grid[r][cl] < 0 || skip[r + ',' + cl]) continue;
+          var tp = TYPES[grid[r][cl]];
+          dt(tp.tile, OX + cl * CELL + pad, OY + r * CELL + pad, sz, sz, tp.tint);
+        }
+        // Falling blocks
+        var et = ease(Math.min(fallT, 1));
+        for (var i = 0; i < fallCells.length; i++) {
+          var fb = fallCells[i]; if (grid[fb.r][fb.c] < 0) continue;
+          var tp = TYPES[grid[fb.r][fb.c]];
+          var y = OY + fb.from * CELL + (fb.r - fb.from) * CELL * et;
+          dt(tp.tile, OX + fb.c * CELL + pad, y + pad, sz, sz, tp.tint);
+        }
+        // Clearing blocks
+        var ct = ease(Math.min(clearT, 1));
+        for (var i = 0; i < clearCells.length; i++) {
+          var cc = clearCells[i], tp = TYPES[cc.tp], s = sz * (1 - ct);
+          if (s <= 0) continue;
+          c.globalAlpha = 1 - ct;
+          dt(tp.tile, OX + cc.c * CELL + CELL / 2 - s / 2, OY + cc.r * CELL + CELL / 2 - s / 2, s, s, tp.tint);
+          c.globalAlpha = 1;
+        }
+        // Swap animation
+        if (swapAnim) {
+          var st = ease(Math.min(swapT, 1));
+          var tp1 = TYPES[swapAnim.v1], tp2 = TYPES[swapAnim.v2];
+          var dx1, dy1, dx2, dy2;
+          if (swapAnim.fwd) {
+            dx1 = OX + swapAnim.c1 * CELL + (swapAnim.c2 - swapAnim.c1) * CELL * st;
+            dy1 = OY + swapAnim.r1 * CELL + (swapAnim.r2 - swapAnim.r1) * CELL * st;
+            dx2 = OX + swapAnim.c2 * CELL + (swapAnim.c1 - swapAnim.c2) * CELL * st;
+            dy2 = OY + swapAnim.r2 * CELL + (swapAnim.r1 - swapAnim.r2) * CELL * st;
+          } else {
+            dx1 = OX + swapAnim.c2 * CELL + (swapAnim.c1 - swapAnim.c2) * CELL * st;
+            dy1 = OY + swapAnim.r2 * CELL + (swapAnim.r1 - swapAnim.r2) * CELL * st;
+            dx2 = OX + swapAnim.c1 * CELL + (swapAnim.c2 - swapAnim.c1) * CELL * st;
+            dy2 = OY + swapAnim.r1 * CELL + (swapAnim.r2 - swapAnim.r1) * CELL * st;
+          }
+          dt(tp1.tile, dx1 + pad, dy1 + pad, sz, sz, tp1.tint);
+          dt(tp2.tile, dx2 + pad, dy2 + pad, sz, sz, tp2.tint);
+        }
+        // Selection highlight
+        if (selected && phase === 'idle' && state === 'playing') {
+          var pulse = 0.6 + 0.4 * Math.sin(frameN * 0.12);
+          c.strokeStyle = 'rgba(85,255,85,' + pulse + ')';
+          c.lineWidth = 3;
+          c.strokeRect(OX + selected.c * CELL + 1, OY + selected.r * CELL + 1, CELL - 2, CELL - 2);
+        }
+        // Border
+        c.strokeStyle = 'rgba(85,255,85,0.3)'; c.lineWidth = 2;
+        c.strokeRect(OX - 1, OY - 1, COLS * CELL + 2, ROWS * CELL + 2);
+        // Score header
+        c.fillStyle = '#fff'; c.font = '16px Minecraft, sans-serif';
+        c.textAlign = 'center'; c.textBaseline = 'middle';
+        c.shadowColor = 'rgba(0,0,0,0.8)'; c.shadowBlur = 4;
+        c.fillText(score, W / 2, OY / 2);
+        c.shadowBlur = 0;
+        // Combo indicator
+        if (phase === 'clearing' && combo > 1) {
+          c.fillStyle = '#ffdd55'; c.font = '12px Minecraft, sans-serif';
+          c.shadowColor = 'rgba(0,0,0,0.8)'; c.shadowBlur = 3;
+          c.fillText('x' + combo + ' Combo!', W / 2, OY - 4);
+          c.shadowBlur = 0;
+        }
+        // Game over
+        if (state === 'dead') {
+          c.fillStyle = 'rgba(0,0,0,0.6)';
+          c.fillRect(OX, OY, COLS * CELL, ROWS * CELL);
+          c.textAlign = 'center'; c.textBaseline = 'middle';
+          c.shadowColor = 'rgba(0,0,0,0.9)'; c.shadowBlur = 6;
+          c.fillStyle = '#ff5555'; c.font = '22px Minecraft, sans-serif';
+          c.fillText('No Moves!', W / 2, H / 2 - 24);
+          c.fillStyle = '#ffdd55'; c.font = '16px Minecraft, sans-serif';
+          c.fillText('Score: ' + score, W / 2, H / 2 + 2);
+          c.fillStyle = '#55ff55'; c.font = '14px Minecraft, sans-serif';
+          c.fillText('Best: ' + best, W / 2, H / 2 + 24);
+          c.fillStyle = '#aaa'; c.font = '10px Minecraft, sans-serif';
+          c.fillText('Click to play again', W / 2, H / 2 + 48);
+          c.shadowBlur = 0;
+        }
+      }
+
+      function getCell(e) {
+        var rect = cvs.getBoundingClientRect();
+        var sx = cvs.width / rect.width, sy = cvs.height / rect.height;
+        var mx = (e.clientX - rect.left) * sx - OX, my = (e.clientY - rect.top) * sy - OY;
+        var cl = (mx / CELL) | 0, r = (my / CELL) | 0;
+        if (cl < 0 || cl >= COLS || r < 0 || r >= ROWS) return null;
+        return { r: r, c: cl };
+      }
+
+      function handleClick(cell) {
+        if (state === 'dead') { init(); return; }
+        if (state !== 'playing' || phase !== 'idle') return;
+        if (!selected) { selected = cell; return; }
+        var dr = Math.abs(cell.r - selected.r), dc = Math.abs(cell.c - selected.c);
+        if ((dr === 1 && dc === 0) || (dr === 0 && dc === 1)) {
+          swapAnim = { r1: selected.r, c1: selected.c, r2: cell.r, c2: cell.c,
+            v1: grid[selected.r][selected.c], v2: grid[cell.r][cell.c], fwd: true };
+          swapT = 0; phase = 'swapping'; selected = null;
+        } else if (cell.r === selected.r && cell.c === selected.c) { selected = null; }
+        else { selected = cell; }
+      }
+
+      function onClick(e) { var cell = getCell(e); if (cell) handleClick(cell); }
+      var tCell = null;
+      function onTS(e) {
+        if (e.target !== cvs) return; e.preventDefault();
+        var t = e.touches[0], rect = cvs.getBoundingClientRect();
+        var sx = cvs.width / rect.width, sy = cvs.height / rect.height;
+        var mx = (t.clientX - rect.left) * sx - OX, my = (t.clientY - rect.top) * sy - OY;
+        var cl = (mx / CELL) | 0, r = (my / CELL) | 0;
+        if (cl < 0 || cl >= COLS || r < 0 || r >= ROWS) { tCell = null; return; }
+        tCell = { r: r, c: cl };
+      }
+      function onTE(e) { if (e.target !== cvs) return; e.preventDefault(); if (tCell) handleClick(tCell); tCell = null; }
+
+      cvs.addEventListener('click', onClick);
+      cvs.addEventListener('touchstart', onTS);
+      cvs.addEventListener('touchend', onTE);
+
+      init();
+      function loop() { update(); drawFrame(); frameN++; setAnim(requestAnimationFrame(loop)); }
+      loop();
+
+      return {
+        cleanup: function () {
+          cvs.removeEventListener('click', onClick);
+          cvs.removeEventListener('touchstart', onTS);
+          cvs.removeEventListener('touchend', onTE);
+        }
+      };
+    }
+
     // Start with game from URL param or default to Flappy Chicken
     var urlParams = new URLSearchParams(window.location.search);
     var gameParam = parseInt(urlParams.get('game'), 10);
-    if (gameParam === 5) {
+    if (gameParam === 6) {
       // Mine Blocks 2 → open Mine Blocks with version 2 pre-selected
       currentMineblocksVersion = 1;
       startGame(4);
