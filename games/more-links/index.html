@@ -147,12 +147,23 @@
     }
     .back-link:hover { color: #aaff88; }
 
+    /* ── Section box ─────────────────────── */
+    .section-box {
+      width: 100%;
+      max-width: 740px;
+      background: rgba(8,14,8,0.7);
+      border: 2px solid rgba(85,255,85,0.18);
+      border-radius: 6px;
+      padding: 16px 20px 20px;
+      margin-top: 20px;
+    }
+
     /* ── Section headings ────────────────── */
     .section-heading {
       font-size: clamp(0.85rem, 1.5vw, 1rem);
       color: #aaffaa;
       text-shadow: 2px 2px 0 rgba(0,0,0,0.7);
-      margin: 24px 0 12px;
+      margin: 0 0 12px;
       text-align: center;
     }
 
@@ -244,6 +255,7 @@
     <h1>More Game Links</h1>
     <p class="subtitle">External Minecraft-related games &amp; downloads</p>
 
+    <div class="section-box">
     <h2 class="section-heading">Website Games</h2>
     <div class="link-grid">
       <a class="link-card" href="https://mine-craft.io/" target="_blank" rel="noopener noreferrer">
@@ -263,7 +275,9 @@
         </div>
       </a>
     </div>
+    </div>
 
+    <div class="section-box">
     <h2 class="section-heading">Downloadable Games</h2>
     <div class="link-grid">
       <a class="link-card" href="https://hdms.itch.io/c4r" target="_blank" rel="noopener noreferrer">
@@ -282,6 +296,7 @@
           <span class="link-card-tag">itch.io &middot; Download &middot; VR Supported</span>
         </div>
       </a>
+    </div>
     </div>
     <a class="back-link" href="/games/">&#9664; Back to Games</a>
   </main>
