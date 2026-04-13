@@ -2638,5 +2638,15 @@
   <script>
   (function(){var h=document.getElementById('cwResize'),p=document.getElementById('cwPanel');if(!h||!p)return;h.addEventListener('mousedown',function(e){e.preventDefault();var sw=p.offsetWidth,sh=p.offsetHeight,sx=e.clientX,sy=e.clientY;function move(e){p.style.width=Math.max(300,sw+(sx-e.clientX))+'px';p.style.height=Math.max(300,sh+(sy-e.clientY))+'px';}function up(){document.removeEventListener('mousemove',move);document.removeEventListener('mouseup',up);}document.addEventListener('mousemove',move);document.addEventListener('mouseup',up);});})();
   </script>
+  <!-- Visitor counter -->
+  <style>
+    .visitor-counter{position:fixed;top:52px;left:8px;z-index:9;font-family:'Minecraft',sans-serif;font-size:.55rem;color:rgba(255,255,255,0.45);text-shadow:1px 1px 0 rgba(0,0,0,0.6);pointer-events:none;transition:opacity .3s}
+    .visitor-counter .vc-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#55ff55;box-shadow:0 0 4px #55ff55;margin-right:4px;vertical-align:middle}
+    @media(max-width:720px){.visitor-counter{top:52px;left:6px;font-size:.5rem}}
+  </style>
+  <div class="visitor-counter" id="visitorCounter"></div>
+  <script>
+  (function(){var el=document.getElementById('visitorCounter');var ws,delay=2000;function connect(){try{ws=new WebSocket('wss://chat.return2beta.com');}catch(e){return;}ws.onopen=function(){delay=2000;ws.send(JSON.stringify({type:'presence'}));};ws.onmessage=function(e){var d;try{d=JSON.parse(e.data);}catch(x){return;}if(d.type==='visitor_count'&&typeof d.count==='number'){el.innerHTML='<span class="vc-dot"></span>'+d.count+' online now';}};ws.onclose=function(){setTimeout(connect,delay);delay=Math.min(delay*2,30000);};ws.onerror=function(){ws.close();};}connect();})();
+  </script>
 </body>
 </html>
