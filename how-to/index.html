@@ -153,21 +153,39 @@
       margin: 12px 0;
       text-shadow: 2px 2px 0 rgba(0,0,0,0.8);
     }
+    .top-boxes {
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+      justify-content: center;
+      margin: 16px 0;
+    }
+    @media (max-width: 720px) {
+      .top-boxes {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
     .ip-box {
       background: rgba(0,0,0,0.5);
       border: 2px solid rgba(85,255,85,0.3);
       border-radius: 6px;
       padding: 16px 24px;
-      margin: 16px auto;
-      max-width: 400px;
       text-align: center;
       line-height: 2.2;
+      flex: 1;
+      max-width: 400px;
     }
     .ip-box .ip {
       display: block;
       color: #aaa;
       font-size: clamp(0.7rem, 1.2vw, 0.9rem);
       text-shadow: 1px 1px 0 rgba(0,0,0,0.7);
+    }
+    .ip-box h3 {
+      margin: 0 0 4px 0;
+      font-size: 0.85rem;
+      color: #55ff55;
     }
     .ip-box .ip.primary {
       color: #55ff55;
@@ -204,8 +222,6 @@
       border: 1px solid rgba(85,255,85,0.2);
       border-radius: 6px;
       padding: 14px 20px;
-      margin-bottom: 24px;
-      display: inline-block;
       text-align: left;
     }
     .toc h3 {
@@ -368,8 +384,9 @@
 
   <main class="content">
     <h1>How to Join Return2Beta</h1>
-    <p style="text-align:center; margin-bottom: 8px;">Server IPs:</p>
+    <div class="top-boxes">
     <div class="ip-box">
+      <h3>Server IPs:</h3>
       <span class="ip primary">mc.return2beta.com</span>
       <span class="ip">beta.mildvanilla.org</span>
       <span class="ip">mc.mildbeta.world</span>
@@ -377,7 +394,7 @@
       <span class="ip">217.160.170.104</span>
     </div>
 
-    <div class="toc" style="margin: 24px auto; display: block; max-width: 400px;">
+    <div class="toc" style="flex: 1; max-width: 400px;">
       <h3>Table of Contents</h3>
       <p class="toc-category">Java Edition (PC Launchers)</p>
       <ul>
@@ -410,6 +427,7 @@
         <li><a href="#troubleshooting">Troubleshooting</a></li>
         <li><a href="#incompatible">Incompatible Platforms</a></li>
       </ul>
+    </div>
     </div>
 
     <div class="note">All launchers listed below are free and support offline/cracked mode. You do <strong>not</strong> need a Mojang or Microsoft account to play on Return2Beta.</div>
