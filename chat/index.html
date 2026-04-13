@@ -652,5 +652,15 @@
   <script>
   (function(){var mp=document.getElementById('mapPanel'),fb=document.getElementById('mapFoldBtn'),mt=document.getElementById('mapToggle');if(localStorage.getItem('r2b_map_collapsed')==='1'){mp.classList.add('collapsed');fb.innerHTML='&#x25C0;';fb.title='Show map';}fb.addEventListener('click',function(){var c=mp.classList.toggle('collapsed');fb.innerHTML=c?'&#x25C0;':'&#x25B6;';fb.title=c?'Show map':'Hide map';localStorage.setItem('r2b_map_collapsed',c?'1':'0');});mt.addEventListener('click',function(){if(mp.classList.contains('collapsed')){mp.classList.remove('collapsed');fb.innerHTML='&#x25B6;';fb.title='Hide map';localStorage.setItem('r2b_map_collapsed','0');}var m=mp.classList.toggle('maximized');mt.innerHTML=m?'\u2715':'\u26F6';mt.title=m?'Minimize map':'Maximize map';});document.addEventListener('keydown',function(e){if(e.key==='Escape'&&mp.classList.contains('maximized')){mp.classList.remove('maximized');mt.innerHTML='\u26F6';mt.title='Maximize map';}});var DU='https://map.return2beta.com/up/world/world/',PU='https://corsproxy.io/?'+encodeURIComponent(DU);function ok(r){if(!r.ok)throw new Error(r.status);return r.json();}function on(){mp.style.display='';document.body.classList.remove('map-hidden');}function off(){mp.style.display='none';document.body.classList.add('map-hidden');}function chk(){fetch(DU).then(ok).then(on).catch(function(){fetch(PU).then(ok).then(on).catch(off);});}chk();setInterval(chk,30000);})();
   </script>
+  <!-- Visitor counter -->
+  <style>
+    .visitor-counter{position:fixed;top:52px;left:8px;z-index:9;font-family:'Minecraft',sans-serif;font-size:.55rem;color:rgba(255,255,255,0.45);text-shadow:1px 1px 0 rgba(0,0,0,0.6);pointer-events:none;transition:opacity .3s}
+    .visitor-counter .vc-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#55ff55;box-shadow:0 0 4px #55ff55;margin-right:4px;vertical-align:middle}
+    @media(max-width:720px){.visitor-counter{top:52px;left:6px;font-size:.5rem}}
+  </style>
+  <div class="visitor-counter" id="visitorCounter"></div>
+  <script>
+  (function(){var el=document.getElementById('visitorCounter');var ws,delay=2000;function connect(){try{ws=new WebSocket('wss://chat.return2beta.com');}catch(e){return;}ws.onopen=function(){delay=2000;ws.send(JSON.stringify({type:'presence'}));};ws.onmessage=function(e){var d;try{d=JSON.parse(e.data);}catch(x){return;}if(d.type==='visitor_count'&&typeof d.count==='number'){el.innerHTML='<span class="vc-dot"></span>'+d.count+' online now';}};ws.onclose=function(){setTimeout(connect,delay);delay=Math.min(delay*2,30000);};ws.onerror=function(){ws.close();};}connect();})();
+  </script>
 </body>
 </html>

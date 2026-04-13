@@ -52,6 +52,27 @@ function saveScores(scores) {
 // ── In-memory state ─────────────────────────────────────
 
 let scores = loadScores();
+const presenceClients = new Set(); // WS clients registered for visitor count
+
+// ── Presence helpers ────────────────────────────────────
+
+function broadcastVisitorCount() {
+  const count = presenceClients.size;
+  const msg = JSON.stringify({ type: 'visitor_count', count: count });
+  for (const c of presenceClients) {
+    if (c.readyState === 1) c.send(msg);
+  }
+}
+
+function registerPresence(ws) {
+  if (presenceClients.has(ws)) return;
+  presenceClients.add(ws);
+  ws.on('close', function () {
+    presenceClients.delete(ws);
+    broadcastVisitorCount();
+  });
+  broadcastVisitorCount();
+}
 
 // ── Handler ─────────────────────────────────────────────
 
@@ -64,6 +85,11 @@ let scores = loadScores();
  * @returns {boolean} true if the message was handled, false otherwise
  */
 function handleMessage(ws, data, allClients) {
+  if (data.type === 'presence') {
+    registerPresence(ws);
+    return true;
+  }
+
   if (data.type === 'get_scores') {
     ws.send(JSON.stringify({ type: 'scores', scores: scores }));
     return true;
