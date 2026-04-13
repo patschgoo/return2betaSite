@@ -108,11 +108,14 @@
     .howto-link { flex-direction: row-reverse; }
 
     /* ── Carousel ────────────────────────── */
-    .nav-carousel { display: none; width: 100%; align-items: center; gap: 6px; overflow: hidden; }
-    .nav-carousel-items { display: flex; gap: 24px; overflow: hidden; flex: 1; justify-content: center; }
-    .nav-caret { background: none; border: none; color: #55ff55; font-size: 1.1rem; cursor: pointer; padding: 4px; font-family: 'Minecraft', sans-serif; }
-    .nav-caret:disabled { opacity: 0.3; cursor: default; }
-    .nav-current { text-shadow: 0 0 6px rgba(85,255,85,0.6), 1px 1px 2px rgba(0,0,0,0.7) !important; color: #55ff55 !important; }
+    .nav-carousel { display: none; width: 100%; align-items: center; justify-content: center; height: 48px; }
+    .nav-caret { background: none; border: none; color: rgba(255,255,255,0.8); font-size: 1.1rem; cursor: pointer; padding: 0 14px; height: 48px; display: flex; align-items: center; flex-shrink: 0; transition: color 0.15s; }
+    .nav-caret:hover { color: #fff; }
+    .nav-caret:disabled { opacity: 0.2; cursor: default; }
+    .nav-carousel-items { display: flex; align-items: center; justify-content: center; gap: 20px; flex: 1; overflow: hidden; }
+    .nav-carousel .nav-link { white-space: nowrap; }
+    .nav-carousel .nav-link.nav-current { color: #55ff55; text-shadow: 0 0 8px rgba(85,255,85,0.4); }
+    .nav-carousel .howto-link { white-space: normal; }
     @media (max-width: 720px) {
       .header-band > .nav-link,
       .header-band > .nav-dropdown,
@@ -335,7 +338,7 @@
       var cp = location.pathname.replace(/\/$/, '') || '/';
       for (var i = 0; i < allLinks.length; i++) {
         var lh = (allLinks[i].getAttribute('href') || '').replace(/\/$/, '') || '/';
-        if (lh === cp) { page = Math.floor(i / N); break; }
+        if (lh === cp || (lh !== '/' && cp.indexOf(lh + '/') === 0)) { page = Math.floor(i / N); break; }
       }
       function render() {
         itemsEl.innerHTML = '';
@@ -359,6 +362,32 @@
         if (!e.target.closest('.nav-dropdown') && !e.target.closest('#navCarouselItems')) {
           var dd = document.getElementById('gamesDropdown'); if (dd) dd.classList.remove('open');
         }
+      });
+      var forced = false;
+      var dropdown = header.querySelector(':scope > .nav-dropdown');
+      function forceOn() {
+        if (forced) return; forced = true;
+        allLinks.forEach(function (a) { a.style.display = 'none'; });
+        if (dropdown) dropdown.style.display = 'none';
+        if (spacer) spacer.style.display = 'none';
+        carousel.style.display = 'flex';
+      }
+      function forceOff() {
+        if (!forced) return; forced = false;
+        allLinks.forEach(function (a) { a.style.display = ''; });
+        if (dropdown) dropdown.style.display = '';
+        if (spacer) spacer.style.display = '';
+        if (window.innerWidth > 720) carousel.style.display = 'none';
+      }
+      if (window.innerWidth > 720 && header.scrollHeight > 100) forceOn();
+      var rt;
+      window.addEventListener('resize', function () {
+        clearTimeout(rt);
+        rt = setTimeout(function () {
+          if (window.innerWidth <= 720) { forceOff(); return; }
+          forceOff();
+          requestAnimationFrame(function () { if (header.scrollHeight > 100) forceOn(); });
+        }, 150);
       });
     })();
   </script>

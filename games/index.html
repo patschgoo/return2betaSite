@@ -331,6 +331,7 @@
     .nav-carousel-items { display: flex; align-items: center; justify-content: center; gap: 20px; flex: 1; overflow: hidden; }
     .nav-carousel .nav-link { white-space: nowrap; }
     .nav-carousel .nav-link.nav-current { color: #55ff55; text-shadow: 0 0 8px rgba(85,255,85,0.4); }
+    .nav-carousel .howto-link { white-space: normal; }
     @media (max-width: 720px) {
       .header-band {
         min-height: 48px;
@@ -1308,7 +1309,7 @@
         }
       });
       document.addEventListener('click', function (e) {
-        if (!dd.contains(e.target)) dd.classList.remove('open');
+        if (!dd.contains(e.target) && !e.target.closest('#navCarouselItems')) dd.classList.remove('open');
       });
     })();
   })();
