@@ -365,8 +365,9 @@
         <a class="dropdown-link" href="/games/?game=0"><img src="../images/Game%20Links/flappy-chicken.png" alt="" />Flappy Chicken</a>
         <a class="dropdown-link" href="/games/?game=1"><img src="../images/Game%20Links/blocktris.png" alt="" />Blocktris</a>
         <a class="dropdown-link" href="/games/?game=2"><img src="../images/Game%20Links/hatch-snake.png" alt="" />Hatch (Snake)</a>
-        <a class="dropdown-link" href="/games/?game=3"><img src="../images/Game%20Links/mine-blocks.png" alt="" />Mine Blocks</a>
-        <a class="dropdown-link" href="/games/?game=4"><img src="../images/Game%20Links/mine-blocks-2.png" alt="" />Mine Blocks 2</a>
+        <a class="dropdown-link" href="/games/?game=3"><img src="../images/Game%20Links/minesweeper.png" alt="" />Minesweeper</a>
+        <a class="dropdown-link" href="/games/?game=4"><img src="../images/Game%20Links/mine-blocks.png" alt="" />Mine Blocks</a>
+        <a class="dropdown-link" href="/games/?game=5"><img src="../images/Game%20Links/mine-blocks-2.png" alt="" />Mine Blocks 2</a>
         <hr />
         <a class="dropdown-more" href="/games/more-links/">More Links &#8250;</a>
       </div>
@@ -499,7 +500,7 @@
     var prevBtn = document.getElementById('gamePrev');
     var nextBtn = document.getElementById('gameNext');
 
-    var games = ['Flappy Chicken', 'Blocktris', 'Hatch (Snake)', 'Mine Blocks'];
+    var games = ['Flappy Chicken', 'Blocktris', 'Hatch (Snake)', 'Minesweeper', 'Mine Blocks'];
     var currentGame = 0;
     var activeGame = null;
     var animId = null;
@@ -582,6 +583,8 @@
       } else if (idx === 2) {
         activeGame = hatchSnake(canvas, ctx, scoreEl, bestEl, siteBestEl, hintEl, function (id) { animId = id; });
       } else if (idx === 3) {
+        activeGame = minesweeper(canvas, ctx, scoreEl, bestEl, siteBestEl, hintEl, function (id) { animId = id; });
+      } else if (idx === 4) {
         // Mine Blocks — embed
         canvas.style.display = 'none';
         scoresEl.style.display = 'none';
@@ -614,12 +617,12 @@
       versionLabelEl.textContent = ver.label;
     }
     versionPrevBtn.addEventListener('click', function () {
-      if (currentGame !== 3) return;
+      if (currentGame !== 4) return;
       currentMineblocksVersion = (currentMineblocksVersion - 1 + mineblocksVersions.length) % mineblocksVersions.length;
       loadMineblocksVersion();
     });
     versionNextBtn.addEventListener('click', function () {
-      if (currentGame !== 3) return;
+      if (currentGame !== 4) return;
       currentMineblocksVersion = (currentMineblocksVersion + 1) % mineblocksVersions.length;
       loadMineblocksVersion();
     });
@@ -1290,11 +1293,13 @@
        ================================================================ */
     function hatchSnake(cvs, c, sEl, bEl, sbEl, hEl, setAnim) {
       var COLS = 20, ROWS = 20, CELL = 20;
-      cvs.width = COLS * CELL;
-      cvs.height = ROWS * CELL;
-      hEl.textContent = 'Arrow keys / Swipe to move. Collect eggs!';
+      var BORDER = CELL;
+      cvs.width = COLS * CELL + BORDER * 2;
+      cvs.height = ROWS * CELL + BORDER * 2;
+      hEl.textContent = 'Press Space or Tap to start. Arrow keys / Swipe to move.';
 
       var W = cvs.width, H = cvs.height;
+      var OX = BORDER, OY = BORDER;
       var score = 0, best = parseInt(localStorage.getItem('r2b_hatch_best') || '0', 10);
       var siteBest = parseInt(localStorage.getItem('r2b_hatch_site') || '0', 10);
       bEl.textContent = best;
@@ -1302,15 +1307,18 @@
 
       var snake, dir, nextDir, egg, state, moveTimer, moveInterval, frame;
 
-      var T = 16;
       var TILE_GRASS_TOP = [0, 0];
+      var TILE_STONE = [1, 0];
+      var TILE_COBBLE = [0, 1];
       var TILE_DIRT = [2, 0];
+      var TILE_LOG = [4, 1];
+      var TILE_PLANKS = [4, 0];
 
       function drawTile(tile, dx, dy, dw, dh, tint) {
         drawTileTinted(c, tile, dx, dy, dw, dh, tint);
       }
 
-      /* ── Chicken pixel art (per-cell, direction-aware) ── */
+      /* ── Chicken pixel art (direction-aware) ── */
       function drawChickenHead(cx, cy, d) {
         var s = CELL;
         c.save();
@@ -1318,12 +1326,14 @@
         // body
         c.fillStyle = '#f0f0f0';
         c.fillRect(-s * 0.4, -s * 0.35, s * 0.8, s * 0.7);
+        c.fillStyle = '#ddd';
+        c.fillRect(-s * 0.4, s * 0.15, s * 0.8, s * 0.2);
         // eye
         c.fillStyle = '#111';
         var ex = d === 1 ? s * 0.15 : d === 3 ? -s * 0.15 : 0;
         var ey = d === 2 ? s * 0.1 : d === 0 ? -s * 0.1 : -s * 0.05;
         c.fillRect(ex, ey, 3, 3);
-        // comb (red, on top)
+        // comb (red)
         c.fillStyle = '#cc2222';
         c.fillRect(-2, -s * 0.38, 3, 4);
         c.fillRect(1, -s * 0.42, 3, 4);
@@ -1337,6 +1347,10 @@
         var wx = d === 1 ? s * 0.25 : d === 3 ? -s * 0.3 : 0;
         var wy = d === 2 ? s * 0.22 : d === 0 ? -s * 0.3 : s * 0.12;
         c.fillRect(wx, wy, 3, 4);
+        // feet
+        c.fillStyle = '#dd8833';
+        c.fillRect(-s * 0.15, s * 0.32, 3, 3);
+        c.fillRect(s * 0.08, s * 0.32, 3, 3);
         c.restore();
       }
 
@@ -1344,19 +1358,14 @@
         var s = CELL;
         c.save();
         c.translate(cx + s / 2, cy + s / 2);
-        // fluffy yellow body
         c.fillStyle = '#ffdd55';
         c.fillRect(-s * 0.3, -s * 0.25, s * 0.6, s * 0.55);
-        // lighter belly
         c.fillStyle = '#ffee88';
         c.fillRect(-s * 0.2, -s * 0.15, s * 0.4, s * 0.35);
-        // eye
         c.fillStyle = '#111';
         c.fillRect(s * 0.05, -s * 0.12, 2, 2);
-        // tiny beak
         c.fillStyle = '#dd8833';
         c.fillRect(s * 0.2, -s * 0.05, 3, 3);
-        // feet
         c.fillStyle = '#dd8833';
         c.fillRect(-s * 0.15, s * 0.28, 3, 3);
         c.fillRect(s * 0.08, s * 0.28, 3, 3);
@@ -1366,26 +1375,15 @@
       function drawEgg(cx, cy) {
         var s = CELL;
         var ex = cx + s / 2, ey = cy + s / 2;
-        // egg shadow
         c.fillStyle = 'rgba(0,0,0,0.15)';
-        c.beginPath();
-        c.ellipse(ex + 1, ey + 2, s * 0.28, s * 0.35, 0, 0, Math.PI * 2);
-        c.fill();
-        // egg body
+        c.beginPath(); c.ellipse(ex + 1, ey + 2, s * 0.28, s * 0.35, 0, 0, Math.PI * 2); c.fill();
         c.fillStyle = '#ffeecc';
-        c.beginPath();
-        c.ellipse(ex, ey - 1, s * 0.26, s * 0.34, 0, 0, Math.PI * 2);
-        c.fill();
-        // egg highlight
+        c.beginPath(); c.ellipse(ex, ey - 1, s * 0.26, s * 0.34, 0, 0, Math.PI * 2); c.fill();
         c.fillStyle = 'rgba(255,255,255,0.45)';
-        c.beginPath();
-        c.ellipse(ex - 2, ey - 5, s * 0.1, s * 0.14, -0.3, 0, Math.PI * 2);
-        c.fill();
-        // speckles
+        c.beginPath(); c.ellipse(ex - 2, ey - 5, s * 0.1, s * 0.14, -0.3, 0, Math.PI * 2); c.fill();
         c.fillStyle = 'rgba(180,150,100,0.3)';
         c.fillRect(ex + 2, ey + 3, 2, 2);
         c.fillRect(ex - 4, ey + 1, 2, 2);
-        c.fillRect(ex + 1, ey - 3, 1, 1);
       }
 
       function spawnEgg() {
@@ -1405,43 +1403,31 @@
 
       function reset() {
         snake = [{ x: 10, y: 10 }, { x: 9, y: 10 }, { x: 8, y: 10 }];
-        dir = 1; nextDir = 1; // 0=up,1=right,2=down,3=left
-        score = 0;
-        moveTimer = 0;
-        moveInterval = 10;
-        frame = 0;
+        dir = 1; nextDir = 1;
+        score = 0; moveTimer = 0; moveInterval = 10; frame = 0;
         state = 'idle';
         sEl.textContent = '0';
-        hEl.textContent = 'Arrow keys / Swipe to move. Collect eggs!';
+        hEl.textContent = 'Press Space or Tap to start. Arrow keys / Swipe to move.';
         spawnEgg();
         drawFrame();
       }
 
-      function begin() {
-        state = 'playing';
-        hEl.textContent = '';
-      }
+      function begin() { state = 'playing'; hEl.textContent = ''; }
 
       function move() {
         dir = nextDir;
         var head = snake[0];
         var dx = dir === 1 ? 1 : dir === 3 ? -1 : 0;
         var dy = dir === 2 ? 1 : dir === 0 ? -1 : 0;
-        var nx = head.x + dx;
-        var ny = head.y + dy;
-
-        // wall collision
+        var nx = head.x + dx, ny = head.y + dy;
         if (nx < 0 || nx >= COLS || ny < 0 || ny >= ROWS) { die(); return; }
-        // self collision
         for (var i = 0; i < snake.length; i++) {
           if (snake[i].x === nx && snake[i].y === ny) { die(); return; }
         }
-
         snake.unshift({ x: nx, y: ny });
         if (nx === egg.x && ny === egg.y) {
           score++;
           sEl.textContent = score;
-          // speed up slightly
           if (moveInterval > 4) moveInterval = Math.max(4, moveInterval - 0.3);
           spawnEgg();
         } else {
@@ -1460,61 +1446,63 @@
         if (state !== 'playing') return;
         frame++;
         moveTimer++;
-        if (moveTimer >= moveInterval) {
-          moveTimer = 0;
-          move();
-        }
+        if (moveTimer >= moveInterval) { moveTimer = 0; move(); }
       }
 
       function drawFrame() {
-        // grass field background
         c.imageSmoothingEnabled = false;
+        // Dark background behind border
+        c.fillStyle = '#0e0e12';
+        c.fillRect(0, 0, W, H);
+
+        // Stone/cobble border
+        var bTiles = [TILE_STONE, TILE_COBBLE, TILE_STONE, TILE_COBBLE];
+        // Top and bottom borders
+        for (var bx = 0; bx < COLS + 2; bx++) {
+          drawTile(bTiles[bx % 4], bx * CELL, 0, CELL, CELL);
+          drawTile(bTiles[(bx + 1) % 4], bx * CELL, OY + ROWS * CELL, CELL, CELL);
+        }
+        // Left and right borders
+        for (var by = 0; by < ROWS; by++) {
+          drawTile(bTiles[by % 4], 0, OY + by * CELL, CELL, CELL);
+          drawTile(bTiles[(by + 1) % 4], OX + COLS * CELL, OY + by * CELL, CELL, CELL);
+        }
+
+        // Grass field with checkerboard tint
         for (var gy = 0; gy < ROWS; gy++) {
           for (var gx = 0; gx < COLS; gx++) {
-            drawTile(TILE_GRASS_TOP, gx * CELL, gy * CELL, CELL, CELL, (gx + gy) % 2 === 0 ? '#5a8f32' : '#4e7f2a');
+            drawTile(TILE_GRASS_TOP, OX + gx * CELL, OY + gy * CELL, CELL, CELL, (gx + gy) % 2 === 0 ? '#5a8f32' : '#4e7f2a');
           }
         }
 
-        // subtle grid lines
-        c.strokeStyle = 'rgba(0,0,0,0.08)';
-        c.lineWidth = 1;
-        for (var gx = 0; gx <= COLS; gx++) {
-          c.beginPath(); c.moveTo(gx * CELL, 0); c.lineTo(gx * CELL, H); c.stroke();
-        }
-        for (var gy = 0; gy <= ROWS; gy++) {
-          c.beginPath(); c.moveTo(0, gy * CELL); c.lineTo(W, gy * CELL); c.stroke();
-        }
+        // Egg
+        if (egg) drawEgg(OX + egg.x * CELL, OY + egg.y * CELL);
 
-        // egg
-        if (egg) drawEgg(egg.x * CELL, egg.y * CELL);
-
-        // snake body (chicks) — draw tail to head
+        // Snake body (chicks) tail-to-head
         for (var i = snake.length - 1; i >= 1; i--) {
-          drawChick(snake[i].x * CELL, snake[i].y * CELL);
+          drawChick(OX + snake[i].x * CELL, OY + snake[i].y * CELL);
         }
-        // head (mother chicken)
-        drawChickenHead(snake[0].x * CELL, snake[0].y * CELL, dir);
+        // Head (mother chicken)
+        drawChickenHead(OX + snake[0].x * CELL, OY + snake[0].y * CELL, dir);
 
-        // score overlay when playing
+        // Score overlay
         if (state === 'playing') {
           c.fillStyle = '#fff';
           c.font = '18px Minecraft, sans-serif';
           c.textAlign = 'center';
-          c.shadowColor = 'rgba(0,0,0,0.8)';
-          c.shadowBlur = 4;
-          c.fillText(score, W / 2, 24);
+          c.shadowColor = 'rgba(0,0,0,0.8)'; c.shadowBlur = 4;
+          c.fillText(score, W / 2, OY - 3);
           c.shadowBlur = 0;
         }
 
-        // death overlay
+        // Death overlay
         if (state === 'dead') {
           c.fillStyle = 'rgba(0,0,0,0.4)';
-          c.fillRect(0, 0, W, H);
+          c.fillRect(OX, OY, COLS * CELL, ROWS * CELL);
           c.fillStyle = '#ff5555';
           c.font = '20px Minecraft, sans-serif';
           c.textAlign = 'center';
-          c.shadowColor = 'rgba(0,0,0,0.9)';
-          c.shadowBlur = 6;
+          c.shadowColor = 'rgba(0,0,0,0.9)'; c.shadowBlur = 6;
           c.fillText('Game Over!', W / 2, H / 2 - 10);
           c.fillStyle = '#ffdd55';
           c.font = '14px Minecraft, sans-serif';
@@ -1523,15 +1511,9 @@
         }
       }
 
-      function loop() {
-        update();
-        drawFrame();
-        setAnim(requestAnimationFrame(loop));
-      }
+      function loop() { update(); drawFrame(); setAnim(requestAnimationFrame(loop)); }
 
-      // Direction opposites to prevent 180° turns
       var opposites = { 0: 2, 1: 3, 2: 0, 3: 1 };
-
       function setDir(d) {
         if (state === 'idle') begin();
         if (opposites[d] !== dir) nextDir = d;
@@ -1539,6 +1521,7 @@
 
       function onKey(e) {
         if (state === 'dead' && (e.code === 'Space' || e.key === ' ')) { e.preventDefault(); reset(); return; }
+        if (state === 'idle' && (e.code === 'Space' || e.key === ' ')) { e.preventDefault(); begin(); return; }
         if (e.code === 'ArrowUp' || e.key === 'ArrowUp') { e.preventDefault(); setDir(0); }
         else if (e.code === 'ArrowRight' || e.key === 'ArrowRight') { e.preventDefault(); setDir(1); }
         else if (e.code === 'ArrowDown' || e.key === 'ArrowDown') { e.preventDefault(); setDir(2); }
@@ -1551,33 +1534,22 @@
         e.preventDefault();
         if (state === 'dead') { reset(); return; }
         var t = e.touches[0];
-        touchStartX = t.clientX;
-        touchStartY = t.clientY;
+        touchStartX = t.clientX; touchStartY = t.clientY;
       }
       function onTouchEnd(e) {
         if (e.target !== cvs) return;
         e.preventDefault();
         var t = e.changedTouches[0];
-        var dx = t.clientX - touchStartX;
-        var dy = t.clientY - touchStartY;
-        if (Math.abs(dx) < 10 && Math.abs(dy) < 10) {
-          // tap — move forward or start
-          if (state === 'idle') begin();
-          return;
-        }
-        if (Math.abs(dx) > Math.abs(dy)) {
-          setDir(dx > 0 ? 1 : 3);
-        } else {
-          setDir(dy > 0 ? 2 : 0);
-        }
+        var dx = t.clientX - touchStartX, dy = t.clientY - touchStartY;
+        if (Math.abs(dx) < 10 && Math.abs(dy) < 10) { if (state === 'idle') begin(); return; }
+        if (Math.abs(dx) > Math.abs(dy)) setDir(dx > 0 ? 1 : 3);
+        else setDir(dy > 0 ? 2 : 0);
       }
 
       document.addEventListener('keydown', onKey);
       cvs.addEventListener('touchstart', onTouchStart);
       cvs.addEventListener('touchend', onTouchEnd);
-
-      reset();
-      loop();
+      reset(); loop();
 
       return {
         cleanup: function () {
@@ -1588,13 +1560,356 @@
       };
     }
 
+    /* ================================================================
+       MINESWEEPER — TNT mines, stone/cobble/dirt hidden cells
+       ================================================================ */
+    function minesweeper(cvs, c, sEl, bEl, sbEl, hEl, setAnim) {
+      var COLS = 16, ROWS = 16, MINES = 40, CELL = 24;
+      var BORDER = CELL;
+      cvs.width = COLS * CELL + BORDER * 2;
+      cvs.height = ROWS * CELL + BORDER * 2;
+      hEl.textContent = 'Click to reveal. Right-click / Long-press to flag.';
+
+      var W = cvs.width, H = cvs.height;
+      var OX = BORDER, OY = BORDER;
+
+      var score = 0, best = parseInt(localStorage.getItem('r2b_mine_best') || '0', 10);
+      var siteBest = parseInt(localStorage.getItem('r2b_mine_site') || '0', 10);
+      bEl.textContent = best;
+      sbEl.textContent = siteBest;
+
+      var TILE_STONE = [1, 0];
+      var TILE_COBBLE = [0, 1];
+      var TILE_DIRT = [2, 0];
+      var TILE_PLANKS = [4, 0];
+      var TILE_SAND = [2, 1];
+      var TILE_TNT = [8, 0];
+      var TILE_GRAVEL = [3, 1];
+      var TILE_LOG_TOP = [5, 1];
+
+      var HIDDEN_TILES = [TILE_STONE, TILE_COBBLE, TILE_DIRT];
+      var BORDER_TILES = [TILE_STONE, TILE_COBBLE];
+
+      // Number colors matching classic minesweeper
+      var NUM_COLORS = [null, '#3333ff', '#007700', '#ff0000', '#000088', '#880000', '#008888', '#000', '#666'];
+
+      var board, cellTex, state, revealed, flagged, mineCount, firstClick;
+
+      function drawTile(tile, dx, dy, dw, dh, tint) {
+        drawTileTinted(c, tile, dx, dy, dw, dh, tint);
+      }
+
+      function initBoard() {
+        board = [];
+        cellTex = [];
+        revealed = [];
+        flagged = [];
+        mineCount = MINES;
+        firstClick = true;
+        state = 'playing';
+        score = 0;
+        sEl.textContent = '0';
+        hEl.textContent = 'Click to reveal. Right-click / Long-press to flag.';
+        for (var r = 0; r < ROWS; r++) {
+          board[r] = [];
+          cellTex[r] = [];
+          revealed[r] = [];
+          flagged[r] = [];
+          for (var cl = 0; cl < COLS; cl++) {
+            board[r][cl] = 0; // 0=empty, -1=mine
+            cellTex[r][cl] = Math.floor(Math.random() * HIDDEN_TILES.length);
+            revealed[r][cl] = false;
+            flagged[r][cl] = false;
+          }
+        }
+      }
+
+      function placeMines(safeR, safeC) {
+        var placed = 0;
+        while (placed < MINES) {
+          var mr = Math.floor(Math.random() * ROWS);
+          var mc = Math.floor(Math.random() * COLS);
+          // Keep a safe zone around first click
+          if (Math.abs(mr - safeR) <= 1 && Math.abs(mc - safeC) <= 1) continue;
+          if (board[mr][mc] === -1) continue;
+          board[mr][mc] = -1;
+          placed++;
+        }
+        // Calculate adjacent counts
+        for (var r = 0; r < ROWS; r++) {
+          for (var cl = 0; cl < COLS; cl++) {
+            if (board[r][cl] === -1) continue;
+            var count = 0;
+            for (var dr = -1; dr <= 1; dr++) {
+              for (var dc = -1; dc <= 1; dc++) {
+                if (dr === 0 && dc === 0) continue;
+                var nr = r + dr, nc = cl + dc;
+                if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS && board[nr][nc] === -1) count++;
+              }
+            }
+            board[r][cl] = count;
+          }
+        }
+      }
+
+      function reveal(r, cl) {
+        if (r < 0 || r >= ROWS || cl < 0 || cl >= COLS) return;
+        if (revealed[r][cl] || flagged[r][cl]) return;
+        revealed[r][cl] = true;
+        score++;
+        sEl.textContent = score;
+        if (board[r][cl] === 0) {
+          // Flood fill
+          for (var dr = -1; dr <= 1; dr++) {
+            for (var dc = -1; dc <= 1; dc++) {
+              if (dr === 0 && dc === 0) continue;
+              reveal(r + dr, cl + dc);
+            }
+          }
+        }
+      }
+
+      function checkWin() {
+        var totalSafe = COLS * ROWS - MINES;
+        if (score >= totalSafe) {
+          state = 'won';
+          if (score > best) { best = score; localStorage.setItem('r2b_mine_best', best); bEl.textContent = best; }
+          if (score > siteBest) { siteBest = score; localStorage.setItem('r2b_mine_site', siteBest); sbEl.textContent = siteBest; }
+          hEl.textContent = 'You win! Click to play again.';
+        }
+      }
+
+      function hitMine() {
+        state = 'dead';
+        // Reveal all mines
+        for (var r = 0; r < ROWS; r++) {
+          for (var cl = 0; cl < COLS; cl++) {
+            if (board[r][cl] === -1) revealed[r][cl] = true;
+          }
+        }
+        if (score > best) { best = score; localStorage.setItem('r2b_mine_best', best); bEl.textContent = best; }
+        if (score > siteBest) { siteBest = score; localStorage.setItem('r2b_mine_site', siteBest); sbEl.textContent = siteBest; }
+        hEl.textContent = 'BOOM! Click to play again.';
+      }
+
+      function drawFrame() {
+        c.imageSmoothingEnabled = false;
+        c.fillStyle = '#0e0e12';
+        c.fillRect(0, 0, W, H);
+
+        // Border
+        for (var bx = 0; bx < COLS + 2; bx++) {
+          drawTile(BORDER_TILES[bx % 2], bx * CELL, 0, CELL, CELL);
+          drawTile(BORDER_TILES[(bx + 1) % 2], bx * CELL, OY + ROWS * CELL, CELL, CELL);
+        }
+        for (var by = 0; by < ROWS; by++) {
+          drawTile(BORDER_TILES[by % 2], 0, OY + by * CELL, CELL, CELL);
+          drawTile(BORDER_TILES[(by + 1) % 2], OX + COLS * CELL, OY + by * CELL, CELL, CELL);
+        }
+
+        // Cells
+        for (var r = 0; r < ROWS; r++) {
+          for (var cl = 0; cl < COLS; cl++) {
+            var px = OX + cl * CELL, py = OY + r * CELL;
+            if (!revealed[r][cl]) {
+              // Hidden cell — textured stone/cobble/dirt
+              drawTile(HIDDEN_TILES[cellTex[r][cl]], px, py, CELL, CELL);
+              // Subtle 3D raised edge
+              c.fillStyle = 'rgba(255,255,255,0.12)';
+              c.fillRect(px, py, CELL, 2);
+              c.fillRect(px, py, 2, CELL);
+              c.fillStyle = 'rgba(0,0,0,0.2)';
+              c.fillRect(px, py + CELL - 2, CELL, 2);
+              c.fillRect(px + CELL - 2, py, 2, CELL);
+              // Flag
+              if (flagged[r][cl]) {
+                // Flag pole
+                c.fillStyle = '#4a3728';
+                c.fillRect(px + CELL / 2, py + 3, 2, CELL - 6);
+                // Red flag
+                c.fillStyle = '#cc2222';
+                c.beginPath();
+                c.moveTo(px + CELL / 2 + 2, py + 3);
+                c.lineTo(px + CELL / 2 + 10, py + 7);
+                c.lineTo(px + CELL / 2 + 2, py + 11);
+                c.fill();
+                // Base
+                c.fillStyle = '#444';
+                c.fillRect(px + CELL / 2 - 3, py + CELL - 5, 8, 3);
+              }
+            } else {
+              // Revealed cell
+              if (board[r][cl] === -1) {
+                // TNT mine
+                drawTile(TILE_TNT, px, py, CELL, CELL);
+              } else {
+                // Safe revealed — sand/planks
+                drawTile((r + cl) % 2 === 0 ? TILE_SAND : TILE_PLANKS, px, py, CELL, CELL);
+                // Subtle sunken edge
+                c.fillStyle = 'rgba(0,0,0,0.1)';
+                c.fillRect(px, py, CELL, 1);
+                c.fillRect(px, py, 1, CELL);
+                // Number
+                if (board[r][cl] > 0) {
+                  c.fillStyle = NUM_COLORS[board[r][cl]] || '#fff';
+                  c.font = 'bold ' + (CELL * 0.65) + 'px Minecraft, sans-serif';
+                  c.textAlign = 'center';
+                  c.textBaseline = 'middle';
+                  c.shadowColor = 'rgba(0,0,0,0.6)';
+                  c.shadowOffsetX = 1;
+                  c.shadowOffsetY = 1;
+                  c.shadowBlur = 0;
+                  c.fillText(board[r][cl], px + CELL / 2, py + CELL / 2 + 1);
+                  c.shadowOffsetX = 0;
+                  c.shadowOffsetY = 0;
+                }
+              }
+            }
+          }
+        }
+
+        // Mine counter in top border
+        var flagCount = 0;
+        for (var r = 0; r < ROWS; r++) for (var cl = 0; cl < COLS; cl++) if (flagged[r][cl]) flagCount++;
+        c.fillStyle = '#ff5555';
+        c.font = (CELL * 0.65) + 'px Minecraft, sans-serif';
+        c.textAlign = 'left';
+        c.textBaseline = 'middle';
+        c.shadowColor = 'rgba(0,0,0,0.8)';
+        c.shadowOffsetX = 1; c.shadowOffsetY = 1; c.shadowBlur = 0;
+        c.fillText('TNT: ' + (MINES - flagCount), OX + 4, CELL / 2 + 1);
+        c.shadowOffsetX = 0; c.shadowOffsetY = 0;
+
+        // Win overlay
+        if (state === 'won') {
+          c.fillStyle = 'rgba(0,80,0,0.35)';
+          c.fillRect(OX, OY, COLS * CELL, ROWS * CELL);
+          c.fillStyle = '#55ff55';
+          c.font = '22px Minecraft, sans-serif';
+          c.textAlign = 'center';
+          c.textBaseline = 'middle';
+          c.shadowColor = 'rgba(0,0,0,0.9)'; c.shadowBlur = 6;
+          c.fillText('All Clear!', W / 2, H / 2);
+          c.shadowBlur = 0;
+        }
+
+        // Death flash
+        if (state === 'dead') {
+          c.fillStyle = 'rgba(80,0,0,0.25)';
+          c.fillRect(OX, OY, COLS * CELL, ROWS * CELL);
+        }
+      }
+
+      function getCellFromEvent(e) {
+        var rect = cvs.getBoundingClientRect();
+        var scaleX = cvs.width / rect.width;
+        var scaleY = cvs.height / rect.height;
+        var mx = (e.clientX - rect.left) * scaleX - OX;
+        var my = (e.clientY - rect.top) * scaleY - OY;
+        var cl = Math.floor(mx / CELL);
+        var r = Math.floor(my / CELL);
+        if (cl < 0 || cl >= COLS || r < 0 || r >= ROWS) return null;
+        return { r: r, c: cl };
+      }
+
+      function handleReveal(r, cl) {
+        if (state === 'won' || state === 'dead') { initBoard(); drawFrame(); return; }
+        if (revealed[r][cl] || flagged[r][cl]) return;
+        if (firstClick) {
+          firstClick = false;
+          placeMines(r, cl);
+        }
+        if (board[r][cl] === -1) {
+          hitMine();
+        } else {
+          reveal(r, cl);
+          checkWin();
+        }
+        drawFrame();
+      }
+
+      function handleFlag(r, cl) {
+        if (state !== 'playing') return;
+        if (revealed[r][cl]) return;
+        flagged[r][cl] = !flagged[r][cl];
+        drawFrame();
+      }
+
+      function onClick(e) {
+        var cell = getCellFromEvent(e);
+        if (!cell) return;
+        handleReveal(cell.r, cell.c);
+      }
+
+      function onContext(e) {
+        e.preventDefault();
+        var cell = getCellFromEvent(e);
+        if (!cell) return;
+        handleFlag(cell.r, cell.c);
+      }
+
+      // Touch: quick tap = reveal, long press = flag
+      var touchTimer = null, touchCell = null, longPressed = false;
+      function onTouchStart(e) {
+        if (e.target !== cvs) return;
+        e.preventDefault();
+        var t = e.touches[0];
+        var rect = cvs.getBoundingClientRect();
+        var scaleX = cvs.width / rect.width;
+        var scaleY = cvs.height / rect.height;
+        var mx = (t.clientX - rect.left) * scaleX - OX;
+        var my = (t.clientY - rect.top) * scaleY - OY;
+        var cl = Math.floor(mx / CELL);
+        var r = Math.floor(my / CELL);
+        if (cl < 0 || cl >= COLS || r < 0 || r >= ROWS) { touchCell = null; return; }
+        touchCell = { r: r, c: cl };
+        longPressed = false;
+        touchTimer = setTimeout(function () {
+          longPressed = true;
+          if (touchCell) handleFlag(touchCell.r, touchCell.c);
+        }, 400);
+      }
+      function onTouchEnd(e) {
+        if (e.target !== cvs) return;
+        e.preventDefault();
+        clearTimeout(touchTimer);
+        if (!longPressed && touchCell) {
+          handleReveal(touchCell.r, touchCell.c);
+        }
+        touchCell = null;
+      }
+      function onTouchMove() { clearTimeout(touchTimer); touchCell = null; }
+
+      cvs.addEventListener('click', onClick);
+      cvs.addEventListener('contextmenu', onContext);
+      cvs.addEventListener('touchstart', onTouchStart);
+      cvs.addEventListener('touchend', onTouchEnd);
+      cvs.addEventListener('touchmove', onTouchMove);
+
+      initBoard();
+      drawFrame();
+      // Idle render loop (just redraws, no state changes)
+      function loop() { drawFrame(); setAnim(requestAnimationFrame(loop)); }
+      loop();
+
+      return {
+        cleanup: function () {
+          cvs.removeEventListener('click', onClick);
+          cvs.removeEventListener('contextmenu', onContext);
+          cvs.removeEventListener('touchstart', onTouchStart);
+          cvs.removeEventListener('touchend', onTouchEnd);
+          cvs.removeEventListener('touchmove', onTouchMove);
+        }
+      };
+    }
+
     // Start with game from URL param or default to Flappy Chicken
     var urlParams = new URLSearchParams(window.location.search);
     var gameParam = parseInt(urlParams.get('game'), 10);
-    if (gameParam === 4) {
+    if (gameParam === 5) {
       // Mine Blocks 2 → open Mine Blocks with version 2 pre-selected
       currentMineblocksVersion = 1;
-      startGame(3);
+      startGame(4);
     } else if (gameParam >= 0 && gameParam < games.length) {
       startGame(gameParam);
     } else {
