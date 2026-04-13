@@ -239,6 +239,12 @@
       .game-container.scaled-canvas.tetris-game {
         margin-bottom: 230px;
       }
+      .game-container.scaled-canvas.hatch-game {
+        margin-bottom: 200px;
+      }
+      .game-container.scaled-canvas.minesweeper-game {
+        margin-bottom: 200px;
+      }
       .game-container.embed-game {
         width: min(552px, 80vw);
       }
@@ -252,6 +258,12 @@
       }
       .game-container.scaled-canvas.tetris-game {
         margin-bottom: 140px;
+      }
+      .game-container.scaled-canvas.hatch-game {
+        margin-bottom: 110px;
+      }
+      .game-container.scaled-canvas.minesweeper-game {
+        margin-bottom: 110px;
       }
     }
     @media (max-width: 720px) {
@@ -581,8 +593,10 @@
         gameContainer.classList.add('tetris-game');
         activeGame = tetris(canvas, ctx, scoreEl, bestEl, siteBestEl, hintEl, function (id) { animId = id; });
       } else if (idx === 2) {
+        gameContainer.classList.add('hatch-game');
         activeGame = hatchSnake(canvas, ctx, scoreEl, bestEl, siteBestEl, hintEl, function (id) { animId = id; });
       } else if (idx === 3) {
+        gameContainer.classList.add('minesweeper-game');
         activeGame = minesweeper(canvas, ctx, scoreEl, bestEl, siteBestEl, hintEl, function (id) { animId = id; });
       } else if (idx === 4) {
         // Mine Blocks — embed
