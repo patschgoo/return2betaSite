@@ -153,26 +153,28 @@
       margin: 12px 0;
       text-shadow: 2px 2px 0 rgba(0,0,0,0.8);
     }
-    /* ── IP box floated top-right (desktop) ─── */
-    .ip-panel {
-      float: right;
-      margin: 0 0 16px 24px;
-      text-align: center;
+    .top-boxes {
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+      justify-content: center;
+      margin: 16px 0;
     }
-    .ip-panel-label {
-      color: #fff;
-      font-size: 0.85rem;
-      text-shadow: 2px 2px 0 rgba(0,0,0,0.8);
-      margin: 0 0 6px 0;
+    @media (max-width: 720px) {
+      .top-boxes {
+        flex-direction: column;
+        align-items: center;
+      }
     }
     .ip-box {
       background: rgba(0,0,0,0.5);
       border: 2px solid rgba(85,255,85,0.3);
       border-radius: 6px;
-      padding: 14px 24px;
+      padding: 16px 24px;
       text-align: center;
       line-height: 2.2;
-      max-width: 280px;
+      flex: 1;
+      max-width: 400px;
     }
     .ip-box .ip {
       display: block;
@@ -180,140 +182,16 @@
       font-size: clamp(0.7rem, 1.2vw, 0.9rem);
       text-shadow: 1px 1px 0 rgba(0,0,0,0.7);
     }
+    .ip-box h3 {
+      margin: 0 0 4px 0;
+      font-size: 0.85rem;
+      color: #55ff55;
+    }
     .ip-box .ip.primary {
       color: #55ff55;
       font-size: clamp(1rem, 1.8vw, 1.3rem);
       text-shadow: 2px 2px 0 rgba(0,0,0,0.8);
       font-weight: bold;
-    }
-    /* Mobile: center IP box instead of floating */
-    .mobile-ip-panel {
-      display: none;
-      text-align: center;
-      margin: 16px auto;
-    }
-    .mobile-ip-panel .ip-panel-label {
-      color: #fff;
-      font-size: 0.85rem;
-      text-shadow: 2px 2px 0 rgba(0,0,0,0.8);
-      margin: 0 0 6px 0;
-    }
-    @media (max-width: 720px) {
-      .ip-panel { display: none; }
-      .mobile-ip-panel { display: block; }
-      .mobile-ip-panel .ip-box { max-width: 400px; margin: 0 auto; }
-    }
-    /* ── TOC sliding panel ─────────────────── */
-    .toc-panel-wrap {
-      --panel-w: 210px;
-      position: fixed;
-      top: 0;
-      left: 0;
-      bottom: 0;
-      z-index: 200;
-      width: var(--panel-w);
-      transform: translateX(calc(-1 * var(--panel-w)));
-      transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-      pointer-events: none;
-    }
-    .toc-panel-wrap.open {
-      transform: translateX(0);
-    }
-    .toc-panel {
-      pointer-events: all;
-      position: absolute;
-      left: 0; top: 0; bottom: 0;
-      width: 100%;
-      background: rgba(6, 10, 6, 0.85);
-      border-right: 2px solid rgba(85,255,85,0.28);
-      backdrop-filter: blur(3px);
-      -webkit-backdrop-filter: blur(3px);
-      display: flex;
-      flex-direction: column;
-    }
-    .toc-panel-header {
-      flex-shrink: 0;
-      padding: 14px 14px 10px;
-      border-bottom: 1px solid rgba(85,255,85,0.22);
-      color: #55ff55;
-      font-size: 0.75rem;
-      text-align: center;
-      text-shadow: 2px 2px 0 rgba(0,0,0,0.85);
-      letter-spacing: 1px;
-    }
-    .toc-panel-list {
-      flex: 1;
-      overflow-y: auto;
-      padding: 5px 0;
-      scrollbar-width: thin;
-      scrollbar-color: rgba(85,255,85,0.35) transparent;
-    }
-    .toc-panel-list::-webkit-scrollbar       { width: 5px; }
-    .toc-panel-list::-webkit-scrollbar-track { background: transparent; }
-    .toc-panel-list::-webkit-scrollbar-thumb {
-      background: rgba(85,255,85,0.35);
-      border-radius: 3px;
-    }
-    .toc-panel-category {
-      color: #55ff55;
-      font-size: 0.68rem;
-      padding: 10px 14px 2px;
-      text-shadow: 1px 1px 0 rgba(0,0,0,0.7);
-      letter-spacing: 0.5px;
-    }
-    .toc-panel-item {
-      display: block;
-      color: #b8b8b8;
-      font-family: 'Minecraft', sans-serif;
-      font-size: 0.65rem;
-      padding: 6px 14px 6px 22px;
-      text-decoration: none;
-      text-shadow: 1px 1px 0 rgba(0,0,0,0.7);
-      transition: background 0.1s, color 0.1s;
-    }
-    .toc-panel-item:hover {
-      background: rgba(85,255,85,0.1);
-      color: #eee;
-    }
-    .toc-tab {
-      pointer-events: all;
-      position: absolute;
-      left: var(--panel-w);
-      top: 50%;
-      transform: translateY(-50%);
-      writing-mode: vertical-rl;
-      background: rgba(8, 14, 8, 0.82);
-      border: 2px solid rgba(85,255,85,0.45);
-      border-left: none;
-      border-radius: 0 6px 6px 0;
-      color: #55ff55;
-      font-family: 'Minecraft', sans-serif;
-      font-size: 0.72rem;
-      letter-spacing: 2px;
-      padding: 12px 7px;
-      cursor: pointer;
-      user-select: none;
-      text-shadow: 1px 1px 0 rgba(0,0,0,0.9);
-      transition: background 0.15s, color 0.15s, border-color 0.15s;
-      white-space: nowrap;
-    }
-    .toc-tab:hover {
-      background: rgba(20, 40, 20, 0.9);
-      color: #aaff88;
-      border-color: rgba(85,255,85,0.7);
-    }
-    .toc-tab-arrow {
-      display: block;
-      writing-mode: horizontal-tb;
-      text-align: center;
-      margin-bottom: 16px;
-      font-size: 0.85rem;
-      width: 100%;
-    }
-    .toc-panel-wrap:not(.open) .toc-tab-arrow::before { content: '\25B6'; }
-    .toc-panel-wrap.open      .toc-tab-arrow::before { content: '\25C0'; }
-    @media (max-width: 720px) {
-      .toc-panel-wrap { --panel-w: 175px; }
     }
     .content .note {
       background: rgba(85,255,85,0.08);
@@ -339,7 +217,45 @@
     .content a:hover {
       color: #aaffaa;
     }
-    /* (toc styles moved to sliding panel above) */
+    .toc {
+      background: rgba(0,0,0,0.4);
+      border: 1px solid rgba(85,255,85,0.2);
+      border-radius: 6px;
+      padding: 14px 20px;
+      text-align: left;
+    }
+    .toc h3 {
+      margin: 0 0 8px 0;
+      font-size: 0.85rem;
+      color: #55ff55;
+    }
+    .toc ol {
+      padding-left: 20px;
+      margin: 0;
+    }
+    .toc li {
+      margin-bottom: 4px;
+    }
+    .toc a {
+      font-size: clamp(0.65rem, 1.1vw, 0.82rem);
+    }
+    .toc-category {
+      color: #55ff55;
+      font-size: clamp(0.7rem, 1.1vw, 0.85rem);
+      margin: 10px 0 4px;
+      padding: 0;
+    }
+    .toc-category:first-child { margin-top: 0; }
+    .toc ul {
+      list-style: none;
+      padding-left: 14px;
+      margin: 0 0 4px;
+    }
+    .toc ul li::before {
+      content: '›';
+      color: #55ff55;
+      margin-right: 6px;
+    }
     /* Nav carousel */
     .nav-carousel { display: none; width: 100%; align-items: center; justify-content: center; height: 48px; }
     .nav-caret { background: none; border: none; color: rgba(255,255,255,0.8); font-size: 1.1rem; cursor: pointer; padding: 0 14px; height: 48px; display: flex; align-items: center; flex-shrink: 0; transition: color 0.15s; }
@@ -468,25 +384,50 @@
 
   <main class="content">
     <h1>How to Join Return2Beta</h1>
-    <section class="ip-panel">
-      <p class="ip-panel-label">Server IPs:</p>
-      <div class="ip-box">
-        <span class="ip primary">mc.return2beta.com</span>
-        <span class="ip">beta.mildvanilla.org</span>
-        <span class="ip">mc.mildbeta.world</span>
-        <span class="ip">5.9.123.120:50179</span>
-        <span class="ip">217.160.170.104</span>
-      </div>
-    </section>
-    <div class="mobile-ip-panel">
-      <p class="ip-panel-label">Server IPs:</p>
-      <div class="ip-box">
-        <span class="ip primary">mc.return2beta.com</span>
-        <span class="ip">beta.mildvanilla.org</span>
-        <span class="ip">mc.mildbeta.world</span>
-        <span class="ip">5.9.123.120:50179</span>
-        <span class="ip">217.160.170.104</span>
-      </div>
+    <div class="top-boxes">
+    <div class="ip-box">
+      <h3>Server IPs:</h3>
+      <span class="ip primary">mc.return2beta.com</span>
+      <span class="ip">beta.mildvanilla.org</span>
+      <span class="ip">mc.mildbeta.world</span>
+      <span class="ip">5.9.123.120:50179</span>
+      <span class="ip">217.160.170.104</span>
+    </div>
+
+    <div class="toc" style="flex: 1; max-width: 400px;">
+      <h3>Table of Contents</h3>
+      <p class="toc-category">Java Edition (PC Launchers)</p>
+      <ul>
+        <li><a href="#betacraft">BetaCraft Launcher</a></li>
+        <li><a href="#multimc">MultiMC</a></li>
+        <li><a href="#prism">Prism Launcher</a></li>
+        <li><a href="#ultimmc">UltimMC</a></li>
+        <li><a href="#retrowrapper">RetroWrapper</a></li>
+        <li><a href="#lts">Minecraft-LTS-Launcher</a></li>
+      </ul>
+      <p class="toc-category">Java Edition (Mobile)</p>
+      <ul>
+        <li><a href="#pojav">PojavLauncher (Android)</a></li>
+      </ul>
+      <p class="toc-category">Browser</p>
+      <ul>
+        <li><a href="#eaglercraft">Eaglercraft</a></li>
+      </ul>
+      <p class="toc-category">Bedrock Edition</p>
+      <ul>
+        <li><a href="#bedrock-easy">Windows 10/11, Android, iOS, Xbox</a></li>
+        <li><a href="#playstation">PlayStation 4 / 5</a></li>
+        <li><a href="#switch">Nintendo Switch</a></li>
+      </ul>
+      <p class="toc-category">Reference</p>
+      <ul>
+        <li><a href="#connections">All Server Addresses</a></li>
+        <li><a href="#server-mods">Server Mods</a></li>
+        <li><a href="#useful-mods">Useful Mods</a></li>
+        <li><a href="#troubleshooting">Troubleshooting</a></li>
+        <li><a href="#incompatible">Incompatible Platforms</a></li>
+      </ul>
+    </div>
     </div>
 
     <div class="note">All launchers listed below are free and support offline/cracked mode. You do <strong>not</strong> need a Mojang or Microsoft account to play on Return2Beta.</div>
@@ -895,40 +836,6 @@
 
     <p style="text-align:center; margin-top: 32px; color: #888; font-size: clamp(0.6rem, 1vw, 0.8rem);">Need more help? Ask in our <a href="https://discord.gg/vVvs7tN5p7" target="_blank" rel="noopener noreferrer">Discord</a> or use the <a href="/chat/">Chat</a>!</p>
   </main>
-
-  <!-- TOC sliding panel -->
-  <div class="toc-panel-wrap" id="tocPanelWrap">
-    <nav class="toc-panel" id="tocPanel" aria-label="Table of contents">
-      <div class="toc-panel-header">&#8212; Contents &#8212;</div>
-      <div class="toc-panel-list" id="tocList">
-        <p class="toc-panel-category">Java Edition (PC Launchers)</p>
-        <a class="toc-panel-item" href="#betacraft">BetaCraft Launcher</a>
-        <a class="toc-panel-item" href="#multimc">MultiMC</a>
-        <a class="toc-panel-item" href="#prism">Prism Launcher</a>
-        <a class="toc-panel-item" href="#ultimmc">UltimMC</a>
-        <a class="toc-panel-item" href="#retrowrapper">RetroWrapper</a>
-        <a class="toc-panel-item" href="#lts">Minecraft-LTS-Launcher</a>
-        <p class="toc-panel-category">Java Edition (Mobile)</p>
-        <a class="toc-panel-item" href="#pojav">PojavLauncher (Android)</a>
-        <p class="toc-panel-category">Browser</p>
-        <a class="toc-panel-item" href="#eaglercraft">Eaglercraft</a>
-        <p class="toc-panel-category">Bedrock Edition</p>
-        <a class="toc-panel-item" href="#bedrock-easy">Windows 10/11, Android, iOS, Xbox</a>
-        <a class="toc-panel-item" href="#playstation">PlayStation 4 / 5</a>
-        <a class="toc-panel-item" href="#switch">Nintendo Switch</a>
-        <p class="toc-panel-category">Reference</p>
-        <a class="toc-panel-item" href="#connections">All Server Addresses</a>
-        <a class="toc-panel-item" href="#server-mods">Server Mods</a>
-        <a class="toc-panel-item" href="#useful-mods">Useful Mods</a>
-        <a class="toc-panel-item" href="#troubleshooting">Troubleshooting</a>
-        <a class="toc-panel-item" href="#incompatible">Incompatible Platforms</a>
-      </div>
-    </nav>
-    <button class="toc-tab" id="tocTab" aria-expanded="false" aria-controls="tocPanel">
-      <span class="toc-tab-arrow" aria-hidden="true"></span>Contents
-    </button>
-  </div>
-
   <script>
     (function() {
       const header = document.querySelector('.header-band');
@@ -936,35 +843,8 @@
       function check() {
         header.classList.toggle('wrapped', header.scrollHeight > 48);
       }
-      // TOC panel positioning + toggle
-      var tocWrap = document.getElementById('tocPanelWrap');
-      var tocTab  = document.getElementById('tocTab');
-      function updateTocTop() {
-        if (tocWrap) tocWrap.style.top = (header.offsetTop + header.offsetHeight) + 'px';
-      }
-      if (tocTab) {
-        tocTab.addEventListener('click', function() {
-          var open = tocWrap.classList.toggle('open');
-          tocTab.setAttribute('aria-expanded', open);
-        });
-        // Close on mobile by default
-        if (window.innerWidth <= 720) {
-          tocWrap.classList.remove('open');
-        }
-      }
-      // Close panel on link click (mobile)
-      var tocList = document.getElementById('tocList');
-      if (tocList) {
-        tocList.addEventListener('click', function(e) {
-          if (e.target.closest('.toc-panel-item') && window.innerWidth <= 720) {
-            tocWrap.classList.remove('open');
-            tocTab.setAttribute('aria-expanded', false);
-          }
-        });
-      }
-      new ResizeObserver(function() { check(); updateTocTop(); }).observe(header);
+      new ResizeObserver(check).observe(header);
       check();
-      updateTocTop();
     })();
   </script>
   <script>
