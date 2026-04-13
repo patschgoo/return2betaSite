@@ -708,10 +708,13 @@
         { blocks: [[0,0],[1,0],[1,1],[2,1]] }    // Z
       ];
 
-      // Border tile references
-      var TILE_STONE = [1, 0];
-      var TILE_BEDROCK = [1, 1];
-      var TILE_COBBLE = [0, 1];
+      // Colored wool palette (Minecraft wool colors)
+      var WOOL_COLORS = [
+        '#E4E4E4','#D87F33','#B24CD8','#6699D8',
+        '#E5E533','#7FCC19','#F27FA5','#4C4C4C',
+        '#999999','#4C7F99','#7F3FB2','#334CB2',
+        '#664C33','#667F33','#993333','#191919'
+      ];
 
       function drawBlock(poolIdx, dx, dy, size) {
         if (poolIdx < 0 || poolIdx >= TEXTURE_POOL.length) return;
@@ -724,13 +727,17 @@
         }
       }
 
-      function drawBorderTile(tile, dx, dy, size) {
-        if (terrainReady) {
-          c.imageSmoothingEnabled = false;
-          c.drawImage(terrainImg, tile[0] * T, tile[1] * T, T, T, dx, dy, size, size);
-        } else {
-          c.fillStyle = '#333';
-          c.fillRect(dx, dy, size, size);
+      function drawWoolTile(color, dx, dy, size) {
+        c.fillStyle = color;
+        c.fillRect(dx, dy, size, size);
+        // Subtle wool fiber texture
+        c.fillStyle = 'rgba(255,255,255,0.08)';
+        for (var wy = 0; wy < size; wy += 4) {
+          c.fillRect(dx + (wy % 8 === 0 ? 1 : 3), dy + wy, size - 4, 1);
+        }
+        c.fillStyle = 'rgba(0,0,0,0.08)';
+        for (var wy = 2; wy < size; wy += 4) {
+          c.fillRect(dx + (wy % 8 === 0 ? 2 : 0), dy + wy, size - 3, 1);
         }
       }
 
@@ -868,26 +875,28 @@
         c.fillStyle = '#0e0e12';
         c.fillRect(0, 0, cvs.width, cvs.height);
 
-        // Draw stone/bedrock border around the playfield
-        c.imageSmoothingEnabled = false;
+        // Draw colored wool border around the playfield
         var bS = BORDER;
+        var wIdx = 0;
         // top border
         for (var bx = 0; bx < COLS + 2; bx++) {
-          drawBorderTile(TILE_BEDROCK, OFFX - bS + bx * bS, OFFY - bS, bS, bS);
-        }
-        // bottom border
-        for (var bx = 0; bx < COLS + 2; bx++) {
-          drawBorderTile(TILE_BEDROCK, OFFX - bS + bx * bS, OFFY + ROWS * CELL, bS, bS);
-        }
-        // left border
-        for (var by = 0; by < ROWS; by++) {
-          var tile = (by % 3 === 0) ? TILE_BEDROCK : TILE_STONE;
-          drawBorderTile(tile, OFFX - bS, OFFY + by * CELL, bS, CELL);
+          drawWoolTile(WOOL_COLORS[wIdx % WOOL_COLORS.length], OFFX - bS + bx * bS, OFFY - bS, bS, bS);
+          wIdx++;
         }
         // right border
         for (var by = 0; by < ROWS; by++) {
-          var tile = (by % 3 === 1) ? TILE_BEDROCK : TILE_STONE;
-          drawBorderTile(tile, OFFX + COLS * CELL, OFFY + by * CELL, bS, CELL);
+          drawWoolTile(WOOL_COLORS[wIdx % WOOL_COLORS.length], OFFX + COLS * CELL, OFFY + by * CELL, bS, CELL);
+          wIdx++;
+        }
+        // bottom border (reversed)
+        for (var bx = COLS + 1; bx >= 0; bx--) {
+          drawWoolTile(WOOL_COLORS[wIdx % WOOL_COLORS.length], OFFX - bS + bx * bS, OFFY + ROWS * CELL, bS, bS);
+          wIdx++;
+        }
+        // left border (reversed)
+        for (var by = ROWS - 1; by >= 0; by--) {
+          drawWoolTile(WOOL_COLORS[wIdx % WOOL_COLORS.length], OFFX - bS, OFFY + by * CELL, bS, CELL);
+          wIdx++;
         }
 
         // Playfield background - subtle dark cave pattern
@@ -922,24 +931,20 @@
           }
         }
 
-        // Preview area
+        // Preview area (no border)
         var previewX = OFFX + COLS * CELL + BORDER + 8;
         var previewCenterX = previewX + (PREVIEW_W - BORDER - 8) / 2;
 
-        // Preview box border (cobblestone)
-        for (var px = 0; px < 5; px++) {
-          drawBorderTile(TILE_COBBLE, previewX + px * bS, OFFY, bS, bS);
-          drawBorderTile(TILE_COBBLE, previewX + px * bS, OFFY + CELL * 5, bS, bS);
-        }
-        for (var py = 1; py < 5; py++) {
-          drawBorderTile(TILE_COBBLE, previewX, OFFY + py * CELL, bS, CELL);
-          drawBorderTile(TILE_COBBLE, previewX + 4 * bS, OFFY + py * CELL, bS, CELL);
-        }
-
-        c.fillStyle = 'rgba(255,255,255,0.15)';
-        c.font = (CELL * 0.6) + 'px Minecraft, sans-serif';
+        c.fillStyle = '#ddd';
+        c.font = (CELL * 0.7) + 'px Minecraft, sans-serif';
         c.textAlign = 'center';
+        c.shadowColor = 'rgba(0,0,0,0.9)';
+        c.shadowBlur = 0;
+        c.shadowOffsetX = 2;
+        c.shadowOffsetY = 2;
         c.fillText('NEXT', previewCenterX, OFFY + CELL * 1.2);
+        c.shadowOffsetX = 0;
+        c.shadowOffsetY = 0;
 
         if (nextPiece) {
           var maxBx = 0;
@@ -957,13 +962,18 @@
         }
 
         // Score display
-        c.fillStyle = 'rgba(255,255,255,0.15)';
-        c.font = (CELL * 0.6) + 'px Minecraft, sans-serif';
+        c.shadowColor = 'rgba(0,0,0,0.9)';
+        c.shadowOffsetX = 2;
+        c.shadowOffsetY = 2;
+        c.fillStyle = '#ddd';
+        c.font = (CELL * 0.65) + 'px Minecraft, sans-serif';
         c.textAlign = 'center';
         c.fillText('SCORE', previewCenterX, OFFY + CELL * 8);
         c.fillStyle = '#ffdd55';
-        c.font = (CELL * 0.75) + 'px Minecraft, sans-serif';
+        c.font = (CELL * 0.8) + 'px Minecraft, sans-serif';
         c.fillText(score, previewCenterX, OFFY + CELL * 9.2);
+        c.shadowOffsetX = 0;
+        c.shadowOffsetY = 0;
       }
 
       function loop() {
