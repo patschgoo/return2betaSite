@@ -370,9 +370,9 @@
       }
 
       .howto-text {
-        font-size: 0.35rem;
-        max-width: 40px;
-        line-height: 1.1;
+        font-size: 0.5rem;
+        max-width: 60px;
+        line-height: 1.15;
         text-align: right;
       }
 
@@ -715,9 +715,6 @@
   </script>
   <script>
   (function(){var h=document.getElementById('cwResize'),p=document.getElementById('cwPanel');if(!h||!p)return;h.addEventListener('mousedown',function(e){e.preventDefault();var sw=p.offsetWidth,sh=p.offsetHeight,sx=e.clientX,sy=e.clientY;function move(e){p.style.width=Math.max(300,sw+(sx-e.clientX))+'px';p.style.height=Math.max(300,sh+(sy-e.clientY))+'px';}function up(){document.removeEventListener('mousemove',move);document.removeEventListener('mouseup',up);}document.addEventListener('mousemove',move);document.addEventListener('mouseup',up);});})();
-  </script>
-  <script>
-  (function(){var dd=document.getElementById('gamesDropdown');if(!dd)return;dd.addEventListener('click',function(e){if(window.innerWidth<=720){e.stopPropagation();dd.classList.toggle('open');}});document.addEventListener('click',function(){dd.classList.remove('open');});})();
   </script>
 </body>
 </html>
