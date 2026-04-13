@@ -453,11 +453,14 @@
 
     .info-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      grid-template-columns: 1fr 1.6fr 1fr;
       gap: 16px;
-      max-width: 820px;
+      max-width: 920px;
       margin: 24px auto 0;
       clear: both;
+    }
+    @media (max-width: 720px) {
+      .info-grid { grid-template-columns: 1fr; }
     }
     .info-card {
       background: rgba(0,0,0,0.5);
