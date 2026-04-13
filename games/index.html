@@ -147,19 +147,40 @@
     .game-container iframe {
       display: block;
       border: none;
+      max-width: 100%;
+      height: auto;
+      aspect-ratio: 552 / 414;
     }
-    /* Scale up on desktop / iPad */
+    /* Scale up on desktop / iPad — canvas games only */
     @media (min-width: 721px) {
       .game-container.scaled-canvas {
         transform: scale(1.45);
         transform-origin: top center;
-        margin-bottom: 200px;
+      }
+      .game-container.scaled-canvas.flappy-game {
+        margin-bottom: 260px;
+      }
+      .game-container.scaled-canvas.tetris-game {
+        margin-bottom: 230px;
+      }
+      .game-container.embed-game {
+        width: min(552px, 80vw);
       }
     }
     @media (min-width: 721px) and (max-width: 1024px) {
       .game-container.scaled-canvas {
         transform: scale(1.25);
-        margin-bottom: 130px;
+      }
+      .game-container.scaled-canvas.flappy-game {
+        margin-bottom: 170px;
+      }
+      .game-container.scaled-canvas.tetris-game {
+        margin-bottom: 140px;
+      }
+    }
+    @media (max-width: 720px) {
+      .game-container.embed-game {
+        width: 100%;
       }
     }
     .game-hint {
@@ -215,12 +236,13 @@
     .mineblocks-link {
       display: none;
       margin-top: 10px;
-      font-size: clamp(0.55rem, 0.9vw, 0.7rem);
+      font-size: clamp(0.6rem, 1vw, 0.75rem);
+      color: #aaa;
+      text-shadow: 1px 1px 0 rgba(0,0,0,0.8);
     }
     .mineblocks-link a {
       color: #55ff55;
       text-decoration: none;
-      text-shadow: 1px 1px 0 rgba(0,0,0,0.8);
     }
     .mineblocks-link a:hover {
       text-decoration: underline;
@@ -290,7 +312,7 @@
       <span class="version-label" id="versionLabel">Mine Blocks</span>
       <button class="version-arrow" id="versionNext" title="Next version">&#9654;</button>
     </div>
-    <div class="mineblocks-link" id="mineblocksLink"><a href="https://mineblocks.com/" target="_blank" rel="noopener noreferrer">mineblocks.com</a></div>
+    <div class="mineblocks-link" id="mineblocksLink">Visit Mine Blocks on their website <a href="https://mineblocks.com/" target="_blank" rel="noopener noreferrer">MineBlocks.com</a></div>
   </main>
 
   <script>
@@ -448,11 +470,13 @@
       hintEl.style.display = '';
       versionSwitcherEl.style.display = 'none';
       mineblocksLink.style.display = 'none';
-      gameContainer.classList.add('scaled-canvas');
+      gameContainer.className = 'game-container scaled-canvas';
 
       if (idx === 0) {
+        gameContainer.classList.add('flappy-game');
         activeGame = flappyBird(canvas, ctx, scoreEl, bestEl, siteBestEl, hintEl, function (id) { animId = id; });
       } else if (idx === 1) {
+        gameContainer.classList.add('tetris-game');
         activeGame = tetris(canvas, ctx, scoreEl, bestEl, siteBestEl, hintEl, function (id) { animId = id; });
       } else if (idx === 2) {
         // Mine Blocks — embed
@@ -461,11 +485,13 @@
         hintEl.style.display = 'none';
         versionSwitcherEl.style.display = 'flex';
         mineblocksLink.style.display = 'block';
-        gameContainer.classList.remove('scaled-canvas');
+        gameContainer.className = 'game-container embed-game';
         iframeEl.style.display = 'block';
+        iframeEl.style.width = '100%';
+        iframeEl.style.height = '';
+        iframeEl.removeAttribute('width');
+        iframeEl.removeAttribute('height');
         var ver = mineblocksVersions[currentMineblocksVersion];
-        iframeEl.width = ver.w;
-        iframeEl.height = ver.h;
         iframeEl.src = ver.url;
         versionLabelEl.textContent = ver.label;
       }
@@ -481,8 +507,6 @@
     // Version switcher for Mine Blocks
     function loadMineblocksVersion() {
       var ver = mineblocksVersions[currentMineblocksVersion];
-      iframeEl.width = ver.w;
-      iframeEl.height = ver.h;
       iframeEl.src = ver.url;
       versionLabelEl.textContent = ver.label;
     }
