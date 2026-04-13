@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Legal Notice / Impressum – Return2Beta</title>
+  <link rel="icon" type="image/png" href="../images/icon.png" />
+  <style>
+    @font-face {
+      font-family: 'Minecraft';
+      src: url('https://cdn.jsdelivr.net/gh/IdreesInc/Minecraft-Font@main/Minecraft.otf') format('opentype');
+      font-weight: normal;
+      font-style: normal;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      width: 100%;
+      min-height: 100%;
+      font-family: 'Minecraft', sans-serif;
+      background-image: url("../images/background.png");
+      background-repeat: repeat;
+      background-size: auto;
+      overflow-x: hidden;
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+      padding-top: 48px;
+      color: #d8d8d8;
+    }
+    .header-band {
+      min-height: 48px;
+      width: 100%;
+      background-image: url("../images/header.png");
+      background-repeat: repeat-x;
+      background-position: top left;
+      background-size: auto 48px;
+      flex-shrink: 0;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0 48px;
+      padding: 0 48px;
+      position: fixed;
+      top: 0;
+      z-index: 10;
+    }
+    .header-band::after {
+      content: '';
+      position: absolute;
+      top: 48px;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image: url("../images/header.png");
+      background-repeat: repeat-x;
+      background-size: auto 48px;
+      transform: scaleY(-1);
+      z-index: 0;
+      pointer-events: none;
+    }
+    .header-band > * { position: relative; z-index: 1; }
+    .howto-text {
+      font-size: 0.65rem;
+      font-weight: 600;
+      line-height: 1.1;
+      text-align: right;
+      max-width: 80px;
+    }
+    .howto-link { flex-direction: row-reverse; }
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      height: 48px;
+      text-decoration: none;
+      color: #fff;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+    }
+    .nav-link img { height: 32px; width: 32px; object-fit: contain; }
+    .nav-spacer { flex: 1; }
+
+    /* Content */
+    .legal-content {
+      max-width: 800px;
+      margin: 32px auto;
+      padding: 24px 32px;
+      background: rgba(6,10,6,0.85);
+      border: 2px solid rgba(85,255,85,0.2);
+      border-radius: 8px;
+      line-height: 1.7;
+      font-size: 0.72rem;
+      text-shadow: 1px 1px 0 rgba(0,0,0,0.6);
+    }
+    .legal-content h1 {
+      color: #55ff55;
+      font-size: 1.1rem;
+      margin-bottom: 20px;
+      text-shadow: 2px 2px 0 rgba(0,0,0,0.7);
+    }
+    .legal-content h2 {
+      color: #88cc88;
+      font-size: 0.85rem;
+      margin-top: 20px;
+      margin-bottom: 8px;
+    }
+    .legal-content p { margin-bottom: 10px; }
+    .legal-content a { color: #55ff55; text-decoration: none; }
+    .legal-content a:hover { text-decoration: underline; }
+    .legal-content .placeholder {
+      color: #ff8855;
+      background: rgba(255,136,85,0.1);
+      padding: 1px 6px;
+      border-radius: 3px;
+      font-style: italic;
+    }
+    .legal-footer {
+      text-align: center;
+      margin: 16px auto 32px;
+      font-size: 0.6rem;
+      color: #666;
+    }
+    .legal-footer a { color: #55ff55; text-decoration: none; }
+    .legal-footer a:hover { text-decoration: underline; }
+
+    /* Language toggle */
+    .lang-toggle {
+      position: fixed;
+      top: 58px;
+      right: 24px;
+      z-index: 20;
+      display: flex;
+      border-radius: 4px;
+      overflow: hidden;
+      border: 2px solid rgba(85,255,85,0.4);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.5);
+    }
+    .lang-btn {
+      padding: 6px 14px;
+      background: rgba(6,10,6,0.88);
+      color: #888;
+      border: none;
+      font-family: 'Minecraft', sans-serif;
+      font-size: 0.65rem;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+    .lang-btn:hover { background: rgba(20,40,20,0.95); color: #ccc; }
+    .lang-btn.active { background: rgba(85,255,85,0.2); color: #55ff55; }
+
+    /* Nav carousel */
+    .nav-carousel { display: none; width: 100%; align-items: center; justify-content: center; height: 48px; }
+    .nav-caret { background: none; border: none; color: rgba(255,255,255,0.8); font-size: 1.1rem; cursor: pointer; padding: 0 14px; height: 48px; display: flex; align-items: center; flex-shrink: 0; transition: color 0.15s; }
+    .nav-caret:hover { color: #fff; }
+    .nav-caret:disabled { opacity: 0.2; cursor: default; }
+    .nav-carousel-items { display: flex; align-items: center; justify-content: center; gap: 20px; flex: 1; overflow: hidden; }
+    .nav-carousel .nav-link { white-space: nowrap; }
+    .nav-carousel .nav-link.nav-current { color: #c8e8c8; text-shadow: 0 0 6px rgba(255,255,255,0.2); }
+    .header-band > .nav-link.nav-current,
+    .header-band > .nav-dropdown > .nav-link.nav-current { color: #c8e8c8; text-shadow: 0 0 6px rgba(255,255,255,0.2); }
+    .nav-carousel .howto-link { white-space: normal; }
+    @media (max-width: 720px) {
+      .header-band { min-height: 48px; gap: 0 24px; padding: 0 16px; }
+      .nav-link { font-size: 0.8rem; }
+      .nav-link img { height: 28px; width: 28px; }
+      .header-band > .nav-link,
+      .header-band > .nav-dropdown,
+      .header-band > .nav-spacer { display: none; }
+      .nav-carousel { display: flex; }
+      .nav-caret { padding: 0 10px; }
+      .nav-carousel-items { gap: 8px; }
+      .howto-text { font-size: 0.5rem; max-width: 60px; line-height: 1.15; text-align: right; }
+      .legal-content { margin: 16px 12px; padding: 16px; }
+      .lang-toggle { top: 56px; right: 12px; }
+    }
+    .nav-dropdown { position: relative; }
+    .nav-dropdown-menu { display: none; position: absolute; top: 48px; left: 50%; transform: translateX(-50%); background: rgba(10,16,10,0.96); border: 2px solid rgba(85,255,85,0.3); border-radius: 4px; padding: 8px 0; min-width: 180px; z-index: 100; box-shadow: 0 6px 20px rgba(0,0,0,0.7); }
+    .nav-dropdown:hover .nav-dropdown-menu, .nav-dropdown.open .nav-dropdown-menu { display: block; }
+    .nav-dropdown-menu .dropdown-link { display: flex; align-items: center; gap: 8px; padding: 6px 16px; color: #ccc; text-decoration: none; font-size: 0.75rem; font-family: 'Minecraft', sans-serif; text-shadow: 1px 1px 0 rgba(0,0,0,0.7); white-space: nowrap; }
+    .nav-dropdown-menu .dropdown-link img { width: 18px; height: 18px; object-fit: contain; image-rendering: pixelated; }
+    .nav-dropdown-menu .dropdown-link:hover { background: rgba(85,255,85,0.1); color: #fff; }
+    .nav-dropdown-menu hr { border: none; border-top: 1px solid rgba(85,255,85,0.12); margin: 4px 10px; }
+    .nav-dropdown-menu .dropdown-more { display: block; padding: 6px 16px; color: #55ff55; text-decoration: none; font-size: 0.7rem; font-family: 'Minecraft', sans-serif; text-shadow: 1px 1px 0 rgba(0,0,0,0.7); white-space: nowrap; }
+    .nav-dropdown-menu .dropdown-more:hover { background: rgba(85,255,85,0.1); color: #aaff88; }
+    @media (max-width: 720px) {
+      .nav-dropdown.open { display: block !important; position: fixed; top: 48px; left: 0; right: 0; z-index: 100; }
+      .nav-dropdown.open > .nav-link { display: none !important; }
+      .nav-dropdown.open .nav-dropdown-menu { position: static; transform: none; width: 100%; border-radius: 0; border-left: none; border-right: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="header-band" aria-label="Header">
+    <a class="nav-link" href="/"><img src="../images/home_icon.png" alt="Home icon" />Home</a>
+    <a class="nav-link" href="/map/"><img src="../images/map_icon.webp" alt="Map icon" />Map</a>
+    <a class="nav-link" href="/plugins/"><img src="../images/plugins_icon.png" alt="Plugins icon" />Plugins</a>
+    <a class="nav-link" href="/wiki/"><img src="../images/wiki_icon.png" alt="Wiki icon" />Wiki</a>
+    <a class="nav-link" href="/chat/"><img src="../images/chat_icon.png" alt="Chat icon" />Chat</a>
+    <a class="nav-link" href="https://discord.gg/vVvs7tN5p7" target="_blank" rel="noopener noreferrer"><img src="../images/discord_icon.png" alt="Discord icon" />Discord</a>
+    <div class="nav-spacer"></div>
+    <a class="nav-link" href="https://eaglercraft.com/play/?version=b1.7.3" target="_blank" rel="noopener noreferrer" title="Eaglercraft"><img src="../images/eaglercraft-icon.png" alt="Eaglercraft" /></a>
+    <div class="nav-dropdown" id="gamesDropdown">
+      <a class="nav-link" href="/games/"><img src="../images/game_icon.png" alt="Games icon" />Games</a>
+      <div class="nav-dropdown-menu">
+        <a class="dropdown-link" href="/games/?game=0"><img src="../images/Game%20Links/flappy-chicken.png" alt="" />Flappy Chicken</a>
+        <a class="dropdown-link" href="/games/?game=1"><img src="../images/Game%20Links/blocktris.png" alt="" />Blocktris</a>
+        <a class="dropdown-link" href="/games/?game=2"><img src="../images/Game%20Links/hatch-snake.webp" alt="" />Hatch (Snake)</a>
+        <a class="dropdown-link" href="/games/?game=3"><img src="../images/Game%20Links/minecreeper.png" alt="" />Minecreeper</a>
+        <a class="dropdown-link" href="/games/?game=4"><img src="../images/Game%20Links/block-crush.png" alt="" />Block Crush</a>
+        <a class="dropdown-link" href="/games/?game=5"><img src="../images/Game%20Links/mine-blocks.png" alt="" />Mine Blocks</a>
+        <a class="dropdown-link" href="/games/?game=6"><img src="../images/Game%20Links/mine-blocks-2.png" alt="" />Mine Blocks 2</a>
+        <hr />
+        <a class="dropdown-more" href="/games/more-links/">More Links &#8250;</a>
+      </div>
+    </div>
+    <a class="nav-link howto-link" href="/how-to/"><span class="howto-text">How to Join &amp; more</span><img src="../images/how-to_icon.gif" alt="How to icon" /></a>
+    <div class="nav-carousel" id="navCarousel">
+      <button class="nav-caret" id="navPrev" aria-label="Previous pages">&#9664;</button>
+      <div class="nav-carousel-items" id="navCarouselItems"></div>
+      <button class="nav-caret" id="navNext" aria-label="Next pages">&#9654;</button>
+    </div>
+  </header>
+
+  <!-- Language toggle -->
+  <div class="lang-toggle" id="langToggle">
+    <button class="lang-btn active" data-lang="en">EN</button>
+    <button class="lang-btn" data-lang="de">DE</button>
+  </div>
+
+  <!-- English version -->
+  <div class="legal-content" id="lang-en">
+    <h1>Legal Notice (Impressum)</h1>
+
+    <h2>Information pursuant to &sect; 5 DDG</h2>
+    <p>
+      <span class="placeholder">Your Full Name</span><br />
+      <span class="placeholder">Your Street Address</span><br />
+      <span class="placeholder">Your ZIP Code &amp; City</span><br />
+      Germany
+    </p>
+
+    <h2>Contact</h2>
+    <p>
+      Email: <span class="placeholder">your@email.com</span><br />
+      <!-- Phone: <span class="placeholder">+49 XXX XXXXXXX</span> (optional) -->
+    </p>
+
+    <h2>Responsible for content pursuant to &sect; 18 (2) MStV</h2>
+    <p>
+      <span class="placeholder">Your Full Name</span><br />
+      <span class="placeholder">Your Street Address</span><br />
+      <span class="placeholder">Your ZIP Code &amp; City</span>
+    </p>
+
+    <h2>Dispute Resolution</h2>
+    <p>
+      The European Commission provides a platform for online dispute resolution (OS):
+      <a href="https://ec.europa.eu/consumers/odr/" target="_blank" rel="noopener noreferrer">https://ec.europa.eu/consumers/odr/</a>.<br />
+      We are not willing or obliged to participate in dispute resolution proceedings before a consumer arbitration board.
+    </p>
+
+    <h2>Liability for Content</h2>
+    <p>
+      As a service provider, we are responsible for our own content on these pages in accordance with general legislation pursuant to &sect; 7 (1) DDG. According to &sect;&sect; 8 to 10 DDG, however, we are not obligated as a service provider to monitor transmitted or stored third-party information or to investigate circumstances that indicate illegal activity.
+    </p>
+    <p>
+      Obligations to remove or block the use of information under general law remain unaffected. However, liability in this regard is only possible from the time of knowledge of a specific infringement. Upon becoming aware of such violations, we will remove this content immediately.
+    </p>
+
+    <h2>Liability for Links</h2>
+    <p>
+      Our website contains links to external third-party websites over whose content we have no influence. Therefore, we cannot accept any liability for this third-party content. The respective provider or operator of the pages is always responsible for the content of the linked pages.
+    </p>
+
+    <h2>Copyright</h2>
+    <p>
+      This website is a fan project for a Minecraft Beta 1.7.3 server. Minecraft is a trademark of Mojang Studios / Microsoft Corporation. All Minecraft-related assets used on this site are property of their respective owners and are used under fair use for non-commercial, community purposes. This site is not affiliated with or endorsed by Mojang or Microsoft.
+    </p>
+  </div>
+
+  <!-- German version -->
+  <div class="legal-content" id="lang-de" style="display:none">
+    <h1>Impressum</h1>
+
+    <h2>Angaben gem&auml;&szlig; &sect; 5 DDG</h2>
+    <p>
+      <span class="placeholder">Dein vollst&auml;ndiger Name</span><br />
+      <span class="placeholder">Deine Stra&szlig;e und Hausnummer</span><br />
+      <span class="placeholder">PLZ und Stadt</span><br />
+      Deutschland
+    </p>
+
+    <h2>Kontakt</h2>
+    <p>
+      E-Mail: <span class="placeholder">deine@email.com</span><br />
+      <!-- Telefon: <span class="placeholder">+49 XXX XXXXXXX</span> (optional) -->
+    </p>
+
+    <h2>Verantwortlich f&uuml;r den Inhalt nach &sect; 18 Abs. 2 MStV</h2>
+    <p>
+      <span class="placeholder">Dein vollst&auml;ndiger Name</span><br />
+      <span class="placeholder">Deine Stra&szlig;e und Hausnummer</span><br />
+      <span class="placeholder">PLZ und Stadt</span>
+    </p>
+
+    <h2>Streitschlichtung</h2>
+    <p>
+      Die Europ&auml;ische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS) bereit:
+      <a href="https://ec.europa.eu/consumers/odr/" target="_blank" rel="noopener noreferrer">https://ec.europa.eu/consumers/odr/</a>.<br />
+      Wir sind nicht bereit oder verpflichtet, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.
+    </p>
+
+    <h2>Haftung f&uuml;r Inhalte</h2>
+    <p>
+      Als Diensteanbieter sind wir gem&auml;&szlig; &sect; 7 Abs. 1 DDG f&uuml;r eigene Inhalte auf diesen Seiten nach den allgemeinen Gesetzen verantwortlich. Nach &sect;&sect; 8 bis 10 DDG sind wir als Diensteanbieter jedoch nicht verpflichtet, &uuml;bermittelte oder gespeicherte fremde Informationen zu &uuml;berwachen oder nach Umst&auml;nden zu forschen, die auf eine rechtswidrige T&auml;tigkeit hinweisen.
+    </p>
+    <p>
+      Verpflichtungen zur Entfernung oder Sperrung der Nutzung von Informationen nach den allgemeinen Gesetzen bleiben hiervon unber&uuml;hrt. Eine diesbez&uuml;gliche Haftung ist jedoch erst ab dem Zeitpunkt der Kenntnis einer konkreten Rechtsverletzung m&ouml;glich. Bei Bekanntwerden von entsprechenden Rechtsverletzungen werden wir diese Inhalte umgehend entfernen.
+    </p>
+
+    <h2>Haftung f&uuml;r Links</h2>
+    <p>
+      Unser Angebot enth&auml;lt Links zu externen Websites Dritter, auf deren Inhalte wir keinen Einfluss haben. Deshalb k&ouml;nnen wir f&uuml;r diese fremden Inhalte auch keine Gew&auml;hr &uuml;bernehmen. F&uuml;r die Inhalte der verlinkten Seiten ist stets der jeweilige Anbieter oder Betreiber der Seiten verantwortlich.
+    </p>
+
+    <h2>Urheberrecht</h2>
+    <p>
+      Diese Website ist ein Fanprojekt f&uuml;r einen Minecraft Beta 1.7.3 Server. Minecraft ist eine Marke von Mojang Studios / Microsoft Corporation. Alle auf dieser Seite verwendeten Minecraft-bezogenen Inhalte sind Eigentum der jeweiligen Rechteinhaber und werden im Rahmen einer nicht-kommerziellen Community-Nutzung verwendet. Diese Seite steht in keiner Verbindung mit Mojang oder Microsoft und wird von diesen nicht unterst&uuml;tzt.
+    </p>
+  </div>
+
+  <div class="legal-footer">
+    <a href="/privacy/">Privacy Policy / Datenschutzerkl&auml;rung</a>
+  </div>
+
+  <!-- Language toggle script -->
+  <script>
+  (function(){
+    var en=document.getElementById('lang-en'),de=document.getElementById('lang-de');
+    var btns=document.querySelectorAll('.lang-btn');
+    var stored=localStorage.getItem('r2b_legal_lang');
+    if(stored==='de'){en.style.display='none';de.style.display='';btns[0].classList.remove('active');btns[1].classList.add('active');document.documentElement.lang='de';}
+    btns.forEach(function(b){b.addEventListener('click',function(){
+      var lang=b.getAttribute('data-lang');
+      btns.forEach(function(x){x.classList.remove('active');});
+      b.classList.add('active');
+      if(lang==='de'){en.style.display='none';de.style.display='';document.documentElement.lang='de';}
+      else{en.style.display='';de.style.display='none';document.documentElement.lang='en';}
+      localStorage.setItem('r2b_legal_lang',lang);
+    });});
+  })();
+  </script>
+
+  <!-- Nav carousel -->
+  <script>
+    (function () {
+      var header = document.querySelector('.header-band');
+      if (!header) return;
+      var allLinks = Array.from(header.querySelectorAll(':scope > .nav-link, :scope > .nav-dropdown > .nav-link'));
+      var spacer = header.querySelector(':scope > .nav-spacer');
+      var carousel = document.getElementById('navCarousel');
+      var prevBtn = document.getElementById('navPrev');
+      var nextBtn = document.getElementById('navNext');
+      var itemsEl = document.getElementById('navCarouselItems');
+      if (!carousel || !prevBtn || !nextBtn || !itemsEl || !allLinks.length) return;
+      var N = 3, page = 0;
+      var total = Math.ceil(allLinks.length / N);
+      var cp = location.pathname.replace(/\/$/, '') || '/';
+      for (var i = 0; i < allLinks.length; i++) {
+        var lh = (allLinks[i].getAttribute('href') || '').replace(/\/$/, '') || '/';
+        if (lh === cp) { allLinks[i].classList.add('nav-current'); page = Math.floor(i / N); break; }
+      }
+      function render() {
+        itemsEl.innerHTML = '';
+        allLinks.slice(page * N, (page + 1) * N).forEach(function (a) {
+          var cl = a.cloneNode(true);
+          var lh = (a.getAttribute('href') || '').replace(/\/$/, '') || '/';
+          if (lh === cp) cl.classList.add('nav-current');
+          itemsEl.appendChild(cl);
+        });
+        prevBtn.disabled = page === 0;
+        nextBtn.disabled = page >= total - 1;
+      }
+      prevBtn.addEventListener('click', function () { if (page > 0) { page--; render(); } });
+      nextBtn.addEventListener('click', function () { if (page < total - 1) { page++; render(); } });
+      render();
+      itemsEl.addEventListener('click', function(e) {
+        var link = e.target.closest('a[href$="/games/"]');
+        if (link) { e.preventDefault(); var dd = document.getElementById('gamesDropdown'); if (dd) dd.classList.toggle('open'); }
+      });
+      document.addEventListener('click', function(e) {
+        if (!e.target.closest('.nav-dropdown') && !e.target.closest('#navCarouselItems')) {
+          var dd = document.getElementById('gamesDropdown'); if (dd) dd.classList.remove('open');
+        }
+      });
+      var forced = false;
+      var dropdown = header.querySelector(':scope > .nav-dropdown');
+      function forceOn() {
+        if (forced) return; forced = true;
+        allLinks.forEach(function (a) { a.style.display = 'none'; });
+        if (dropdown) dropdown.style.display = 'none';
+        if (spacer) spacer.style.display = 'none';
+        carousel.style.display = 'flex';
+      }
+      function forceOff() {
+        if (!forced) return; forced = false;
+        allLinks.forEach(function (a) { a.style.display = ''; });
+        if (dropdown) dropdown.style.display = '';
+        if (spacer) spacer.style.display = '';
+        if (window.innerWidth > 720) carousel.style.display = 'none';
+      }
+      if (window.innerWidth > 720 && header.scrollHeight > 100) forceOn();
+      var rt;
+      window.addEventListener('resize', function () {
+        clearTimeout(rt);
+        rt = setTimeout(function () {
+          if (window.innerWidth <= 720) { forceOff(); return; }
+          forceOff();
+          requestAnimationFrame(function () { if (header.scrollHeight > 100) forceOn(); });
+        }, 150);
+      });
+    }());
+  </script>
+  <!-- Visitor counter -->
+  <style>
+    .visitor-counter{position:fixed;top:52px;left:8px;z-index:9;font-family:'Minecraft',sans-serif;font-size:.55rem;color:rgba(255,255,255,0.45);text-shadow:1px 1px 0 rgba(0,0,0,0.6);pointer-events:none;transition:opacity .3s}
+    .visitor-counter .vc-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#55ff55;box-shadow:0 0 4px #55ff55;margin-right:4px;vertical-align:middle}
+    @media(max-width:720px){.visitor-counter{top:52px;left:6px;font-size:.5rem}}
+  </style>
+  <div class="visitor-counter" id="visitorCounter"></div>
+  <script>
+  (function(){var el=document.getElementById('visitorCounter');var ws,delay=2000;function connect(){try{ws=new WebSocket('wss://chat.return2beta.com');}catch(e){return;}ws.onopen=function(){delay=2000;ws.send(JSON.stringify({type:'presence'}));};ws.onmessage=function(e){var d;try{d=JSON.parse(e.data);}catch(x){return;}if(d.type==='visitor_count'&&typeof d.count==='number'){el.innerHTML='<span class="vc-dot"></span>'+d.count+' online now';}};ws.onclose=function(){setTimeout(connect,delay);delay=Math.min(delay*2,30000);};ws.onerror=function(){ws.close();};}connect();})();
+  </script>
+</body>
+</html>

@@ -522,6 +522,12 @@
   <script>
   (function(){var h=document.getElementById('cwResize'),p=document.getElementById('cwPanel');if(!h||!p)return;h.addEventListener('mousedown',function(e){e.preventDefault();var sw=p.offsetWidth,sh=p.offsetHeight,sx=e.clientX,sy=e.clientY;function move(e){p.style.width=Math.max(300,sw+(sx-e.clientX))+'px';p.style.height=Math.max(300,sh+(sy-e.clientY))+'px';}function up(){document.removeEventListener('mousemove',move);document.removeEventListener('mouseup',up);}document.addEventListener('mousemove',move);document.addEventListener('mouseup',up);});})();
   </script>
+  <!-- Legal footer -->
+  <div style="text-align:center;padding:12px 0 4px;font-family:'Minecraft',sans-serif;font-size:.5rem">
+    <a href="/legal/" style="color:#666;text-decoration:none">Legal Notice</a>
+    <span style="color:#444"> | </span>
+    <a href="/privacy/" style="color:#666;text-decoration:none">Privacy Policy</a>
+  </div>
   <!-- Visitor counter -->
   <style>
     .visitor-counter{position:fixed;top:52px;left:8px;z-index:9;font-family:'Minecraft',sans-serif;font-size:.55rem;color:rgba(255,255,255,0.45);text-shadow:1px 1px 0 rgba(0,0,0,0.6);pointer-events:none;transition:opacity .3s}
