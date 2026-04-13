@@ -144,6 +144,24 @@
     .game-container canvas {
       display: block;
     }
+    .game-container iframe {
+      display: block;
+      border: none;
+    }
+    /* Scale up on desktop / iPad */
+    @media (min-width: 721px) {
+      .game-container {
+        transform: scale(1.45);
+        transform-origin: top center;
+        margin-bottom: 160px;
+      }
+    }
+    @media (min-width: 721px) and (max-width: 1024px) {
+      .game-container {
+        transform: scale(1.25);
+        margin-bottom: 100px;
+      }
+    }
     .game-hint {
       font-size: clamp(0.55rem, 0.9vw, 0.7rem);
       color: #666;
@@ -210,8 +228,9 @@
       <span class="game-title" id="gameTitle">Flappy Bird</span>
       <button class="game-arrow" id="gameNext" title="Next game">&#9654;</button>
     </div>
-    <div class="game-container">
+    <div class="game-container" id="gameContainer">
       <canvas id="gameCanvas" width="320" height="480"></canvas>
+      <iframe id="gameIframe" width="480" height="360" allowfullscreen style="display:none"></iframe>
     </div>
     <p class="game-hint" id="gameHint">Press Space or Tap to play</p>
     <div class="game-scores">
@@ -304,10 +323,12 @@
     var prevBtn = document.getElementById('gamePrev');
     var nextBtn = document.getElementById('gameNext');
 
-    var games = ['Flappy Chicken', 'Blocktris'];
+    var games = ['Flappy Chicken', 'Blocktris', 'Paper Minecraft'];
     var currentGame = 0;
     var activeGame = null;
     var animId = null;
+    var iframeEl = document.getElementById('gameIframe');
+    var scoresEl = document.querySelector('.game-scores');
 
     // Load Minecraft terrain spritesheet
     var terrainImg = new Image();
@@ -352,10 +373,27 @@
       currentGame = idx;
       titleEl.textContent = games[idx];
       scoreEl.textContent = '0';
+
+      // Hide iframe / show canvas by default
+      iframeEl.style.display = 'none';
+      iframeEl.src = '';
+      canvas.style.display = 'block';
+      scoresEl.style.display = '';
+      hintEl.style.display = '';
+
       if (idx === 0) {
         activeGame = flappyBird(canvas, ctx, scoreEl, bestEl, siteBestEl, hintEl, function (id) { animId = id; });
-      } else {
+      } else if (idx === 1) {
         activeGame = tetris(canvas, ctx, scoreEl, bestEl, siteBestEl, hintEl, function (id) { animId = id; });
+      } else if (idx === 2) {
+        // Paper Minecraft — Scratch embed
+        canvas.style.display = 'none';
+        scoresEl.style.display = 'none';
+        hintEl.style.display = 'none';
+        iframeEl.style.display = 'block';
+        iframeEl.width = 480;
+        iframeEl.height = 360;
+        iframeEl.src = 'https://scratch.mit.edu/projects/10128407/embed';
       }
     }
 
