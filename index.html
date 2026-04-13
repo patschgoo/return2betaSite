@@ -462,6 +462,45 @@
     @media (max-width: 720px) {
       .info-grid { grid-template-columns: 1fr; }
     }
+
+    .worlds-section {
+      max-width: 920px;
+      margin: 28px auto 0;
+    }
+    .worlds-section h2 {
+      color: #55ff55;
+      font-size: 0.95rem;
+      text-align: center;
+      margin-bottom: 14px;
+      text-shadow: 2px 2px 0 rgba(0,0,0,0.7);
+    }
+    .worlds-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+    }
+    @media (max-width: 720px) {
+      .worlds-grid { grid-template-columns: 1fr; }
+    }
+    .world-card {
+      background: rgba(0,0,0,0.5);
+      border: 2px solid rgba(85,255,85,0.22);
+      border-radius: 6px;
+      padding: 16px 18px;
+      color: #fff;
+      font-size: 0.72rem;
+      line-height: 1.7;
+      text-shadow: 1px 1px 0 rgba(0,0,0,0.7);
+    }
+    .world-card h3 {
+      font-size: 0.82rem;
+      margin: 0 0 8px;
+      text-shadow: 2px 2px 0 rgba(0,0,0,0.7);
+      border-bottom: 1px solid rgba(85,255,85,0.22);
+      padding-bottom: 6px;
+    }
+    .world-card p { margin: 0 0 6px; color: #ccc; }
+    .world-card .world-cmd { color: #ffaa00; font-size: 0.65rem; margin-top: 6px; }
     .info-card {
       background: rgba(0,0,0,0.5);
       border: 2px solid rgba(85,255,85,0.22);
@@ -549,6 +588,27 @@
         <p>Return2Beta stays true to the authentic feel of Beta 1.7.3, but with a twist: we’ve added custom plugins designed specifically for the server to enhance gameplay while preserving the original atmosphere. From subtle quality-of-life improvements to unique features that blend seamlessly into the beta style, <span class="highlight">Return2Beta</span> offers the perfect balance of nostalgia and innovation.</p>
         <p>Whether you’re revisiting old memories or discovering Beta Minecraft for the first time, our world is yours to shape. Build, survive, explore, and enjoy Minecraft as it was meant to be.</p>
         <p class="highlight">Join us — and experience the true return to beta.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="worlds-section" aria-label="Server worlds">
+      <h2>Three Worlds, One Server</h2>
+      <div class="worlds-grid">
+        <div class="world-card">
+          <h3 style="color:#55ff55">Server World</h3>
+          <p>The main world with the full Return2Beta experience. All plugins active &mdash; economy, land protection, warps, homes, chat features, and every quality-of-life enhancement the server offers.</p>
+          <div class="world-cmd">Default spawn</div>
+        </div>
+        <div class="world-card">
+          <h3 style="color:#ffdd55">Creative World</h3>
+          <p>A building paradise adjusted to work like creative mode. Spawn items with <span style="color:#ffaa00">/i</span>, use WorldEdit tools, fly freely, and break blocks instantly. Build whatever you can imagine &mdash; no resource gathering needed.</p>
+          <div class="world-cmd">/dd creative</div>
+        </div>
+        <div class="world-card">
+          <h3 style="color:#dd5555">Survival World</h3>
+          <p>Old-school, raw survival &mdash; like a classic 2b2t. No plugins, no commands, no teleports, nothing. Just you and the world. Mine, craft, and survive on your own terms.</p>
+          <div class="world-cmd">/dd survival</div>
         </div>
       </div>
     </section>
