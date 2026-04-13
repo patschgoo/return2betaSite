@@ -328,6 +328,7 @@
       .nav-link img { height: 28px; width: 28px; }
       .howto-text { display: none; }
       .header-band > .nav-link,
+      .header-band > .nav-dropdown,
       .header-band > .nav-spacer { display: none; }
       .nav-carousel { display: flex; }
       .nav-caret { padding: 0 10px; }
@@ -433,15 +434,18 @@
       nextBtn.addEventListener('click', function () { if (page < total - 1) { page++; render(); } });
       render();
       var forced = false;
+      var dropdown = header.querySelector(':scope > .nav-dropdown');
       function forceOn() {
         if (forced) return; forced = true;
         allLinks.forEach(function (a) { a.style.display = 'none'; });
+        if (dropdown) dropdown.style.display = 'none';
         if (spacer) spacer.style.display = 'none';
         carousel.style.display = 'flex';
       }
       function forceOff() {
         if (!forced) return; forced = false;
         allLinks.forEach(function (a) { a.style.display = ''; });
+        if (dropdown) dropdown.style.display = '';
         if (spacer) spacer.style.display = '';
         if (window.innerWidth > 720) carousel.style.display = 'none';
       }
