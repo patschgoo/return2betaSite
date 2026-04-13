@@ -81,6 +81,54 @@
       width: 32px;
       object-fit: contain;
     }
+    /* Games dropdown */
+    .nav-dropdown {
+      position: relative;
+    }
+    .nav-dropdown-menu {
+      display: none;
+      position: absolute;
+      top: 48px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(10,16,10,0.95);
+      border: 2px solid rgba(85,255,85,0.3);
+      border-radius: 4px;
+      padding: 8px 0;
+      min-width: 200px;
+      z-index: 100;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+    }
+    .nav-dropdown:hover .nav-dropdown-menu {
+      display: block;
+    }
+    .nav-dropdown-menu .dropdown-heading {
+      color: #55ff55;
+      font-size: 0.65rem;
+      padding: 6px 14px 2px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      text-shadow: 1px 1px 0 rgba(0,0,0,0.8);
+    }
+    .nav-dropdown-menu .dropdown-link {
+      display: block;
+      padding: 5px 14px;
+      color: #ccc;
+      text-decoration: none;
+      font-size: 0.75rem;
+      font-family: 'Minecraft', sans-serif;
+      text-shadow: 1px 1px 0 rgba(0,0,0,0.7);
+      white-space: nowrap;
+    }
+    .nav-dropdown-menu .dropdown-link:hover {
+      background: rgba(85,255,85,0.1);
+      color: #fff;
+    }
+    .nav-dropdown-menu hr {
+      border: none;
+      border-top: 1px solid rgba(85,255,85,0.15);
+      margin: 6px 10px;
+    }
     .nav-spacer { flex: 1; }
     .content {
       flex: 1;
@@ -187,13 +235,13 @@
       font-size: clamp(0.55rem, 0.9vw, 0.7rem);
       color: #666;
       text-shadow: 1px 1px 0 rgba(0,0,0,0.8);
-      margin-top: 10px;
+      margin-top: 4px;
     }
     .game-scores {
       display: flex;
       gap: 24px;
       justify-content: center;
-      margin-top: 8px;
+      margin-top: 2px;
       font-size: clamp(0.6rem, 1vw, 0.75rem);
       color: #aaa;
       text-shadow: 1px 1px 0 rgba(0,0,0,0.8);
@@ -279,7 +327,18 @@
     <a class="nav-link" href="/plugins/"><img src="../images/plugins_icon.png" alt="Plugins icon" />Plugins</a>
     <a class="nav-link" href="/wiki/"><img src="../images/wiki_icon.png" alt="Wiki icon" />Wiki</a>
     <a class="nav-link" href="/chat/"><img src="../images/chat_icon.png" alt="Chat icon" />Chat</a>
-    <a class="nav-link" href="/games/"><img src="../images/game_icon.png" alt="Games icon" />Games</a>
+    <div class="nav-dropdown">
+      <a class="nav-link" href="/games/"><img src="../images/game_icon.png" alt="Games icon" />Games</a>
+      <div class="nav-dropdown-menu">
+        <div class="dropdown-heading">Website Games</div>
+        <a class="dropdown-link" href="https://mine-craft.io/" target="_blank" rel="noopener noreferrer">mine-craft.io</a>
+        <a class="dropdown-link" href="https://classic.minecraft.net/" target="_blank" rel="noopener noreferrer">Minecraft Classic</a>
+        <hr />
+        <div class="dropdown-heading">itch.io Downloads</div>
+        <a class="dropdown-link" href="https://hdms.itch.io/c4r" target="_blank" rel="noopener noreferrer">C::Reactris</a>
+        <a class="dropdown-link" href="https://dakharr.itch.io/mine-souls-3" target="_blank" rel="noopener noreferrer">Mine Souls 3</a>
+      </div>
+    </div>
     <a class="nav-link" href="https://discord.gg/vVvs7tN5p7" target="_blank" rel="noopener noreferrer"><img src="../images/discord_icon.png" alt="Discord icon" />Discord</a>
     <div class="nav-spacer"></div>
     <a class="nav-link howto-link" href="/how-to/"><span class="howto-text">How to Join &amp; more</span><img src="../images/how-to_icon.gif" alt="How to icon" /></a>
@@ -312,7 +371,7 @@
       <span class="version-label" id="versionLabel">Mine Blocks</span>
       <button class="version-arrow" id="versionNext" title="Next version">&#9654;</button>
     </div>
-    <div class="mineblocks-link" id="mineblocksLink">Visit Mine Blocks on their website <a href="https://mineblocks.com/" target="_blank" rel="noopener noreferrer">MineBlocks.com</a></div>
+    <div class="mineblocks-link" id="mineblocksLink">Visit Mine Blocks on their official Website: <a href="https://mineblocks.com/" target="_blank" rel="noopener noreferrer">MineBlocks.com</a></div>
   </main>
 
   <script>
