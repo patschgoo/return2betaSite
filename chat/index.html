@@ -279,7 +279,7 @@
       .nav-carousel { display: flex; }
       .nav-caret { padding: 0 10px; }
       .nav-carousel-items { gap: 8px; }
-      .howto-text { font-size: 0.35rem; max-width: 40px; line-height: 1.1; text-align: right; }
+      .howto-text { font-size: 0.5rem; max-width: 60px; line-height: 1.15; text-align: right; }
       .nav-carousel-items a[href$="/games/"] { flex-direction: row-reverse; }
     }
     .nav-dropdown { position: relative; }
@@ -639,9 +639,6 @@
   </section>
   <script>
   (function(){var mp=document.getElementById('mapPanel'),fb=document.getElementById('mapFoldBtn'),mt=document.getElementById('mapToggle');if(localStorage.getItem('r2b_map_collapsed')==='1'){mp.classList.add('collapsed');fb.innerHTML='&#x25C0;';fb.title='Show map';}fb.addEventListener('click',function(){var c=mp.classList.toggle('collapsed');fb.innerHTML=c?'&#x25C0;':'&#x25B6;';fb.title=c?'Show map':'Hide map';localStorage.setItem('r2b_map_collapsed',c?'1':'0');});mt.addEventListener('click',function(){if(mp.classList.contains('collapsed')){mp.classList.remove('collapsed');fb.innerHTML='&#x25B6;';fb.title='Hide map';localStorage.setItem('r2b_map_collapsed','0');}var m=mp.classList.toggle('maximized');mt.innerHTML=m?'\u2715':'\u26F6';mt.title=m?'Minimize map':'Maximize map';});document.addEventListener('keydown',function(e){if(e.key==='Escape'&&mp.classList.contains('maximized')){mp.classList.remove('maximized');mt.innerHTML='\u26F6';mt.title='Maximize map';}});var DU='https://map.return2beta.com/up/world/world/',PU='https://corsproxy.io/?'+encodeURIComponent(DU);function ok(r){if(!r.ok)throw new Error(r.status);return r.json();}function on(){mp.style.display='';document.body.classList.remove('map-hidden');}function off(){mp.style.display='none';document.body.classList.add('map-hidden');}function chk(){fetch(DU).then(ok).then(on).catch(function(){fetch(PU).then(ok).then(on).catch(off);});}chk();setInterval(chk,30000);})();
-  </script>
-  <script>
-  (function(){var dd=document.getElementById('gamesDropdown');if(!dd)return;dd.addEventListener('click',function(e){if(window.innerWidth<=720){e.stopPropagation();dd.classList.toggle('open');}});document.addEventListener('click',function(){dd.classList.remove('open');});})();
   </script>
 </body>
 </html>
