@@ -377,7 +377,7 @@
         <a class="dropdown-link" href="/games/?game=0"><img src="../images/Game%20Links/flappy-chicken.png" alt="" />Flappy Chicken</a>
         <a class="dropdown-link" href="/games/?game=1"><img src="../images/Game%20Links/blocktris.png" alt="" />Blocktris</a>
         <a class="dropdown-link" href="/games/?game=2"><img src="../images/Game%20Links/hatch-snake.png" alt="" />Hatch (Snake)</a>
-        <a class="dropdown-link" href="/games/?game=3"><img src="../images/Game%20Links/minesweeper.png" alt="" />Minesweeper</a>
+        <a class="dropdown-link" href="/games/?game=3"><img src="../images/Game%20Links/minecreeper.png" alt="" />Minecreeper</a>
         <a class="dropdown-link" href="/games/?game=4"><img src="../images/Game%20Links/mine-blocks.png" alt="" />Mine Blocks</a>
         <a class="dropdown-link" href="/games/?game=5"><img src="../images/Game%20Links/mine-blocks-2.png" alt="" />Mine Blocks 2</a>
         <hr />
@@ -512,7 +512,7 @@
     var prevBtn = document.getElementById('gamePrev');
     var nextBtn = document.getElementById('gameNext');
 
-    var games = ['Flappy Chicken', 'Blocktris', 'Hatch (Snake)', 'Minesweeper', 'Mine Blocks'];
+    var games = ['Flappy Chicken', 'Blocktris', 'Hatch (Snake)', 'Minecreeper', 'Mine Blocks'];
     var currentGame = 0;
     var activeGame = null;
     var animId = null;
@@ -806,7 +806,7 @@
         state = 'dead';
         if (score > best) { best = score; localStorage.setItem('r2b_flappy_best', best); bEl.textContent = best; }
         if (score > siteBest) { siteBest = score; localStorage.setItem('r2b_flappy_site', siteBest); sbEl.textContent = siteBest; }
-        hEl.textContent = 'Game Over! Press Space or Tap to restart';
+        hEl.textContent = '';
       }
 
       function drawFrame() {
@@ -909,6 +909,31 @@
           c.shadowColor = 'rgba(0,0,0,0.8)';
           c.shadowBlur = 4;
           c.fillText(score, W / 2, 50);
+          c.shadowBlur = 0;
+        }
+
+        // Game over overlay
+        if (state === 'dead') {
+          c.fillStyle = 'rgba(0,0,0,0.5)';
+          c.fillRect(0, 0, W, groundY);
+          c.textAlign = 'center';
+          c.shadowColor = 'rgba(0,0,0,0.9)'; c.shadowBlur = 6;
+          // Title
+          c.fillStyle = '#ff5555';
+          c.font = '28px Minecraft, sans-serif';
+          c.fillText('Game Over!', W / 2, H / 2 - 50);
+          // Score
+          c.fillStyle = '#ffdd55';
+          c.font = '18px Minecraft, sans-serif';
+          c.fillText('Score: ' + score, W / 2, H / 2 - 18);
+          // Best
+          c.fillStyle = '#aaffaa';
+          c.font = '14px Minecraft, sans-serif';
+          c.fillText('Best: ' + best, W / 2, H / 2 + 8);
+          // Play again
+          c.fillStyle = '#aaa';
+          c.font = '12px Minecraft, sans-serif';
+          c.fillText('Press Space or Tap to play again', W / 2, H / 2 + 38);
           c.shadowBlur = 0;
         }
       }
@@ -1112,7 +1137,7 @@
         state = 'dead';
         if (score > best) { best = score; localStorage.setItem('r2b_tetris_best', best); bEl.textContent = best; }
         if (score > siteBest) { siteBest = score; localStorage.setItem('r2b_tetris_site', siteBest); sbEl.textContent = siteBest; }
-        hEl.textContent = 'Game Over! Press Space or Tap to restart';
+        hEl.textContent = '';
       }
 
       function reset() {
@@ -1249,6 +1274,34 @@
         c.fillText(score, previewCenterX, OFFY + CELL * 9.2);
         c.shadowOffsetX = 0;
         c.shadowOffsetY = 0;
+
+        // Game over overlay
+        if (state === 'dead') {
+          c.fillStyle = 'rgba(0,0,0,0.55)';
+          c.fillRect(OFFX, OFFY, COLS * CELL, ROWS * CELL);
+          var midX = OFFX + COLS * CELL / 2;
+          var midY = OFFY + ROWS * CELL / 2;
+          c.textAlign = 'center';
+          c.shadowColor = 'rgba(0,0,0,0.9)'; c.shadowBlur = 6;
+          c.shadowOffsetX = 0; c.shadowOffsetY = 0;
+          // Title
+          c.fillStyle = '#ff5555';
+          c.font = '22px Minecraft, sans-serif';
+          c.fillText('Game Over!', midX, midY - 30);
+          // Score
+          c.fillStyle = '#ffdd55';
+          c.font = '16px Minecraft, sans-serif';
+          c.fillText('Score: ' + score, midX, midY + 0);
+          // Best
+          c.fillStyle = '#aaffaa';
+          c.font = '13px Minecraft, sans-serif';
+          c.fillText('Best: ' + best, midX, midY + 22);
+          // Play again
+          c.fillStyle = '#aaa';
+          c.font = '10px Minecraft, sans-serif';
+          c.fillText('Press Space or Tap to play again', midX, midY + 48);
+          c.shadowBlur = 0;
+        }
       }
 
       function loop() {
@@ -1332,57 +1385,77 @@
         drawTileTinted(c, tile, dx, dy, dw, dh, tint);
       }
 
-      /* ── Chicken pixel art (direction-aware) ── */
+      /* ── Chicken pixel art (Minecraft-style, direction-aware) ── */
+      var P = Math.floor(CELL / 8); // pixel unit for blocky look
       function drawChickenHead(cx, cy, d) {
-        var s = CELL;
         c.save();
-        c.translate(cx + s / 2, cy + s / 2);
-        // body
+        c.translate(cx + CELL / 2, cy + CELL / 2);
+        c.imageSmoothingEnabled = false;
+        // d: 0=up, 1=right, 2=down, 3=left
+        // Body — white block
         c.fillStyle = '#f0f0f0';
-        c.fillRect(-s * 0.4, -s * 0.35, s * 0.8, s * 0.7);
-        c.fillStyle = '#ddd';
-        c.fillRect(-s * 0.4, s * 0.15, s * 0.8, s * 0.2);
-        // eye
+        c.fillRect(-3*P, -3*P, 6*P, 6*P);
+        // Darker underside
+        c.fillStyle = '#d8d8d8';
+        c.fillRect(-3*P, 2*P, 6*P, P);
+        // Outline edges
+        c.fillStyle = '#bbb';
+        c.fillRect(-3*P, -3*P, P, 6*P); // left edge
+        c.fillRect(2*P, -3*P, P, 6*P);  // right edge
+        // Eye (black pixel) — shifts with direction
         c.fillStyle = '#111';
-        var ex = d === 1 ? s * 0.15 : d === 3 ? -s * 0.15 : 0;
-        var ey = d === 2 ? s * 0.1 : d === 0 ? -s * 0.1 : -s * 0.05;
-        c.fillRect(ex, ey, 3, 3);
-        // comb (red)
+        var ex = d === 1 ? P : d === 3 ? -P : 0;
+        var ey = d === 2 ? P : d === 0 ? -P : 0;
+        c.fillRect(ex, ey - P, P, P);
+        // Comb (red, on top) — 3 red blocks
         c.fillStyle = '#cc2222';
-        c.fillRect(-2, -s * 0.38, 3, 4);
-        c.fillRect(1, -s * 0.42, 3, 4);
-        // beak
+        if (d === 0) {
+          c.fillRect(-P, -4*P - P, P, P); c.fillRect(0, -4*P - P, P, P); c.fillRect(P, -4*P, P, P);
+        } else {
+          c.fillRect(-P, -4*P, P, P); c.fillRect(0, -4*P, P, P); c.fillRect(P, -4*P, P, P);
+        }
+        // Beak (orange, protrudes in facing direction)
         c.fillStyle = '#dd8833';
-        var bx = d === 1 ? s * 0.35 : d === 3 ? -s * 0.42 : -2;
-        var by = d === 2 ? s * 0.3 : d === 0 ? -s * 0.42 : s * 0.05;
-        c.fillRect(bx, by, d === 0 || d === 2 ? 5 : 7, d === 0 || d === 2 ? 5 : 4);
-        // wattle
+        if (d === 1) { c.fillRect(3*P, -P, 2*P, P); c.fillRect(3*P, 0, P, P); }
+        else if (d === 3) { c.fillRect(-5*P, -P, 2*P, P); c.fillRect(-4*P, 0, P, P); }
+        else if (d === 2) { c.fillRect(-P, 3*P, 2*P, P); c.fillRect(0, 4*P, P, P); }
+        else { c.fillRect(-P, -4*P - 2*P, 2*P, P); c.fillRect(0, -4*P - P, P, P); }
+        // Wattle (red chin blob)
         c.fillStyle = '#cc2222';
-        var wx = d === 1 ? s * 0.25 : d === 3 ? -s * 0.3 : 0;
-        var wy = d === 2 ? s * 0.22 : d === 0 ? -s * 0.3 : s * 0.12;
-        c.fillRect(wx, wy, 3, 4);
-        // feet
+        if (d === 1) { c.fillRect(2*P, P, P, P); }
+        else if (d === 3) { c.fillRect(-3*P, P, P, P); }
+        else if (d === 2) { c.fillRect(0, 3*P, P, P); }
+        else { c.fillRect(0, -3*P, P, P); }
+        // Feet (orange)
         c.fillStyle = '#dd8833';
-        c.fillRect(-s * 0.15, s * 0.32, 3, 3);
-        c.fillRect(s * 0.08, s * 0.32, 3, 3);
+        c.fillRect(-2*P, 3*P, P, P);
+        c.fillRect(P, 3*P, P, P);
         c.restore();
       }
 
       function drawChick(cx, cy) {
-        var s = CELL;
         c.save();
-        c.translate(cx + s / 2, cy + s / 2);
-        c.fillStyle = '#ffdd55';
-        c.fillRect(-s * 0.3, -s * 0.25, s * 0.6, s * 0.55);
-        c.fillStyle = '#ffee88';
-        c.fillRect(-s * 0.2, -s * 0.15, s * 0.4, s * 0.35);
+        c.translate(cx + CELL / 2, cy + CELL / 2);
+        c.imageSmoothingEnabled = false;
+        // Small white body
+        c.fillStyle = '#f0f0f0';
+        c.fillRect(-2*P, -2*P, 4*P, 4*P);
+        // Lighter highlight
+        c.fillStyle = '#fafafa';
+        c.fillRect(-P, -P, 2*P, 2*P);
+        // Edge shading
+        c.fillStyle = '#d0d0d0';
+        c.fillRect(-2*P, P, 4*P, P);
+        // Eye
         c.fillStyle = '#111';
-        c.fillRect(s * 0.05, -s * 0.12, 2, 2);
+        c.fillRect(0, -P, P, P);
+        // Tiny beak
         c.fillStyle = '#dd8833';
-        c.fillRect(s * 0.2, -s * 0.05, 3, 3);
+        c.fillRect(2*P, -P, P, P);
+        // Tiny feet
         c.fillStyle = '#dd8833';
-        c.fillRect(-s * 0.15, s * 0.28, 3, 3);
-        c.fillRect(s * 0.08, s * 0.28, 3, 3);
+        c.fillRect(-P, 2*P, P, P);
+        c.fillRect(P, 2*P, P, P);
         c.restore();
       }
 
@@ -1453,7 +1526,7 @@
         state = 'dead';
         if (score > best) { best = score; localStorage.setItem('r2b_hatch_best', best); bEl.textContent = best; }
         if (score > siteBest) { siteBest = score; localStorage.setItem('r2b_hatch_site', siteBest); sbEl.textContent = siteBest; }
-        hEl.textContent = 'Game Over! Press Space or Tap to restart';
+        hEl.textContent = '';
       }
 
       function update() {
@@ -1511,16 +1584,22 @@
 
         // Death overlay
         if (state === 'dead') {
-          c.fillStyle = 'rgba(0,0,0,0.4)';
+          c.fillStyle = 'rgba(0,0,0,0.5)';
           c.fillRect(OX, OY, COLS * CELL, ROWS * CELL);
-          c.fillStyle = '#ff5555';
-          c.font = '20px Minecraft, sans-serif';
           c.textAlign = 'center';
           c.shadowColor = 'rgba(0,0,0,0.9)'; c.shadowBlur = 6;
-          c.fillText('Game Over!', W / 2, H / 2 - 10);
+          // Game Over title
+          c.fillStyle = '#ff5555';
+          c.font = '22px Minecraft, sans-serif';
+          c.fillText('Game Over!', W / 2, H / 2 - 24);
+          // Score
           c.fillStyle = '#ffdd55';
-          c.font = '14px Minecraft, sans-serif';
-          c.fillText('Eggs: ' + score, W / 2, H / 2 + 16);
+          c.font = '16px Minecraft, sans-serif';
+          c.fillText('Score: ' + score, W / 2, H / 2 + 2);
+          // Play again prompt
+          c.fillStyle = '#aaa';
+          c.font = '11px Minecraft, sans-serif';
+          c.fillText('Press Space or Tap to play again', W / 2, H / 2 + 26);
           c.shadowBlur = 0;
         }
       }
@@ -1575,7 +1654,7 @@
     }
 
     /* ================================================================
-       MINESWEEPER — TNT mines, stone/cobble/dirt hidden cells
+       MINECREEPER — TNT mines, stone/cobble/dirt hidden cells
        ================================================================ */
     function minesweeper(cvs, c, sEl, bEl, sbEl, hEl, setAnim) {
       var COLS = 16, ROWS = 16, MINES = 40, CELL = 24;
@@ -1693,6 +1772,34 @@
         }
       }
 
+      // Creeper hiss sound via Web Audio API
+      function playCreeperHiss() {
+        try {
+          var actx = new (window.AudioContext || window.webkitAudioContext)();
+          var dur = 1.5;
+          var buf = actx.createBuffer(1, actx.sampleRate * dur, actx.sampleRate);
+          var data = buf.getChannelData(0);
+          for (var i = 0; i < data.length; i++) {
+            var t = i / actx.sampleRate;
+            var env = Math.max(0, 1 - t / dur);
+            env = env * env;
+            // Hissing noise with frequency sweep
+            var freq = 6000 + 2000 * Math.sin(t * 8);
+            var noise = (Math.random() * 2 - 1);
+            var tone = Math.sin(2 * Math.PI * freq * t) * 0.15;
+            data[i] = (noise * 0.7 + tone) * env * 0.3;
+          }
+          var src = actx.createBufferSource();
+          src.buffer = buf;
+          var gain = actx.createGain();
+          gain.gain.value = 0.4;
+          src.connect(gain);
+          gain.connect(actx.destination);
+          src.start();
+          src.onended = function () { actx.close(); };
+        } catch (e) { /* Audio not available */ }
+      }
+
       function hitMine() {
         state = 'dead';
         // Reveal all mines
@@ -1703,7 +1810,38 @@
         }
         if (score > best) { best = score; localStorage.setItem('r2b_mine_best', best); bEl.textContent = best; }
         if (score > siteBest) { siteBest = score; localStorage.setItem('r2b_mine_site', siteBest); sbEl.textContent = siteBest; }
-        hEl.textContent = 'BOOM! Click to play again.';
+        hEl.textContent = '';
+        playCreeperHiss();
+      }
+
+      // Draw a pixel-art creeper face at given center, with given size
+      function drawCreeperFace(cx, cy, faceSize) {
+        var p = faceSize / 8; // each "pixel" of the 8x8 face grid
+        var ox = cx - faceSize / 2;
+        var oy = cy - faceSize / 2;
+        // Background green face
+        c.fillStyle = '#5da13a';
+        c.fillRect(ox, oy, faceSize, faceSize);
+        // Lighter patches
+        c.fillStyle = '#6fbf47';
+        c.fillRect(ox + p, oy + p, p, p);
+        c.fillRect(ox + 3*p, oy, p, p);
+        c.fillRect(ox + 6*p, oy + p, p, p);
+        c.fillRect(ox, oy + 5*p, p, p);
+        c.fillRect(ox + 7*p, oy + 5*p, p, p);
+        c.fillRect(ox + 2*p, oy + 7*p, p, p);
+        c.fillRect(ox + 5*p, oy + 7*p, p, p);
+        // Dark creeper face pattern
+        c.fillStyle = '#2a2a2a';
+        // Eyes (2x2 each)
+        c.fillRect(ox + p, oy + 2*p, 2*p, 2*p);      // left eye
+        c.fillRect(ox + 5*p, oy + 2*p, 2*p, 2*p);     // right eye
+        // Nose/mouth (cross shape)
+        c.fillRect(ox + 3*p, oy + 4*p, 2*p, p);       // top of mouth
+        c.fillRect(ox + 2*p, oy + 5*p, 4*p, p);       // wide part
+        c.fillRect(ox + 2*p, oy + 6*p, p, 2*p);       // left fang
+        c.fillRect(ox + 5*p, oy + 6*p, p, 2*p);       // right fang
+        c.fillRect(ox + 3*p, oy + 6*p, 2*p, p);       // inner mouth
       }
 
       function drawFrame() {
@@ -1798,19 +1936,42 @@
         if (state === 'won') {
           c.fillStyle = 'rgba(0,80,0,0.35)';
           c.fillRect(OX, OY, COLS * CELL, ROWS * CELL);
-          c.fillStyle = '#55ff55';
-          c.font = '22px Minecraft, sans-serif';
           c.textAlign = 'center';
           c.textBaseline = 'middle';
           c.shadowColor = 'rgba(0,0,0,0.9)'; c.shadowBlur = 6;
-          c.fillText('All Clear!', W / 2, H / 2);
+          c.fillStyle = '#55ff55';
+          c.font = '22px Minecraft, sans-serif';
+          c.fillText('All Clear!', W / 2, H / 2 - 12);
+          c.fillStyle = '#aaa';
+          c.font = '11px Minecraft, sans-serif';
+          c.fillText('Click to play again', W / 2, H / 2 + 14);
           c.shadowBlur = 0;
         }
 
-        // Death flash
+        // Death overlay — creeper face
         if (state === 'dead') {
-          c.fillStyle = 'rgba(80,0,0,0.25)';
+          c.fillStyle = 'rgba(0,0,0,0.6)';
           c.fillRect(OX, OY, COLS * CELL, ROWS * CELL);
+          // Creeper face
+          var faceSize = Math.min(COLS * CELL, ROWS * CELL) * 0.4;
+          drawCreeperFace(W / 2, H / 2 - 30, faceSize);
+          // Text below face
+          c.textAlign = 'center';
+          c.textBaseline = 'middle';
+          c.shadowColor = 'rgba(0,0,0,0.9)'; c.shadowBlur = 6;
+          // Sssss...
+          c.fillStyle = '#55ff55';
+          c.font = '18px Minecraft, sans-serif';
+          c.fillText('Sssss... BOOM!', W / 2, H / 2 + faceSize / 2 + 8);
+          // Score
+          c.fillStyle = '#ffdd55';
+          c.font = '14px Minecraft, sans-serif';
+          c.fillText('Cleared: ' + score + ' / ' + (COLS * ROWS - MINES), W / 2, H / 2 + faceSize / 2 + 30);
+          // Play again
+          c.fillStyle = '#aaa';
+          c.font = '11px Minecraft, sans-serif';
+          c.fillText('Click to play again', W / 2, H / 2 + faceSize / 2 + 50);
+          c.shadowBlur = 0;
         }
       }
 
