@@ -166,6 +166,14 @@
       .nav-caret { padding: 0 10px; }
       .nav-carousel-items { gap: 8px; }
     }
+    .nav-dropdown { position: relative; }
+    .nav-dropdown-menu { display: none; position: absolute; top: 48px; left: 50%; transform: translateX(-50%); background: rgba(10,16,10,0.96); border: 2px solid rgba(85,255,85,0.3); border-radius: 4px; padding: 8px 0; min-width: 180px; z-index: 100; box-shadow: 0 6px 20px rgba(0,0,0,0.7); }
+    .nav-dropdown:hover .nav-dropdown-menu, .nav-dropdown.open .nav-dropdown-menu { display: block; }
+    .nav-dropdown-menu .dropdown-link { display: block; padding: 6px 16px; color: #ccc; text-decoration: none; font-size: 0.75rem; font-family: 'Minecraft', sans-serif; text-shadow: 1px 1px 0 rgba(0,0,0,0.7); white-space: nowrap; }
+    .nav-dropdown-menu .dropdown-link:hover { background: rgba(85,255,85,0.1); color: #fff; }
+    .nav-dropdown-menu hr { border: none; border-top: 1px solid rgba(85,255,85,0.12); margin: 4px 10px; }
+    .nav-dropdown-menu .dropdown-more { display: block; padding: 6px 16px; color: #55ff55; text-decoration: none; font-size: 0.7rem; font-family: 'Minecraft', sans-serif; text-shadow: 1px 1px 0 rgba(0,0,0,0.7); white-space: nowrap; }
+    .nav-dropdown-menu .dropdown-more:hover { background: rgba(85,255,85,0.1); color: #aaff88; }
   </style>
 </head>
 <body>
@@ -175,7 +183,16 @@
     <a class="nav-link" href="/plugins/"><img src="../images/plugins_icon.png" alt="Plugins icon" />Plugins</a>
     <a class="nav-link" href="/wiki/"><img src="../images/wiki_icon.png" alt="Wiki icon" />Wiki</a>
     <a class="nav-link" href="/chat/"><img src="../images/chat_icon.png" alt="Chat icon" />Chat</a>
-    <a class="nav-link" href="/games/"><img src="../images/game_icon.png" alt="Games icon" />Games</a>
+    <div class="nav-dropdown" id="gamesDropdown">
+      <a class="nav-link" href="/games/"><img src="../images/game_icon.png" alt="Games icon" />Games</a>
+      <div class="nav-dropdown-menu">
+        <a class="dropdown-link" href="/games/?game=0">Flappy Chicken</a>
+        <a class="dropdown-link" href="/games/?game=1">Blocktris</a>
+        <a class="dropdown-link" href="/games/?game=2">Mine Blocks</a>
+        <hr />
+        <a class="dropdown-more" href="/games/more-links/">More Links &#8250;</a>
+      </div>
+    </div>
     <a class="nav-link" href="https://discord.gg/vVvs7tN5p7" target="_blank" rel="noopener noreferrer"><img src="../images/discord_icon.png" alt="Discord icon" />Discord</a>
     <div class="nav-spacer"></div>
     <a class="nav-link howto-link" href="/how-to/"><span class="howto-text">How to Join &amp; more</span><img src="../images/how-to_icon.gif" alt="How to icon" /></a>
@@ -253,7 +270,7 @@
     (function () {
       var header = document.querySelector('.header-band');
       if (!header) return;
-      var allLinks = Array.from(header.querySelectorAll(':scope > .nav-link'));
+      var allLinks = Array.from(header.querySelectorAll(':scope > .nav-link, :scope > .nav-dropdown > .nav-link'));
       var spacer = header.querySelector(':scope > .nav-spacer');
       var carousel = document.getElementById('navCarousel');
       var prevBtn = document.getElementById('navPrev');
@@ -552,6 +569,9 @@
   </script>
   <script>
   (function(){var h=document.getElementById('cwResize'),p=document.getElementById('cwPanel');if(!h||!p)return;h.addEventListener('mousedown',function(e){e.preventDefault();var sw=p.offsetWidth,sh=p.offsetHeight,sx=e.clientX,sy=e.clientY;function move(e){p.style.width=Math.max(300,sw+(sx-e.clientX))+'px';p.style.height=Math.max(300,sh+(sy-e.clientY))+'px';}function up(){document.removeEventListener('mousemove',move);document.removeEventListener('mouseup',up);}document.addEventListener('mousemove',move);document.addEventListener('mouseup',up);});})();
+  </script>
+  <script>
+  (function(){var dd=document.getElementById('gamesDropdown');if(!dd)return;dd.addEventListener('click',function(e){if(window.innerWidth<=720){e.stopPropagation();dd.classList.toggle('open');}});document.addEventListener('click',function(){dd.classList.remove('open');});})();
   </script>
 </body>
 </html>
