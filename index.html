@@ -491,6 +491,12 @@
       font-size: 0.72rem;
       line-height: 1.7;
       text-shadow: 1px 1px 0 rgba(0,0,0,0.7);
+      transition: border-color 0.15s, background 0.15s;
+      display: block;
+    }
+    .world-card:hover {
+      border-color: rgba(85,255,85,0.45);
+      background: rgba(0,0,0,0.6);
     }
     .world-card h3 {
       font-size: 0.82rem;
@@ -595,21 +601,21 @@
     <section class="worlds-section" aria-label="Server worlds">
       <h2>Three Worlds, One Server <a href="/worlds/" style="color:#55ff55;text-decoration:none;font-size:1.6em;vertical-align:middle;line-height:0" title="View all worlds">&#8250;</a></h2>
       <div class="worlds-grid">
-        <div class="world-card">
+        <a href="/worlds/#server" class="world-card" style="text-decoration:none">
           <h3 style="color:#55ff55">Server World</h3>
           <p>The main world with the full Return2Beta experience. All plugins active &mdash; economy, land protection, warps, homes, chat features, and every quality-of-life enhancement the server offers.</p>
           <div class="world-cmd">Default spawn</div>
-        </div>
-        <div class="world-card">
+        </a>
+        <a href="/worlds/#creative" class="world-card" style="text-decoration:none">
           <h3 style="color:#ffdd55">Creative World</h3>
           <p>A building paradise adjusted to work like creative mode. Spawn items with <span style="color:#ffaa00">/i</span>, use WorldEdit tools, fly freely, and break blocks instantly. Build whatever you can imagine &mdash; no resource gathering needed.</p>
           <div class="world-cmd">/dd creative</div>
-        </div>
-        <div class="world-card">
+        </a>
+        <a href="/worlds/#survival" class="world-card" style="text-decoration:none">
           <h3 style="color:#dd5555">Survival World</h3>
           <p>Old-school, raw survival &mdash; like a classic 2b2t. No plugins, no commands, no teleports, nothing. Just you and the world. Mine, craft, and survive on your own terms.</p>
           <div class="world-cmd">/dd survival</div>
-        </div>
+        </a>
       </div>
     </section>
 
