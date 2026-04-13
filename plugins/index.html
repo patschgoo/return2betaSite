@@ -444,6 +444,11 @@
     .nav-dropdown-menu hr { border: none; border-top: 1px solid rgba(85,255,85,0.12); margin: 4px 10px; }
     .nav-dropdown-menu .dropdown-more { display: block; padding: 6px 16px; color: #55ff55; text-decoration: none; font-size: 0.7rem; font-family: 'Minecraft', sans-serif; text-shadow: 1px 1px 0 rgba(0,0,0,0.7); white-space: nowrap; }
     .nav-dropdown-menu .dropdown-more:hover { background: rgba(85,255,85,0.1); color: #aaff88; }
+    @media (max-width: 720px) {
+      .nav-dropdown.open { display: block !important; position: fixed; top: 48px; left: 0; right: 0; z-index: 100; }
+      .nav-dropdown.open > .nav-link { display: none !important; }
+      .nav-dropdown.open .nav-dropdown-menu { position: static; transform: none; width: 100%; border-radius: 0; border-left: none; border-right: none; }
+    }
   </style>
 </head>
 <body>
@@ -748,6 +753,15 @@
       prevBtn.addEventListener('click', function () { if (page > 0) { page--; render(); } });
       nextBtn.addEventListener('click', function () { if (page < total - 1) { page++; render(); } });
       render();
+      itemsEl.addEventListener('click', function(e) {
+        var link = e.target.closest('a[href$="/games/"]');
+        if (link) { e.preventDefault(); var dd = document.getElementById('gamesDropdown'); if (dd) dd.classList.toggle('open'); }
+      });
+      document.addEventListener('click', function(e) {
+        if (!e.target.closest('.nav-dropdown') && !e.target.closest('#navCarouselItems')) {
+          var dd = document.getElementById('gamesDropdown'); if (dd) dd.classList.remove('open');
+        }
+      });
       var forced = false;
       var dropdown = header.querySelector(':scope > .nav-dropdown');
       function forceOn() {
