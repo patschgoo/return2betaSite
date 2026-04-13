@@ -229,53 +229,43 @@
     }
     /* Scale up on desktop / iPad — canvas games only */
     @media (min-width: 721px) {
-      .game-container.scaled-canvas {
-        transform: scale(1.45);
-        transform-origin: top center;
-      }
-      .game-container.scaled-canvas.flappy-game {
-        margin-bottom: 220px;
-      }
-      .game-container.scaled-canvas.tetris-game {
-        margin-bottom: 230px;
-      }
-      .game-container.scaled-canvas.hatch-game {
-        margin-bottom: 200px;
-      }
-      .game-container.scaled-canvas.minesweeper-game {
-        margin-bottom: 200px;
-      }
-      .game-container.scaled-canvas.blockcrush-game {
-        margin-bottom: 200px;
-      }
       .game-container.embed-game {
         width: min(552px, 80vw);
       }
     }
     @media (min-width: 721px) and (max-width: 1024px) {
-      .game-container.scaled-canvas {
-        transform: scale(1.25);
-      }
-      .game-container.scaled-canvas.flappy-game {
-        margin-bottom: 170px;
-      }
-      .game-container.scaled-canvas.tetris-game {
-        margin-bottom: 140px;
-      }
-      .game-container.scaled-canvas.hatch-game {
-        margin-bottom: 110px;
-      }
-      .game-container.scaled-canvas.minesweeper-game {
-        margin-bottom: 110px;
-      }
-      .game-container.scaled-canvas.blockcrush-game {
-        margin-bottom: 110px;
-      }
     }
     @media (max-width: 720px) {
       .game-container.embed-game {
         width: 100%;
       }
+    }
+    .game-container.scaled-canvas {
+      transform-origin: top center;
+    }
+    /* Flag/reveal toggle for Minesweeper touch */
+    .mine-mode-toggle {
+      display: none;
+      margin: 8px auto 0;
+      padding: 6px 18px;
+      font-family: 'Minecraft', sans-serif;
+      font-size: 0.7rem;
+      background: rgba(0,0,0,0.6);
+      border: 2px solid rgba(85,255,85,0.3);
+      border-radius: 4px;
+      color: #ccc;
+      cursor: pointer;
+      text-shadow: 1px 1px 0 rgba(0,0,0,0.7);
+    }
+    .mine-mode-toggle.flag-mode {
+      color: #ff5555;
+      border-color: rgba(255,85,85,0.4);
+    }
+    @media (max-width: 720px) {
+      .mine-mode-toggle.visible { display: block; }
+    }
+    @media (pointer: coarse) {
+      .mine-mode-toggle.visible { display: block; }
     }
     .game-hint {
       font-size: clamp(0.55rem, 0.9vw, 0.7rem);
@@ -413,6 +403,7 @@
       <canvas id="gameCanvas" width="320" height="480"></canvas>
       <iframe id="gameIframe" width="480" height="360" allowfullscreen style="display:none"></iframe>
     </div>
+    <button class="mine-mode-toggle" id="mineModeToggle">Mode: Reveal</button>
     <p class="game-hint" id="gameHint">Press Space or Tap to play</p>
     <div class="game-scores">
       <div>Score: <span id="scoreDisplay">0</span></div>
@@ -607,6 +598,29 @@
 
     var mineblocksLink = document.getElementById('mineblocksLink');
     var gameContainer = document.getElementById('gameContainer');
+    var mineModeBtn = document.getElementById('mineModeToggle');
+    var mineFlag = false;
+
+    // Dynamic canvas scaling
+    var TARGET_W = 464; // target visual width on desktop
+    function scaleGame() {
+      if (!canvas.width || canvas.style.display === 'none') return;
+      var vw = window.innerWidth;
+      var cw = canvas.width;
+      var scale;
+      if (vw <= 720) {
+        // Mobile: fit to viewport width with padding
+        scale = Math.min((vw - 32) / cw, 1.8);
+      } else if (vw <= 1024) {
+        scale = Math.min(TARGET_W / cw, 1.4);
+      } else {
+        scale = Math.min(TARGET_W / cw, 1.6);
+      }
+      scale = Math.round(scale * 100) / 100;
+      gameContainer.style.transform = 'scale(' + scale + ')';
+      gameContainer.style.marginBottom = ((canvas.height * scale - canvas.height) + 8) + 'px';
+    }
+    window.addEventListener('resize', scaleGame);
 
     var mineblocksVersions = [
       { label: 'Mine Blocks', url: 'https://mineblocks.com/1/embed', w: 552, h: 414 },
@@ -667,6 +681,11 @@
       versionSwitcherEl.style.display = 'none';
       mineblocksLink.style.display = 'none';
       gameContainer.className = 'game-container scaled-canvas';
+      gameContainer.style.transform = '';
+      gameContainer.style.marginBottom = '';
+      mineModeBtn.classList.remove('visible', 'flag-mode');
+      mineModeBtn.textContent = 'Mode: Reveal';
+      mineFlag = false;
 
       if (idx === 0) {
         gameContainer.classList.add('flappy-game');
@@ -679,6 +698,7 @@
         activeGame = hatchSnake(canvas, ctx, scoreEl, bestEl, siteBestEl, hintEl, function (id) { animId = id; });
       } else if (idx === 3) {
         gameContainer.classList.add('minesweeper-game');
+        mineModeBtn.classList.add('visible');
         activeGame = minesweeper(canvas, ctx, scoreEl, bestEl, siteBestEl, hintEl, function (id) { animId = id; });
       } else if (idx === 4) {
         gameContainer.classList.add('blockcrush-game');
@@ -700,7 +720,14 @@
         iframeEl.src = ver.url;
         versionLabelEl.textContent = ver.label;
       }
+      scaleGame();
     }
+
+    mineModeBtn.addEventListener('click', function () {
+      mineFlag = !mineFlag;
+      mineModeBtn.textContent = mineFlag ? 'Mode: Flag' : 'Mode: Reveal';
+      mineModeBtn.classList.toggle('flag-mode', mineFlag);
+    });
 
     prevBtn.addEventListener('click', function () {
       startGame((currentGame - 1 + games.length) % games.length);
@@ -1762,6 +1789,7 @@
       bEl.textContent = best;
       sbEl.textContent = siteBest;
       R2BScores.onChange(function (s) { if (s.mine > siteBest) { siteBest = s.mine; sbEl.textContent = siteBest; } });
+      if ('ontouchstart' in window) hEl.textContent = 'Tap to reveal. Use toggle below to flag.';
 
       var TILE_STONE = [1, 0];
       var TILE_COBBLE = [0, 1];
@@ -1794,7 +1822,7 @@
         state = 'playing';
         score = 0;
         sEl.textContent = '0';
-        hEl.textContent = 'Click to reveal. Right-click / Long-press to flag.';
+        hEl.textContent = ('ontouchstart' in window) ? 'Tap to reveal. Use toggle below to flag.' : 'Click to reveal. Right-click / Long-press to flag.';
         for (var r = 0; r < ROWS; r++) {
           board[r] = [];
           cellTex[r] = [];
@@ -2094,7 +2122,7 @@
         handleFlag(cell.r, cell.c);
       }
 
-      // Touch: quick tap = reveal, long press = flag
+      // Touch: tap = reveal or flag (based on toggle), long press always = flag
       var touchTimer = null, touchCell = null, longPressed = false;
       function onTouchStart(e) {
         if (e.target !== cvs) return;
@@ -2113,14 +2141,18 @@
         touchTimer = setTimeout(function () {
           longPressed = true;
           if (touchCell) handleFlag(touchCell.r, touchCell.c);
-        }, 400);
+        }, 500);
       }
       function onTouchEnd(e) {
         if (e.target !== cvs) return;
         e.preventDefault();
         clearTimeout(touchTimer);
         if (!longPressed && touchCell) {
-          handleReveal(touchCell.r, touchCell.c);
+          if (mineFlag) {
+            handleFlag(touchCell.r, touchCell.c);
+          } else {
+            handleReveal(touchCell.r, touchCell.c);
+          }
         }
         touchCell = null;
       }
