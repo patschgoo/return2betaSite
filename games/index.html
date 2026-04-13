@@ -1814,35 +1814,9 @@
         playCreeperHiss();
       }
 
-      // Draw a pixel-art creeper face at given center, with given size
-      function drawCreeperFace(cx, cy, faceSize) {
-        var p = faceSize / 8; // each "pixel" of the 8x8 face grid
-        var ox = cx - faceSize / 2;
-        var oy = cy - faceSize / 2;
-        // Background green face
-        c.fillStyle = '#5da13a';
-        c.fillRect(ox, oy, faceSize, faceSize);
-        // Lighter patches
-        c.fillStyle = '#6fbf47';
-        c.fillRect(ox + p, oy + p, p, p);
-        c.fillRect(ox + 3*p, oy, p, p);
-        c.fillRect(ox + 6*p, oy + p, p, p);
-        c.fillRect(ox, oy + 5*p, p, p);
-        c.fillRect(ox + 7*p, oy + 5*p, p, p);
-        c.fillRect(ox + 2*p, oy + 7*p, p, p);
-        c.fillRect(ox + 5*p, oy + 7*p, p, p);
-        // Dark creeper face pattern
-        c.fillStyle = '#2a2a2a';
-        // Eyes (2x2 each)
-        c.fillRect(ox + p, oy + 2*p, 2*p, 2*p);      // left eye
-        c.fillRect(ox + 5*p, oy + 2*p, 2*p, 2*p);     // right eye
-        // Nose/mouth (cross shape)
-        c.fillRect(ox + 3*p, oy + 4*p, 2*p, p);       // top of mouth
-        c.fillRect(ox + 2*p, oy + 5*p, 4*p, p);       // wide part
-        c.fillRect(ox + 2*p, oy + 6*p, p, 2*p);       // left fang
-        c.fillRect(ox + 5*p, oy + 6*p, p, 2*p);       // right fang
-        c.fillRect(ox + 3*p, oy + 6*p, 2*p, p);       // inner mouth
-      }
+      // Load creeper face image for game over screen
+      var creeperImg = new Image();
+      creeperImg.src = '../images/creeper-face.png';
 
       function drawFrame() {
         c.imageSmoothingEnabled = false;
@@ -1948,29 +1922,32 @@
           c.shadowBlur = 0;
         }
 
-        // Death overlay — creeper face
+        // Death overlay — creeper face image
         if (state === 'dead') {
           c.fillStyle = 'rgba(0,0,0,0.6)';
           c.fillRect(OX, OY, COLS * CELL, ROWS * CELL);
-          // Creeper face
-          var faceSize = Math.min(COLS * CELL, ROWS * CELL) * 0.4;
-          drawCreeperFace(W / 2, H / 2 - 30, faceSize);
-          // Text below face
+          // Draw creeper image centered
+          var imgSize = Math.min(COLS * CELL, ROWS * CELL) * 0.5;
+          if (creeperImg.complete && creeperImg.naturalWidth) {
+            var aspect = creeperImg.naturalWidth / creeperImg.naturalHeight;
+            var iw = imgSize * aspect;
+            var ih = imgSize;
+            if (iw > imgSize) { iw = imgSize; ih = imgSize / aspect; }
+            c.drawImage(creeperImg, W / 2 - iw / 2, H / 2 - ih / 2 - 24, iw, ih);
+          }
+          // Text below image
           c.textAlign = 'center';
           c.textBaseline = 'middle';
           c.shadowColor = 'rgba(0,0,0,0.9)'; c.shadowBlur = 6;
-          // Sssss...
           c.fillStyle = '#55ff55';
-          c.font = '18px Minecraft, sans-serif';
-          c.fillText('Sssss... BOOM!', W / 2, H / 2 + faceSize / 2 + 8);
-          // Score
+          c.font = '16px Minecraft, sans-serif';
+          c.fillText('Sssss... BOOM!', W / 2, H / 2 + imgSize / 2 - 10);
           c.fillStyle = '#ffdd55';
-          c.font = '14px Minecraft, sans-serif';
-          c.fillText('Cleared: ' + score + ' / ' + (COLS * ROWS - MINES), W / 2, H / 2 + faceSize / 2 + 30);
-          // Play again
+          c.font = '13px Minecraft, sans-serif';
+          c.fillText('Cleared: ' + score + ' / ' + (COLS * ROWS - MINES), W / 2, H / 2 + imgSize / 2 + 10);
           c.fillStyle = '#aaa';
           c.font = '11px Minecraft, sans-serif';
-          c.fillText('Click to play again', W / 2, H / 2 + faceSize / 2 + 50);
+          c.fillText('Click to play again', W / 2, H / 2 + imgSize / 2 + 30);
           c.shadowBlur = 0;
         }
       }
