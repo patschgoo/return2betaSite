@@ -1,11 +1,13 @@
 # DifferentDimension
 
 ## What It Does
-DifferentDimension creates separate worlds with different rule sets. It has two dimension types:
+DifferentDimension creates separate worlds with different rule sets, giving the server three distinct worlds to play in:
 
-**Survival Dimension (DD)** — A completely pure survival world where **no commands or plugins work at all**. Not even server operators can run commands inside — the only way out is `/dd leave`. This creates a truly unmodified survival experience.
+**Server World (Main World)** — The default world where all plugins work normally. Economy, land protection, chat features, warps, homes — everything is active here. This is the full Return2Beta experience with all the quality-of-life enhancements and community features.
 
-**Creative Dimension (CD)** — A building-focused world where players can use **item and building commands** like `/i`, `/give`, `/mc`, and other useful tools. Dangerous commands (server management, permissions, bans, economy, etc.) are blocked via a blacklist. This lets players build freely without risk to the server.
+**Creative World (CD)** — A building-focused world adjusted to work like creative mode. Players can use **item and building commands** like `/i`, `/give`, `/mc`, and WorldEdit tools. Dangerous commands (server management, permissions, bans, economy, etc.) are blocked via a blacklist. Creative flight and instant block breaking are automatically enabled when you enter. This lets players build freely without risk to the server.
+
+**Survival World (DD)** — An old-school, raw survival world like a classic 2b2t experience. **No plugins, no commands, nothing** — just pure vanilla survival. Not even server operators can run commands inside. The only way out is `/dd leave`. No home teleports, no warps, no give commands. Just you, the terrain, and whatever you can mine and craft.
 
 When players enter either dimension, their current location and inventory in the main world are saved. When they leave, their dimension location and inventory are saved. Players can freely switch between worlds and always pick up exactly where they left off.
 
