@@ -349,6 +349,8 @@
     .nav-carousel-items { display: flex; align-items: center; justify-content: center; gap: 20px; flex: 1; overflow: hidden; }
     .nav-carousel .nav-link { white-space: nowrap; }
     .nav-carousel .nav-link.nav-current { color: #c8e8c8; text-shadow: 0 0 6px rgba(255,255,255,0.2); }
+    .header-band > .nav-link.nav-current,
+    .header-band > .nav-dropdown > .nav-link.nav-current { color: #c8e8c8; text-shadow: 0 0 6px rgba(255,255,255,0.2); }
     .nav-carousel .howto-link { white-space: normal; }
     @media (max-width: 720px) {
       .header-band {
@@ -453,7 +455,7 @@
       var cp = location.pathname.replace(/\/$/, '') || '/';
       for (var i = 0; i < allLinks.length; i++) {
         var lh = (allLinks[i].getAttribute('href') || '').replace(/\/$/, '') || '/';
-        if (lh === cp) { page = Math.floor(i / N); break; }
+        if (lh === cp) { allLinks[i].classList.add('nav-current'); page = Math.floor(i / N); break; }
       }
       function render() {
         itemsEl.innerHTML = '';
