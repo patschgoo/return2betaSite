@@ -315,6 +315,32 @@
     var terrainReady = false;
     terrainImg.onload = function () { terrainReady = true; };
 
+    // Off-screen canvas for tinting grayscale textures (grass, leaves)
+    var tintCvs = document.createElement('canvas');
+    tintCvs.width = 16; tintCvs.height = 16;
+    var tintCtx = tintCvs.getContext('2d');
+
+    // Draw a terrain tile with optional color tint (for grass/leaves which are grayscale)
+    function drawTileTinted(ctx, tile, dx, dy, dw, dh, tint) {
+      if (!terrainReady) { ctx.fillRect(dx, dy, dw, dh); return; }
+      var T = 16;
+      if (tint) {
+        tintCtx.clearRect(0, 0, 16, 16);
+        tintCtx.drawImage(terrainImg, tile[0] * T, tile[1] * T, T, T, 0, 0, 16, 16);
+        tintCtx.globalCompositeOperation = 'multiply';
+        tintCtx.fillStyle = tint;
+        tintCtx.fillRect(0, 0, 16, 16);
+        tintCtx.globalCompositeOperation = 'destination-in';
+        tintCtx.drawImage(terrainImg, tile[0] * T, tile[1] * T, T, T, 0, 0, 16, 16);
+        tintCtx.globalCompositeOperation = 'source-over';
+        ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(tintCvs, dx, dy, dw, dh);
+      } else {
+        ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(terrainImg, tile[0] * T, tile[1] * T, T, T, dx, dy, dw, dh);
+      }
+    }
+
     function stopGame() {
       if (animId) { cancelAnimationFrame(animId); animId = null; }
       if (activeGame && activeGame.cleanup) activeGame.cleanup();
@@ -358,76 +384,85 @@
       var groundY = H - 48;
       var wingFrame = 0;
 
-      // terrain.png tile coords (col, row) — each tile 16x16
-      var T = 16; // tile size in spritesheet
+      var T = 16;
       var TILE_GRASS_TOP = [0, 0];
       var TILE_DIRT = [2, 0];
       var TILE_LEAVES = [4, 3];
       var TILE_LOG = [4, 1];
       var TILE_STONE = [1, 0];
       var TILE_COBBLE = [0, 1];
+      var TILE_PLANKS = [4, 0];
+
+      // Generate random stars
+      var stars = [];
+      for (var si = 0; si < 40; si++) {
+        stars.push({
+          x: Math.random() * W,
+          y: Math.random() * (groundY - 30),
+          s: 0.5 + Math.random() * 1.5,
+          b: 0.3 + Math.random() * 0.7,
+          twinkle: Math.random() * Math.PI * 2
+        });
+      }
+
+      // Generate clouds
+      var clouds = [];
+      for (var ci = 0; ci < 5; ci++) {
+        clouds.push({
+          x: Math.random() * (W + 100) - 50,
+          y: 30 + Math.random() * 120,
+          w: 40 + Math.random() * 60,
+          speed: 0.15 + Math.random() * 0.2
+        });
+      }
 
       bEl.textContent = best;
       sbEl.textContent = siteBest;
 
-      // Draw a terrain tile scaled to fill a rect
-      function drawTile(tile, dx, dy, dw, dh) {
-        if (!terrainReady) { c.fillRect(dx, dy, dw, dh); return; }
-        c.drawImage(terrainImg, tile[0] * T, tile[1] * T, T, T, dx, dy, dw, dh);
+      function drawTile(tile, dx, dy, dw, dh, tint) {
+        drawTileTinted(c, tile, dx, dy, dw, dh, tint);
       }
 
-      // Draw a Minecraft chicken (pixel art style)
       function drawChicken(cx, cy, flapAngle) {
-        var s = 2; // pixel scale
+        var s = 2;
         c.save();
         c.translate(cx, cy);
-        // tilt based on velocity
         var tilt = Math.max(-0.4, Math.min(0.5, bird.vy * 0.04));
         c.rotate(tilt);
         c.imageSmoothingEnabled = false;
 
-        // Body (white)
         c.fillStyle = '#f0f0f0';
         c.fillRect(-6*s, -4*s, 12*s, 10*s);
-        // Body shading
         c.fillStyle = '#ddd';
         c.fillRect(-6*s, 4*s, 12*s, 2*s);
 
-        // Wing
         c.fillStyle = flapAngle ? '#e8e8e8' : '#ddd';
         var wingY = flapAngle ? -6*s : -1*s;
         c.fillRect(-7*s, wingY, 4*s, 6*s);
 
-        // Head (white)
         c.fillStyle = '#f0f0f0';
         c.fillRect(2*s, -8*s, 8*s, 8*s);
 
-        // Eye (black)
         c.fillStyle = '#111';
         c.fillRect(7*s, -7*s, 2*s, 2*s);
 
-        // Comb (red)
         c.fillStyle = '#cc2222';
         c.fillRect(4*s, -10*s, 2*s, 2*s);
         c.fillRect(6*s, -11*s, 2*s, 3*s);
         c.fillRect(8*s, -10*s, 2*s, 2*s);
 
-        // Beak (orange)
         c.fillStyle = '#dd8833';
         c.fillRect(10*s, -5*s, 4*s, 2*s);
 
-        // Wattle (red, under beak)
         c.fillStyle = '#cc2222';
         c.fillRect(8*s, -3*s, 2*s, 3*s);
 
-        // Feet (orange)
         c.fillStyle = '#dd8833';
         c.fillRect(-2*s, 6*s, 2*s, 3*s);
         c.fillRect(2*s, 6*s, 2*s, 3*s);
         c.fillRect(-4*s, 8*s, 3*s, 1*s);
         c.fillRect(0*s, 8*s, 3*s, 1*s);
 
-        // Tail
         c.fillStyle = '#e0e0e0';
         c.fillRect(-8*s, -6*s, 2*s, 4*s);
         c.fillRect(-9*s, -7*s, 2*s, 3*s);
@@ -463,6 +498,15 @@
         bird.vy += gravity;
         bird.y += bird.vy;
 
+        // move clouds
+        for (var ci = 0; ci < clouds.length; ci++) {
+          clouds[ci].x -= clouds[ci].speed;
+          if (clouds[ci].x + clouds[ci].w < -10) {
+            clouds[ci].x = W + 20;
+            clouds[ci].y = 30 + Math.random() * 120;
+          }
+        }
+
         if (frame % 90 === 0) spawnPipe();
 
         for (var i = pipes.length - 1; i >= 0; i--) {
@@ -474,7 +518,6 @@
             score++;
             sEl.textContent = score;
           }
-          // collision
           if (bird.x + bird.r > p.x && bird.x - bird.r < p.x + pipeW) {
             if (bird.y - bird.r < p.top || bird.y + bird.r > p.top + gap) {
               die(); return;
@@ -492,32 +535,66 @@
       }
 
       function drawFrame() {
-        // sky gradient
-        c.fillStyle = '#1a1a2e';
-        c.fillRect(0, 0, W, H);
-        // sky tint
+        // night sky gradient
         var skyGrad = c.createLinearGradient(0, 0, 0, groundY);
-        skyGrad.addColorStop(0, '#0a0a1e');
+        skyGrad.addColorStop(0, '#070b1a');
+        skyGrad.addColorStop(0.5, '#0e1a30');
         skyGrad.addColorStop(1, '#1a2a1e');
         c.fillStyle = skyGrad;
-        c.fillRect(0, 0, W, groundY);
+        c.fillRect(0, 0, W, H);
 
-        // ground — tiled with grass and dirt from terrain.png
+        // stars with twinkling
+        var t = Date.now() * 0.002;
+        for (var si = 0; si < stars.length; si++) {
+          var st = stars[si];
+          var alpha = st.b * (0.5 + 0.5 * Math.sin(t + st.twinkle));
+          c.fillStyle = 'rgba(255,255,220,' + alpha + ')';
+          c.fillRect(Math.floor(st.x), Math.floor(st.y), Math.ceil(st.s), Math.ceil(st.s));
+        }
+
+        // moon
+        c.fillStyle = '#e8e8cc';
+        c.beginPath();
+        c.arc(W - 50, 55, 20, 0, Math.PI * 2);
+        c.fill();
+        c.fillStyle = '#070b1a';
+        c.beginPath();
+        c.arc(W - 42, 50, 18, 0, Math.PI * 2);
+        c.fill();
+
+        // clouds (blocky Minecraft-style)
+        c.fillStyle = 'rgba(200,210,220,0.12)';
+        for (var ci = 0; ci < clouds.length; ci++) {
+          var cl = clouds[ci];
+          var bSize = 12;
+          var cols = Math.ceil(cl.w / bSize);
+          for (var bx = 0; bx < cols; bx++) {
+            c.fillRect(cl.x + bx * bSize, cl.y, bSize - 1, bSize - 1);
+            if (bx > 0 && bx < cols - 1) {
+              c.fillRect(cl.x + bx * bSize, cl.y - bSize, bSize - 1, bSize - 1);
+            }
+          }
+        }
+
+        // ground — tiled grass (tinted green) over dirt
         c.imageSmoothingEnabled = false;
         var tileS = 24;
         for (var gx = 0; gx < W; gx += tileS) {
-          drawTile(TILE_GRASS_TOP, gx, groundY, tileS, tileS);
+          drawTile(TILE_GRASS_TOP, gx, groundY, tileS, tileS, '#5a8f32');
           for (var gy = groundY + tileS; gy < H; gy += tileS) {
             drawTile(TILE_DIRT, gx, gy, tileS, tileS);
           }
         }
+        // stone layer at very bottom
+        for (var gx = 0; gx < W; gx += tileS) {
+          drawTile(TILE_STONE, gx, H - tileS, tileS, tileS);
+        }
 
-        // pipes — tiled with log/leaves from terrain.png
+        // pipes — log body with tinted leaves cap
         var pipeTile = 16;
         for (var i = 0; i < pipes.length; i++) {
           var p = pipes[i];
 
-          // top pipe body
           for (var py = 0; py < p.top - 20; py += pipeTile) {
             for (var px = 0; px < pipeW; px += pipeTile) {
               var th = Math.min(pipeTile, p.top - 20 - py);
@@ -525,19 +602,16 @@
               drawTile(TILE_LOG, p.x + px, py, tw, th);
             }
           }
-          // top pipe cap
           for (var px = -4; px < pipeW + 4; px += pipeTile) {
             var tw = Math.min(pipeTile, pipeW + 8 - (px + 4));
-            drawTile(TILE_LEAVES, p.x + px, p.top - 20, tw, 20);
+            drawTile(TILE_LEAVES, p.x + px, p.top - 20, tw, 20, '#3a8f22');
           }
 
-          // bottom pipe cap
           var botY = p.top + gap;
           for (var px = -4; px < pipeW + 4; px += pipeTile) {
             var tw = Math.min(pipeTile, pipeW + 8 - (px + 4));
-            drawTile(TILE_LEAVES, p.x + px, botY, tw, 20);
+            drawTile(TILE_LEAVES, p.x + px, botY, tw, 20, '#3a8f22');
           }
-          // bottom pipe body
           for (var py = botY + 20; py < groundY; py += pipeTile) {
             for (var px = 0; px < pipeW; px += pipeTile) {
               var th = Math.min(pipeTile, groundY - py);
@@ -598,46 +672,64 @@
     function tetris(cvs, c, sEl, bEl, sbEl, hEl, setAnim) {
       var COLS = 10, ROWS = 20;
       var CELL = 22;
+      var BORDER = CELL;
       var PREVIEW_W = CELL * 6;
-      cvs.width = COLS * CELL + PREVIEW_W + 4;
-      cvs.height = ROWS * CELL + 4;
+      cvs.width = BORDER * 2 + COLS * CELL + PREVIEW_W + 4;
+      cvs.height = BORDER * 2 + ROWS * CELL + 4;
       hEl.textContent = 'Press Space or Tap to start. Arrow keys / Swipe to move.';
 
-      var OFFX = 2;
-      var OFFY = 2;
+      var OFFX = BORDER + 2;
+      var OFFY = BORDER + 2;
 
-      // terrain.png tile coords [col, row] for each piece type
       var T = 16;
-      var TILE_MAP = [
-        [9, 6],    // I — diamond block (cyan)
-        [7, 1],    // O — gold block
-        [4, 3],    // T — leaves (purple-ish)
-        [7, 2],    // L — pumpkin (orange)
-        [0, 4],    // J — lapis block (blue)
-        [4, 1],    // S — log top (green/brown)
-        [8, 0]     // Z — TNT (red)
+
+      // Texture pool: Minecraft blocks for pieces
+      var TEXTURE_POOL = [
+        { tile: [2, 0], tint: null },       // dirt
+        { tile: [0, 1], tint: null },       // cobblestone
+        { tile: [4, 1], tint: null },       // log side (wood)
+        { tile: [4, 3], tint: '#3a8f22' }, // leaves (green tint)
+        { tile: [4, 0], tint: null },       // wooden planks
+        { tile: [2, 1], tint: null },       // sand
+        { tile: [1, 0], tint: null },       // stone
+        { tile: [3, 1], tint: null },       // gravel
+        { tile: [0, 11], tint: null }      // sandstone
       ];
+
+      var FALLBACK_COLORS = ['#8B6914','#888','#6B4226','#3a8f22','#C4A55A','#DBD4A7','#777','#999','#D2C07F'];
 
       var SHAPES = [
-        { blocks: [[0,0],[1,0],[2,0],[3,0]], tileIdx: 0 },   // I
-        { blocks: [[0,0],[1,0],[0,1],[1,1]], tileIdx: 1 },   // O
-        { blocks: [[0,0],[1,0],[2,0],[1,1]], tileIdx: 2 },   // T
-        { blocks: [[0,0],[1,0],[2,0],[2,1]], tileIdx: 3 },   // L
-        { blocks: [[0,0],[1,0],[2,0],[0,1]], tileIdx: 4 },   // J
-        { blocks: [[1,0],[2,0],[0,1],[1,1]], tileIdx: 5 },   // S
-        { blocks: [[0,0],[1,0],[1,1],[2,1]], tileIdx: 6 }    // Z
+        { blocks: [[0,0],[1,0],[2,0],[3,0]] },   // I
+        { blocks: [[0,0],[1,0],[0,1],[1,1]] },   // O
+        { blocks: [[0,0],[1,0],[2,0],[1,1]] },   // T
+        { blocks: [[0,0],[1,0],[2,0],[2,1]] },   // L
+        { blocks: [[0,0],[1,0],[2,0],[0,1]] },   // J
+        { blocks: [[1,0],[2,0],[0,1],[1,1]] },   // S
+        { blocks: [[0,0],[1,0],[1,1],[2,1]] }    // Z
       ];
 
-      // Fallback colors if terrain not loaded
-      var FALLBACK_COLORS = ['#55ffff','#ffdd55','#cc55ff','#ff8844','#5555ff','#55ff55','#ff5555'];
+      // Border tile references
+      var TILE_STONE = [1, 0];
+      var TILE_BEDROCK = [1, 1];
+      var TILE_COBBLE = [0, 1];
 
-      function drawBlock(tileIdx, dx, dy, size) {
+      function drawBlock(poolIdx, dx, dy, size) {
+        if (poolIdx < 0 || poolIdx >= TEXTURE_POOL.length) return;
+        var tex = TEXTURE_POOL[poolIdx];
         if (terrainReady) {
-          var tile = TILE_MAP[tileIdx];
+          drawTileTinted(c, tex.tile, dx, dy, size, size, tex.tint);
+        } else {
+          c.fillStyle = FALLBACK_COLORS[poolIdx] || '#888';
+          c.fillRect(dx, dy, size, size);
+        }
+      }
+
+      function drawBorderTile(tile, dx, dy, size) {
+        if (terrainReady) {
           c.imageSmoothingEnabled = false;
           c.drawImage(terrainImg, tile[0] * T, tile[1] * T, T, T, dx, dy, size, size);
         } else {
-          c.fillStyle = FALLBACK_COLORS[tileIdx];
+          c.fillStyle = '#333';
           c.fillRect(dx, dy, size, size);
         }
       }
@@ -647,6 +739,7 @@
       var current = null, nextPiece = null;
       var dropTimer = 0, dropInterval = 45;
       var state = 'idle';
+      var lastPoolIdx = -1;
 
       bEl.textContent = best;
       sbEl.textContent = siteBest;
@@ -662,9 +755,15 @@
       function randomPiece() {
         var idx = Math.floor(Math.random() * SHAPES.length);
         var s = SHAPES[idx];
+        // Pick random texture different from last piece
+        var poolIdx;
+        do {
+          poolIdx = Math.floor(Math.random() * TEXTURE_POOL.length);
+        } while (poolIdx === lastPoolIdx && TEXTURE_POOL.length > 1);
+        lastPoolIdx = poolIdx;
         return {
           blocks: s.blocks.map(function (b) { return [b[0], b[1]]; }),
-          tileIdx: s.tileIdx,
+          poolIdx: poolIdx,
           x: Math.floor(COLS / 2) - 1,
           y: 0
         };
@@ -686,9 +785,8 @@
           var bx = current.x + current.blocks[i][0];
           var by = current.y + current.blocks[i][1];
           if (by < 0) { die(); return; }
-          board[by][bx] = current.tileIdx;
+          board[by][bx] = current.poolIdx;
         }
-        // clear lines
         var cleared = 0;
         for (var r = ROWS - 1; r >= 0; r--) {
           var full = true;
@@ -699,7 +797,7 @@
             for (var cl = 0; cl < COLS; cl++) row.push(-1);
             board.unshift(row);
             cleared++;
-            r++; // re-check this row
+            r++;
           }
         }
         if (cleared > 0) {
@@ -719,7 +817,6 @@
       function rotate() {
         if (!current) return;
         var rotated = current.blocks.map(function (b) { return [-b[1], b[0]]; });
-        // normalize
         var minX = Infinity, minY = Infinity;
         for (var i = 0; i < rotated.length; i++) {
           if (rotated[i][0] < minX) minX = rotated[i][0];
@@ -742,6 +839,7 @@
         sEl.textContent = '0';
         state = 'idle';
         current = null; nextPiece = null;
+        lastPoolIdx = -1;
         hEl.textContent = 'Press Space or Tap to start. Arrow keys to move.';
         drawFrame();
       }
@@ -766,23 +864,45 @@
       }
 
       function drawFrame() {
-        c.fillStyle = '#1a1a2e';
+        // Dark stone cave background
+        c.fillStyle = '#0e0e12';
         c.fillRect(0, 0, cvs.width, cvs.height);
 
-        // board border
-        c.strokeStyle = 'rgba(85,255,85,0.3)';
-        c.lineWidth = 2;
-        c.strokeRect(OFFX - 1, OFFY - 1, COLS * CELL + 2, ROWS * CELL + 2);
+        // Draw stone/bedrock border around the playfield
+        c.imageSmoothingEnabled = false;
+        var bS = BORDER;
+        // top border
+        for (var bx = 0; bx < COLS + 2; bx++) {
+          drawBorderTile(TILE_BEDROCK, OFFX - bS + bx * bS, OFFY - bS, bS, bS);
+        }
+        // bottom border
+        for (var bx = 0; bx < COLS + 2; bx++) {
+          drawBorderTile(TILE_BEDROCK, OFFX - bS + bx * bS, OFFY + ROWS * CELL, bS, bS);
+        }
+        // left border
+        for (var by = 0; by < ROWS; by++) {
+          var tile = (by % 3 === 0) ? TILE_BEDROCK : TILE_STONE;
+          drawBorderTile(tile, OFFX - bS, OFFY + by * CELL, bS, CELL);
+        }
+        // right border
+        for (var by = 0; by < ROWS; by++) {
+          var tile = (by % 3 === 1) ? TILE_BEDROCK : TILE_STONE;
+          drawBorderTile(tile, OFFX + COLS * CELL, OFFY + by * CELL, bS, CELL);
+        }
 
-        // grid
-        c.fillStyle = 'rgba(255,255,255,0.03)';
+        // Playfield background - subtle dark cave pattern
         for (var r = 0; r < ROWS; r++) {
           for (var cl = 0; cl < COLS; cl++) {
-            if ((r + cl) % 2 === 0) c.fillRect(OFFX + cl * CELL, OFFY + r * CELL, CELL, CELL);
+            if ((r + cl) % 2 === 0) {
+              c.fillStyle = 'rgba(255,255,255,0.02)';
+            } else {
+              c.fillStyle = 'rgba(0,0,0,0.05)';
+            }
+            c.fillRect(OFFX + cl * CELL, OFFY + r * CELL, CELL, CELL);
           }
         }
 
-        // locked blocks
+        // Locked blocks
         for (var r = 0; r < ROWS; r++) {
           for (var cl = 0; cl < COLS; cl++) {
             if (board[r][cl] >= 0) {
@@ -791,33 +911,37 @@
           }
         }
 
-        // current piece
+        // Current piece
         if (current) {
           for (var i = 0; i < current.blocks.length; i++) {
             var bx = current.x + current.blocks[i][0];
             var by = current.y + current.blocks[i][1];
             if (by >= 0) {
-              drawBlock(current.tileIdx, OFFX + bx * CELL + 1, OFFY + by * CELL + 1, CELL - 2);
+              drawBlock(current.poolIdx, OFFX + bx * CELL + 1, OFFY + by * CELL + 1, CELL - 2);
             }
           }
         }
 
-        // next piece preview area
-        var previewX = OFFX + COLS * CELL + 8;
-        var previewCenterX = previewX + (PREVIEW_W - 8) / 2;
+        // Preview area
+        var previewX = OFFX + COLS * CELL + BORDER + 8;
+        var previewCenterX = previewX + (PREVIEW_W - BORDER - 8) / 2;
 
-        // preview box
-        c.strokeStyle = 'rgba(85,255,85,0.2)';
-        c.lineWidth = 1;
-        c.strokeRect(previewX, OFFY, PREVIEW_W - 8, CELL * 6);
+        // Preview box border (cobblestone)
+        for (var px = 0; px < 5; px++) {
+          drawBorderTile(TILE_COBBLE, previewX + px * bS, OFFY, bS, bS);
+          drawBorderTile(TILE_COBBLE, previewX + px * bS, OFFY + CELL * 5, bS, bS);
+        }
+        for (var py = 1; py < 5; py++) {
+          drawBorderTile(TILE_COBBLE, previewX, OFFY + py * CELL, bS, CELL);
+          drawBorderTile(TILE_COBBLE, previewX + 4 * bS, OFFY + py * CELL, bS, CELL);
+        }
 
         c.fillStyle = 'rgba(255,255,255,0.15)';
-        c.font = (CELL * 0.65) + 'px Minecraft, sans-serif';
+        c.font = (CELL * 0.6) + 'px Minecraft, sans-serif';
         c.textAlign = 'center';
         c.fillText('NEXT', previewCenterX, OFFY + CELL * 1.2);
 
         if (nextPiece) {
-          // center the preview piece in the box
           var maxBx = 0;
           for (var i = 0; i < nextPiece.blocks.length; i++) {
             if (nextPiece.blocks[i][0] > maxBx) maxBx = nextPiece.blocks[i][0];
@@ -828,11 +952,11 @@
           for (var i = 0; i < nextPiece.blocks.length; i++) {
             var px = startX + nextPiece.blocks[i][0] * CELL;
             var py = OFFY + CELL * 2 + nextPiece.blocks[i][1] * CELL;
-            drawBlock(nextPiece.tileIdx, px + 1, py + 1, CELL - 2);
+            drawBlock(nextPiece.poolIdx, px + 1, py + 1, CELL - 2);
           }
         }
 
-        // score display on canvas
+        // Score display
         c.fillStyle = 'rgba(255,255,255,0.15)';
         c.font = (CELL * 0.6) + 'px Minecraft, sans-serif';
         c.textAlign = 'center';
