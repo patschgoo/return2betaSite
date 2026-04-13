@@ -384,8 +384,8 @@
         <a class="dropdown-link" href="/games/?game=1"><img src="../images/Game%20Links/blocktris.png" alt="" />Blocktris</a>
         <a class="dropdown-link" href="/games/?game=2"><img src="../images/Game%20Links/hatch-snake.webp" alt="" />Hatch (Snake)</a>
         <a class="dropdown-link" href="/games/?game=3"><img src="../images/Game%20Links/minecreeper.png" alt="" />Minecreeper</a>
-        <a class="dropdown-link" href="/games/?game=4"><img src="../images/Game%20Links/mine-blocks.png" alt="" />Mine Blocks</a>
-        <a class="dropdown-link" href="/games/?game=5"><img src="../images/Game%20Links/block-crush.png" alt="" />Block Crush</a>
+        <a class="dropdown-link" href="/games/?game=4"><img src="../images/Game%20Links/block-crush.png" alt="" />Block Crush</a>
+        <a class="dropdown-link" href="/games/?game=5"><img src="../images/Game%20Links/mine-blocks.png" alt="" />Mine Blocks</a>
         <a class="dropdown-link" href="/games/?game=6"><img src="../images/Game%20Links/mine-blocks-2.png" alt="" />Mine Blocks 2</a>
         <hr />
         <a class="dropdown-more" href="/games/more-links/">More Links &#8250;</a>
@@ -519,7 +519,7 @@
     var prevBtn = document.getElementById('gamePrev');
     var nextBtn = document.getElementById('gameNext');
 
-    var games = ['Flappy Chicken', 'Blocktris', 'Hatch (Snake)', 'Minecreeper', 'Mine Blocks', 'Block Crush'];
+    var games = ['Flappy Chicken', 'Blocktris', 'Hatch (Snake)', 'Minecreeper', 'Block Crush', 'Mine Blocks'];
     var currentGame = 0;
     var activeGame = null;
     var animId = null;
@@ -606,6 +606,9 @@
         gameContainer.classList.add('minesweeper-game');
         activeGame = minesweeper(canvas, ctx, scoreEl, bestEl, siteBestEl, hintEl, function (id) { animId = id; });
       } else if (idx === 4) {
+        gameContainer.classList.add('blockcrush-game');
+        activeGame = blockCrush(canvas, ctx, scoreEl, bestEl, siteBestEl, hintEl, function (id) { animId = id; });
+      } else if (idx === 5) {
         // Mine Blocks — embed
         canvas.style.display = 'none';
         scoresEl.style.display = 'none';
@@ -621,9 +624,6 @@
         var ver = mineblocksVersions[currentMineblocksVersion];
         iframeEl.src = ver.url;
         versionLabelEl.textContent = ver.label;
-      } else if (idx === 5) {
-        gameContainer.classList.add('blockcrush-game');
-        activeGame = blockCrush(canvas, ctx, scoreEl, bestEl, siteBestEl, hintEl, function (id) { animId = id; });
       }
     }
 
@@ -641,12 +641,12 @@
       versionLabelEl.textContent = ver.label;
     }
     versionPrevBtn.addEventListener('click', function () {
-      if (currentGame !== 4) return;
+      if (currentGame !== 5) return;
       currentMineblocksVersion = (currentMineblocksVersion - 1 + mineblocksVersions.length) % mineblocksVersions.length;
       loadMineblocksVersion();
     });
     versionNextBtn.addEventListener('click', function () {
-      if (currentGame !== 4) return;
+      if (currentGame !== 5) return;
       currentMineblocksVersion = (currentMineblocksVersion + 1) % mineblocksVersions.length;
       loadMineblocksVersion();
     });
@@ -2071,7 +2071,7 @@
     function blockCrush(cvs, c, sEl, bEl, sbEl, hEl, setAnim) {
       var COLS = 8, ROWS = 8, CELL = 36;
       cvs.width = 320; cvs.height = 340;
-      hEl.textContent = 'Click to select, swap adjacent to match 3+';
+      hEl.textContent = 'Swap adjacent blocks to match 3+. Press Esc to give up.';
       var OX = 16, OY = 40;
       var W = cvs.width, H = cvs.height;
       var pad = 2, sz = CELL - pad * 2;
@@ -2087,7 +2087,7 @@
       ];
       var NT = TYPES.length;
 
-      var grid, score, combo, state, selected, phase;
+      var grid, score, combo, state, selected, phase, gaveUp;
       var swapAnim, swapT, clearCells, clearT, fallCells, fallT, frameN;
       var best = +localStorage.getItem('r2b_bcrush_best') || 0;
       var siteBest = +localStorage.getItem('r2b_bcrush_site') || 0;
@@ -2110,7 +2110,7 @@
           }
         }
         score = 0; combo = 0; selected = null; frameN = 0;
-        phase = 'idle'; state = 'playing';
+        phase = 'idle'; state = 'playing'; gaveUp = false;
         swapAnim = null; clearCells = []; fallCells = [];
         sEl.textContent = '0';
       }
@@ -2293,6 +2293,17 @@
         c.shadowColor = 'rgba(0,0,0,0.8)'; c.shadowBlur = 4;
         c.fillText(score, W / 2, OY / 2);
         c.shadowBlur = 0;
+        // Give Up button (top-right)
+        if (state === 'playing') {
+          var gbW = 60, gbH = 18, gbX = W - gbW - 4, gbY = 4;
+          c.fillStyle = 'rgba(80,0,0,0.5)';
+          c.fillRect(gbX, gbY, gbW, gbH);
+          c.strokeStyle = 'rgba(255,85,85,0.4)'; c.lineWidth = 1;
+          c.strokeRect(gbX, gbY, gbW, gbH);
+          c.fillStyle = '#ff8888'; c.font = '9px Minecraft, sans-serif';
+          c.textAlign = 'center'; c.textBaseline = 'middle';
+          c.fillText('Give Up', gbX + gbW / 2, gbY + gbH / 2 + 1);
+        }
         // Combo indicator
         if (phase === 'clearing' && combo > 1) {
           c.fillStyle = '#ffdd55'; c.font = '12px Minecraft, sans-serif';
@@ -2307,7 +2318,7 @@
           c.textAlign = 'center'; c.textBaseline = 'middle';
           c.shadowColor = 'rgba(0,0,0,0.9)'; c.shadowBlur = 6;
           c.fillStyle = '#ff5555'; c.font = '22px Minecraft, sans-serif';
-          c.fillText('No Moves!', W / 2, H / 2 - 24);
+          c.fillText(gaveUp ? 'Gave Up!' : 'No Moves!', W / 2, H / 2 - 24);
           c.fillStyle = '#ffdd55'; c.font = '16px Minecraft, sans-serif';
           c.fillText('Score: ' + score, W / 2, H / 2 + 2);
           c.fillStyle = '#55ff55'; c.font = '14px Minecraft, sans-serif';
@@ -2340,19 +2351,46 @@
         else { selected = cell; }
       }
 
-      function onClick(e) { var cell = getCell(e); if (cell) handleClick(cell); }
-      var tCell = null;
+      function checkGiveUp(cx, cy) {
+        var gbW = 60, gbH = 18, gbX = W - gbW - 4, gbY = 4;
+        return cx >= gbX && cx <= gbX + gbW && cy >= gbY && cy <= gbY + gbH;
+      }
+
+      function onClick(e) {
+        var rect = cvs.getBoundingClientRect();
+        var sx = cvs.width / rect.width, sy = cvs.height / rect.height;
+        var cx = (e.clientX - rect.left) * sx, cy = (e.clientY - rect.top) * sy;
+        if (state === 'playing' && phase === 'idle' && checkGiveUp(cx, cy)) { gaveUp = true; endGame(); return; }
+        if (state === 'dead') { init(); return; }
+        var cell = getCell(e); if (cell) handleClick(cell);
+      }
+      var tCell = null, tGiveUp = false;
       function onTS(e) {
         if (e.target !== cvs) return; e.preventDefault();
         var t = e.touches[0], rect = cvs.getBoundingClientRect();
         var sx = cvs.width / rect.width, sy = cvs.height / rect.height;
-        var mx = (t.clientX - rect.left) * sx - OX, my = (t.clientY - rect.top) * sy - OY;
+        var cx = (t.clientX - rect.left) * sx, cy = (t.clientY - rect.top) * sy;
+        if (state === 'playing' && phase === 'idle' && checkGiveUp(cx, cy)) { tGiveUp = true; tCell = null; return; }
+        tGiveUp = false;
+        var mx = cx - OX, my = cy - OY;
         var cl = (mx / CELL) | 0, r = (my / CELL) | 0;
         if (cl < 0 || cl >= COLS || r < 0 || r >= ROWS) { tCell = null; return; }
         tCell = { r: r, c: cl };
       }
-      function onTE(e) { if (e.target !== cvs) return; e.preventDefault(); if (tCell) handleClick(tCell); tCell = null; }
+      function onTE(e) {
+        if (e.target !== cvs) return; e.preventDefault();
+        if (tGiveUp) { gaveUp = true; endGame(); tGiveUp = false; return; }
+        if (state === 'dead') { init(); tCell = null; return; }
+        if (tCell) handleClick(tCell); tCell = null;
+      }
 
+      function onKey(e) {
+        if ((e.code === 'Escape' || e.key === 'Escape') && state === 'playing' && phase === 'idle') {
+          e.preventDefault(); gaveUp = true; endGame();
+        }
+        if (state === 'dead' && (e.code === 'Space' || e.key === ' ')) { e.preventDefault(); init(); }
+      }
+      document.addEventListener('keydown', onKey);
       cvs.addEventListener('click', onClick);
       cvs.addEventListener('touchstart', onTS);
       cvs.addEventListener('touchend', onTE);
@@ -2363,6 +2401,7 @@
 
       return {
         cleanup: function () {
+          document.removeEventListener('keydown', onKey);
           cvs.removeEventListener('click', onClick);
           cvs.removeEventListener('touchstart', onTS);
           cvs.removeEventListener('touchend', onTE);
@@ -2376,7 +2415,7 @@
     if (gameParam === 6) {
       // Mine Blocks 2 → open Mine Blocks with version 2 pre-selected
       currentMineblocksVersion = 1;
-      startGame(4);
+      startGame(5);
     } else if (gameParam >= 0 && gameParam < games.length) {
       startGame(gameParam);
     } else {

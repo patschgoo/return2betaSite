@@ -5,8 +5,9 @@ AuthMe protects your account by requiring you to register a password and log in 
 
 ## How It Affects You
 - On first join, you must register with a password.
-- Each time you connect, you must log in within 90 seconds or you will be timed out.
+- Each time you connect, you must log in within 30 seconds or you will be timed out.
 - Until you log in, you cannot chat, use commands (except `/login` and `/register`), or walk around.
+- You stay at your last location when you connect — you are frozen in place until you log in.
 - Usernames must be 3–20 characters and can only contain letters, numbers, and underscores.
 - If you are not registered, you will be directed to the server's registration page.
 
