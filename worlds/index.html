@@ -331,13 +331,62 @@
     <p class="page-subtitle">Three worlds, one server &mdash; pick your play style</p>
 
     <div class="world-tabs">
-      <button class="world-tab active" data-world="server" onclick="switchWorld('server')">Server World</button>
+      <button class="world-tab active" data-world="overview" onclick="switchWorld('overview')">Overview</button>
+      <button class="world-tab" data-world="server" onclick="switchWorld('server')">Server World</button>
       <button class="world-tab" data-world="creative" onclick="switchWorld('creative')">Creative World</button>
       <button class="world-tab" data-world="survival" onclick="switchWorld('survival')">Survival World</button>
     </div>
 
+    <!-- Overview -->
+    <div class="world-panel active" id="panel-overview">
+      <h2 style="color:#55ff55">Return2Beta Server</h2>
+      <p class="world-tagline">A Beta 1.7.3 multiplayer server with three distinct worlds</p>
+
+      <h3>About the Server</h3>
+      <p>Return2Beta is a lovingly crafted Minecraft Beta 1.7.3 server built for players who miss the simplicity, charm, and raw creativity of classic Minecraft. We stay true to the authentic beta feel while adding custom plugins designed specifically to enhance gameplay without breaking the original atmosphere.</p>
+
+      <h3>Three Worlds</h3>
+      <p>The server offers three separate worlds, each with its own rules, inventory, and playstyle. Switch between them freely using the <span class="cmd">/dd</span> command &mdash; your position and items in each world are always saved.</p>
+      <ul>
+        <li><strong style="color:#55ff55">Server World</strong> &mdash; The main world with all 80+ plugins active: economy, protection, warps, homes, chat, and every QoL feature</li>
+        <li><strong style="color:#ffdd55">Creative World</strong> &mdash; A building paradise with item spawning, WorldEdit, flight, and instant breaking</li>
+        <li><strong style="color:#dd5555">Survival World</strong> &mdash; Raw, old-school survival with zero plugins and zero commands &mdash; just you and the world</li>
+      </ul>
+      <p>Click a tab above to see full details about each world.</p>
+
+      <h3>How to Connect</h3>
+      <ul>
+        <li>Server IP: <span class="cmd">mc.return2beta.com</span></li>
+        <li>Version: <strong style="color:#ffaa00">Beta 1.7.3</strong></li>
+        <li>Port: <strong style="color:#ffaa00">25565</strong> (default)</li>
+        <li>No client? Use <a href="https://eaglercraft.com/play/?version=b1.7.3" target="_blank" rel="noopener noreferrer" style="color:#55ff55">Eaglercraft</a> in your browser</li>
+      </ul>
+
+      <h3>Key Features</h3>
+      <ul>
+        <li><strong style="color:#ffaa00">80+ custom plugins</strong> &mdash; quality-of-life enhancements that preserve the beta feel</li>
+        <li><strong style="color:#ffaa00">Separate inventories</strong> &mdash; each world has its own items, gear, and progress</li>
+        <li><strong style="color:#ffaa00">Live web map</strong> &mdash; <a href="/map/" style="color:#55ff55">Dynmap</a> with real-time player and mob tracking</li>
+        <li><strong style="color:#ffaa00">Web &amp; Discord chat</strong> &mdash; talk to in-game players from the <a href="/chat/" style="color:#55ff55">website</a> or <a href="https://discord.gg/vVvs7tN5p7" target="_blank" rel="noopener noreferrer" style="color:#55ff55">Discord</a></li>
+        <li><strong style="color:#ffaa00">Player economy</strong> &mdash; iConomy, shops, and a ranking system</li>
+        <li><strong style="color:#ffaa00">Land &amp; chest protection</strong> &mdash; PreciousStones force fields and LWC locks</li>
+        <li><strong style="color:#ffaa00">Classic terrain</strong> &mdash; original Beta 1.7.3 world generation</li>
+        <li><strong style="color:#ffaa00">No hunger, no enchanting</strong> &mdash; food heals instantly, pure old-school gameplay</li>
+      </ul>
+
+      <h3>Switching Worlds</h3>
+      <table class="cmd-table">
+        <tr><th>Command</th><th>Description</th></tr>
+        <tr><td>/dd creative</td><td>Enter the Creative World</td></tr>
+        <tr><td>/dd survival</td><td>Enter the Survival World</td></tr>
+        <tr><td>/dd leave</td><td>Return to the Server World from any world</td></tr>
+      </table>
+
+      <p class="note">Select a world tab above to see detailed information about commands, plugins, and rules for each world.</p>
+    </div>
+
     <!-- Server World -->
-    <div class="world-panel active" id="panel-server">
+    <div class="world-panel" id="panel-server">
       <h2 style="color:#55ff55">Server World</h2>
       <p class="world-tagline">The full Return2Beta experience &mdash; all plugins, all features</p>
 
@@ -506,7 +555,11 @@
       document.querySelectorAll('.world-panel').forEach(function(p) {
         p.classList.toggle('active', p.id === 'panel-' + world);
       });
-      history.replaceState(null, '', '#' + world);
+      if (world === 'overview') {
+        history.replaceState(null, '', location.pathname);
+      } else {
+        history.replaceState(null, '', '#' + world);
+      }
     }
 
     // Activate tab from hash on load
