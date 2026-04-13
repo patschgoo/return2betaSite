@@ -216,7 +216,8 @@
     <p class="game-hint" id="gameHint">Press Space or Tap to play</p>
     <div class="game-scores">
       <div>Score: <span id="scoreDisplay">0</span></div>
-      <div>Best: <span id="bestDisplay">0</span></div>
+      <div>Your Best: <span id="bestDisplay">0</span></div>
+      <div>Site Record: <span id="siteBestDisplay">0</span></div>
     </div>
   </main>
 
@@ -299,6 +300,7 @@
     var hintEl = document.getElementById('gameHint');
     var scoreEl = document.getElementById('scoreDisplay');
     var bestEl = document.getElementById('bestDisplay');
+    var siteBestEl = document.getElementById('siteBestDisplay');
     var prevBtn = document.getElementById('gamePrev');
     var nextBtn = document.getElementById('gameNext');
 
@@ -319,9 +321,9 @@
       titleEl.textContent = games[idx];
       scoreEl.textContent = '0';
       if (idx === 0) {
-        activeGame = flappyBird(canvas, ctx, scoreEl, bestEl, hintEl, function (id) { animId = id; });
+        activeGame = flappyBird(canvas, ctx, scoreEl, bestEl, siteBestEl, hintEl, function (id) { animId = id; });
       } else {
-        activeGame = tetris(canvas, ctx, scoreEl, bestEl, hintEl, function (id) { animId = id; });
+        activeGame = tetris(canvas, ctx, scoreEl, bestEl, siteBestEl, hintEl, function (id) { animId = id; });
       }
     }
 
@@ -335,7 +337,7 @@
     /* ================================================================
        FLAPPY BIRD
        ================================================================ */
-    function flappyBird(cvs, c, sEl, bEl, hEl, setAnim) {
+    function flappyBird(cvs, c, sEl, bEl, sbEl, hEl, setAnim) {
       cvs.width = 320; cvs.height = 480;
       hEl.textContent = 'Press Space or Tap to flap';
 
@@ -344,11 +346,13 @@
       var pipes = [];
       var gap = 130, pipeW = 44, pipeSpeed = 2, gravity = 0.45, flapForce = -7;
       var score = 0, best = parseInt(localStorage.getItem('r2b_flappy_best') || '0', 10);
+      var siteBest = parseInt(localStorage.getItem('r2b_flappy_site') || '0', 10);
       var state = 'idle'; // idle, playing, dead
       var frame = 0;
       var groundY = H - 40;
 
       bEl.textContent = best;
+      sbEl.textContent = siteBest;
 
       function spawnPipe() {
         var topH = 60 + Math.random() * (groundY - gap - 120);
@@ -401,6 +405,7 @@
       function die() {
         state = 'dead';
         if (score > best) { best = score; localStorage.setItem('r2b_flappy_best', best); bEl.textContent = best; }
+        if (score > siteBest) { siteBest = score; localStorage.setItem('r2b_flappy_site', siteBest); sbEl.textContent = siteBest; }
         hEl.textContent = 'Game Over! Press Space or Tap to restart';
       }
 
@@ -497,14 +502,16 @@
     /* ================================================================
        TETRIS
        ================================================================ */
-    function tetris(cvs, c, sEl, bEl, hEl, setAnim) {
-      cvs.width = 320; cvs.height = 480;
+    function tetris(cvs, c, sEl, bEl, sbEl, hEl, setAnim) {
+      var COLS = 10, ROWS = 20;
+      var CELL = 22;
+      var PREVIEW_W = CELL * 6;
+      cvs.width = COLS * CELL + PREVIEW_W + 4;
+      cvs.height = ROWS * CELL + 4;
       hEl.textContent = 'Press Space or Tap to start. Arrow keys / Swipe to move.';
 
-      var COLS = 10, ROWS = 20;
-      var CELL = Math.floor(Math.min(cvs.width / (COLS + 6), cvs.height / ROWS));
-      var OFFX = Math.floor((cvs.width - COLS * CELL) / 2);
-      var OFFY = Math.floor((cvs.height - ROWS * CELL) / 2);
+      var OFFX = 2;
+      var OFFY = 2;
 
       var SHAPES = [
         { blocks: [[0,0],[1,0],[2,0],[3,0]], color: '#55ffff' },   // I
@@ -517,11 +524,13 @@
       ];
 
       var board = [], score = 0, best = parseInt(localStorage.getItem('r2b_tetris_best') || '0', 10);
+      var siteBest = parseInt(localStorage.getItem('r2b_tetris_site') || '0', 10);
       var current = null, nextPiece = null;
       var dropTimer = 0, dropInterval = 45;
       var state = 'idle'; // idle, playing, dead
 
       bEl.textContent = best;
+      sbEl.textContent = siteBest;
 
       function clearBoard() {
         board = [];
@@ -603,6 +612,7 @@
       function die() {
         state = 'dead';
         if (score > best) { best = score; localStorage.setItem('r2b_tetris_best', best); bEl.textContent = best; }
+        if (score > siteBest) { siteBest = score; localStorage.setItem('r2b_tetris_site', siteBest); sbEl.textContent = siteBest; }
         hEl.textContent = 'Game Over! Press Space or Tap to restart';
       }
 
@@ -674,19 +684,45 @@
           }
         }
 
-        // next piece preview
+        // next piece preview area
+        var previewX = OFFX + COLS * CELL + 8;
+        var previewCenterX = previewX + (PREVIEW_W - 8) / 2;
+
+        // preview box
+        c.strokeStyle = 'rgba(85,255,85,0.2)';
+        c.lineWidth = 1;
+        c.strokeRect(previewX, OFFY, PREVIEW_W - 8, CELL * 6);
+
+        c.fillStyle = 'rgba(255,255,255,0.15)';
+        c.font = (CELL * 0.65) + 'px Minecraft, sans-serif';
+        c.textAlign = 'center';
+        c.fillText('NEXT', previewCenterX, OFFY + CELL * 1.2);
+
         if (nextPiece) {
-          c.fillStyle = 'rgba(255,255,255,0.15)';
-          c.font = (CELL * 0.6) + 'px Minecraft, sans-serif';
-          c.textAlign = 'center';
-          c.fillText('NEXT', OFFX + COLS * CELL + CELL * 2.5, OFFY + CELL);
+          // center the preview piece in the box
+          var maxBx = 0;
+          for (var i = 0; i < nextPiece.blocks.length; i++) {
+            if (nextPiece.blocks[i][0] > maxBx) maxBx = nextPiece.blocks[i][0];
+          }
+          var pieceW = (maxBx + 1) * CELL;
+          var startX = previewCenterX - pieceW / 2;
+
           c.fillStyle = nextPiece.color;
           for (var i = 0; i < nextPiece.blocks.length; i++) {
-            var px = OFFX + COLS * CELL + CELL + nextPiece.blocks[i][0] * CELL;
-            var py = OFFY + CELL * 1.5 + nextPiece.blocks[i][1] * CELL;
+            var px = startX + nextPiece.blocks[i][0] * CELL;
+            var py = OFFY + CELL * 2 + nextPiece.blocks[i][1] * CELL;
             c.fillRect(px + 1, py + 1, CELL - 2, CELL - 2);
           }
         }
+
+        // score display on canvas
+        c.fillStyle = 'rgba(255,255,255,0.15)';
+        c.font = (CELL * 0.6) + 'px Minecraft, sans-serif';
+        c.textAlign = 'center';
+        c.fillText('SCORE', previewCenterX, OFFY + CELL * 8);
+        c.fillStyle = '#ffdd55';
+        c.font = (CELL * 0.75) + 'px Minecraft, sans-serif';
+        c.fillText(score, previewCenterX, OFFY + CELL * 9.2);
       }
 
       function loop() {
