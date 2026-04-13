@@ -338,6 +338,35 @@
       background: rgba(85,255,85,0.18);
       color: #55ff55;
     }
+    .plugin-item.member-highlight::before {
+      content: '\2605';
+      margin-right: 4px;
+      font-size: 0.55rem;
+      color: #ffdd55;
+    }
+    .plugin-item.member-highlight {
+      color: #ffdd55;
+      background: rgba(255,221,85,0.06);
+      border-left: 2px solid rgba(255,221,85,0.5);
+    }
+    .plugin-item.member-highlight:hover {
+      color: #ffe888;
+      background: rgba(255,221,85,0.14);
+    }
+    .plugin-item.member-highlight.active {
+      color: #ffee77;
+      background: rgba(255,221,85,0.2);
+    }
+    .plugin-panel-legend {
+      padding: 4px 14px 6px;
+      font-size: 0.55rem;
+      color: #888;
+      text-shadow: 1px 1px 0 rgba(0,0,0,0.7);
+      border-bottom: 1px solid rgba(85,255,85,0.12);
+    }
+    .plugin-panel-legend span {
+      color: #ffdd55;
+    }
 
     /* ── Crafting widget ──────────────────────────────────── */
     .crafting-widget {
@@ -425,6 +454,7 @@
   <div class="panel-wrap open" id="panelWrap">
     <nav class="plugin-panel" id="pluginPanel" aria-label="Plugin list">
       <div class="plugin-panel-header">&#8212; Plugin List &#8212;</div>
+      <div class="plugin-panel-legend"><span>&#x2605;</span> = Helpful for Members</div>
       <div class="plugin-list" id="pluginList" role="list"></div>
     </nav>
     <button class="panel-tab" id="panelTab" aria-expanded="false" aria-controls="pluginPanel">
@@ -527,7 +557,7 @@
       "AcceptRules","AntiNetherRoof","AuthMe","Backup","BetaExtraGen",
       "BetaServerCommands","BetaSprint","BitTweaks","BlocksOnGlass","BucketReturn",
       "Citizens","CommandiConomy","CommandSigns","CookieHeal","CustomPortalSize",
-      "DeadMansChest","DifferentDimension","DisableCrafts","DynamicLight","Dynmap","DynmapMobs","Essentials",
+      "DeadMansChest","DifferentDimension","DisableCrafts","DiscordChatBridge","DiscordCore","DynamicLight","Dynmap","DynmapMobs","Essentials",
       "EssentialsChat","EssentialsProtect","EssentialsSpawn","FalseBook","GetStairs",
       "GiftOfTheDay","HeroicDeath","iConomy","InventorySort","ItemLWC",
       "JWildTP","LagMeter","LegacyVoiceChat","LWC","MagicCarpet",
@@ -548,10 +578,18 @@
     const introHint  = document.getElementById('intro-hint');
     const pageTitle  = document.getElementById('pageTitle');
 
+    // Plugins most useful for regular members
+    const MEMBER_HIGHLIGHTS = new Set([
+      "AuthMe","DeadMansChest","DiscordChatBridge","Dynmap","Essentials",
+      "GiftOfTheDay","iConomy","JWildTP","LegacyVoiceChat","LWC",
+      "PreciousStones","Showcase","Timber"
+    ]);
+
     // Build plugin list buttons
     PLUGINS.forEach(name => {
       const btn = document.createElement('button');
       btn.className = 'plugin-item';
+      if (MEMBER_HIGHLIGHTS.has(name)) btn.classList.add('member-highlight');
       btn.textContent = name;
       btn.setAttribute('role', 'listitem');
       btn.addEventListener('click', () => selectPlugin(name, btn));
