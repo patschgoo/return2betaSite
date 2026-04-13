@@ -153,28 +153,33 @@
       margin: 12px 0;
       text-shadow: 2px 2px 0 rgba(0,0,0,0.8);
     }
-    .top-boxes {
-      display: flex;
-      gap: 20px;
-      align-items: flex-start;
-      justify-content: center;
+    .ip-wrap {
+      text-align: center;
       margin: 16px 0;
     }
-    @media (max-width: 720px) {
-      .top-boxes {
-        flex-direction: column;
-        align-items: center;
+    .ip-wrap .ip-label {
+      color: #fff;
+      font-size: clamp(0.8rem, 1.3vw, 1rem);
+      text-shadow: 2px 2px 0 rgba(0,0,0,0.7);
+      margin-bottom: 6px;
+    }
+    @media (min-width: 721px) {
+      .content { position: relative; }
+      .ip-wrap {
+        position: absolute;
+        top: 0;
+        right: 24px;
+        margin: 0;
+        z-index: 1;
       }
     }
     .ip-box {
       background: rgba(0,0,0,0.5);
       border: 2px solid rgba(85,255,85,0.3);
       border-radius: 6px;
-      padding: 16px 24px;
+      padding: 12px 20px;
       text-align: center;
       line-height: 2.2;
-      flex: 1;
-      max-width: 400px;
     }
     .ip-box .ip {
       display: block;
@@ -182,11 +187,7 @@
       font-size: clamp(0.7rem, 1.2vw, 0.9rem);
       text-shadow: 1px 1px 0 rgba(0,0,0,0.7);
     }
-    .ip-box h3 {
-      margin: 0 0 4px 0;
-      font-size: 0.85rem;
-      color: #55ff55;
-    }
+
     .ip-box .ip.primary {
       color: #55ff55;
       font-size: clamp(1rem, 1.8vw, 1.3rem);
@@ -222,7 +223,12 @@
       border: 1px solid rgba(85,255,85,0.2);
       border-radius: 6px;
       padding: 14px 20px;
+      margin: 0 auto 24px;
+      display: inline-block;
       text-align: left;
+    }
+    .toc-wrap {
+      text-align: center;
     }
     .toc h3 {
       margin: 0 0 8px 0;
@@ -384,17 +390,19 @@
 
   <main class="content">
     <h1>How to Join Return2Beta</h1>
-    <div class="top-boxes">
-    <div class="ip-box">
-      <h3>Server IPs:</h3>
-      <span class="ip primary">mc.return2beta.com</span>
-      <span class="ip">beta.mildvanilla.org</span>
-      <span class="ip">mc.mildbeta.world</span>
-      <span class="ip">5.9.123.120:50179</span>
-      <span class="ip">217.160.170.104</span>
+    <div class="ip-wrap">
+      <p class="ip-label">Server IPs:</p>
+      <div class="ip-box">
+        <span class="ip primary">mc.return2beta.com</span>
+        <span class="ip">beta.mildvanilla.org</span>
+        <span class="ip">mc.mildbeta.world</span>
+        <span class="ip">5.9.123.120:50179</span>
+        <span class="ip">217.160.170.104</span>
+      </div>
     </div>
 
-    <div class="toc" style="flex: 1; max-width: 400px;">
+    <div class="toc-wrap">
+    <div class="toc">
       <h3>Table of Contents</h3>
       <p class="toc-category">Java Edition (PC Launchers)</p>
       <ul>
@@ -430,7 +438,7 @@
     </div>
     </div>
 
-    <div class="note">All launchers listed below are free and support offline/cracked mode. You do <strong>not</strong> need a Mojang or Microsoft account to play on Return2Beta.</div>
+    <div class="note" style="clear: both;">All launchers listed below are free and support offline/cracked mode. You do <strong>not</strong> need a Mojang or Microsoft account to play on Return2Beta.</div>
 
     <!-- ════════════════════════════════════════ -->
     <!--         JAVA EDITION (PC LAUNCHERS)      -->
