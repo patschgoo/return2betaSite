@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Games – Return2Beta</title>
+  <link rel="icon" type="image/png" href="../images/icon.png" />
+  <style>
+    @font-face {
+      font-family: 'Minecraft';
+      src: url('https://cdn.jsdelivr.net/gh/IdreesInc/Minecraft-Font@main/Minecraft.otf') format('opentype');
+      font-weight: normal;
+      font-style: normal;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      width: 100%;
+      min-height: 100%;
+      font-family: 'Minecraft', sans-serif;
+      background-image: url("../images/background.png");
+      background-repeat: repeat;
+      background-size: auto;
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      padding-top: 48px;
+    }
+    .header-band {
+      min-height: 48px;
+      width: 100%;
+      background-image: url("../images/header.png");
+      background-repeat: repeat-x;
+      background-position: top left;
+      background-size: auto 48px;
+      flex-shrink: 0;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0 48px;
+      padding: 0 48px;
+      position: fixed;
+      top: 0;
+      z-index: 10;
+    }
+    .header-band::after {
+      content: '';
+      position: absolute;
+      top: 48px;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image: url("../images/header.png");
+      background-repeat: repeat-x;
+      background-size: auto 48px;
+      transform: scaleY(-1);
+      z-index: 0;
+      pointer-events: none;
+    }
+    .header-band > * {
+      position: relative;
+      z-index: 1;
+    }
+    .header-band.wrapped .howto-link {
+      flex-direction: row-reverse;
+    }
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      height: 48px;
+      text-decoration: none;
+      color: #fff;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+    }
+    .nav-link img {
+      height: 32px;
+      width: 32px;
+      object-fit: contain;
+    }
+    .nav-spacer { flex: 1; }
+    .content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 24px;
+      text-align: center;
+      color: #fff;
+    }
+    .content h1 {
+      font-size: clamp(1.4rem, 3vw, 2.2rem);
+      color: #55ff55;
+      text-shadow: 3px 3px 0 rgba(0,0,0,0.7);
+      margin-bottom: 16px;
+    }
+    .content p {
+      font-size: clamp(0.65rem, 1.1vw, 0.85rem);
+      color: #888;
+      text-shadow: 1px 1px 0 rgba(0,0,0,0.8);
+    }
+    /* Nav carousel */
+    .nav-carousel { display: none; width: 100%; align-items: center; justify-content: center; height: 48px; }
+    .nav-caret { background: none; border: none; color: rgba(255,255,255,0.8); font-size: 1.1rem; cursor: pointer; padding: 0 14px; height: 48px; display: flex; align-items: center; flex-shrink: 0; transition: color 0.15s; }
+    .nav-caret:hover { color: #fff; }
+    .nav-caret:disabled { opacity: 0.2; cursor: default; }
+    .nav-carousel-items { display: flex; align-items: center; justify-content: center; gap: 20px; flex: 1; overflow: hidden; }
+    .nav-carousel .nav-link { white-space: nowrap; }
+    .nav-carousel .nav-link.nav-current { color: #55ff55; text-shadow: 0 0 8px rgba(85,255,85,0.4); }
+    @media (max-width: 720px) {
+      .header-band {
+        min-height: 48px;
+        gap: 0 24px;
+        padding: 0 16px;
+      }
+      .nav-link { font-size: 0.8rem; }
+      .nav-link img { height: 28px; width: 28px; }
+      .howto-text { display: none; }
+      .header-band > .nav-link,
+      .header-band > .nav-spacer { display: none; }
+      .nav-carousel { display: flex; }
+      .nav-caret { padding: 0 10px; }
+      .nav-carousel-items { gap: 8px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="header-band" aria-label="Header">
+    <a class="nav-link" href="/"><img src="../images/home_icon.png" alt="Home icon" />Home</a>
+    <a class="nav-link" href="/map/"><img src="../images/map_icon.webp" alt="Map icon" />Map</a>
+    <a class="nav-link" href="/plugins/"><img src="../images/plugins_icon.png" alt="Plugins icon" />Plugins</a>
+    <a class="nav-link" href="/wiki/"><img src="../images/wiki_icon.png" alt="Wiki icon" />Wiki</a>
+    <a class="nav-link" href="/chat/"><img src="../images/chat_icon.png" alt="Chat icon" />Chat</a>
+    <a class="nav-link" href="/games/"><img src="../images/game_icon.png" alt="Games icon" />Games</a>
+    <a class="nav-link" href="https://discord.gg/vVvs7tN5p7" target="_blank" rel="noopener noreferrer"><img src="../images/discord_icon.png" alt="Discord icon" />Discord</a>
+    <div class="nav-spacer"></div>
+    <a class="nav-link howto-link" href="/how-to/"><span class="howto-text">How to Join &amp; more</span><img src="../images/how-to_icon.gif" alt="How to icon" /></a>
+    <div class="nav-carousel" id="navCarousel">
+      <button class="nav-caret" id="navPrev" aria-label="Previous pages">&#9664;</button>
+      <div class="nav-carousel-items" id="navCarouselItems"></div>
+      <button class="nav-caret" id="navNext" aria-label="Next pages">&#9654;</button>
+    </div>
+  </header>
+
+  <main class="content">
+    <h1>Games</h1>
+    <p>Coming soon...</p>
+  </main>
+
+  <script>
+    (function () {
+      var header = document.querySelector('.header-band');
+      if (!header) return;
+      function checkHeader() { header.classList.toggle('wrapped', header.scrollHeight > 48); }
+      function updatePadding() { document.body.style.paddingTop = header.offsetHeight + 'px'; }
+      var obs = new ResizeObserver(function () { checkHeader(); updatePadding(); });
+      obs.observe(header);
+      checkHeader();
+      updatePadding();
+    })();
+  </script>
+  <script>
+    (function () {
+      var header = document.querySelector('.header-band');
+      if (!header) return;
+      var allLinks = Array.from(header.querySelectorAll(':scope > .nav-link'));
+      var spacer = header.querySelector(':scope > .nav-spacer');
+      var carousel = document.getElementById('navCarousel');
+      var prevBtn = document.getElementById('navPrev');
+      var nextBtn = document.getElementById('navNext');
+      var itemsEl = document.getElementById('navCarouselItems');
+      if (!carousel || !prevBtn || !nextBtn || !itemsEl || !allLinks.length) return;
+      var N = 3, page = 0;
+      var total = Math.ceil(allLinks.length / N);
+      var cp = location.pathname.replace(/\/$/, '') || '/';
+      for (var i = 0; i < allLinks.length; i++) {
+        var lh = (allLinks[i].getAttribute('href') || '').replace(/\/$/, '') || '/';
+        if (lh === cp) { page = Math.floor(i / N); break; }
+      }
+      function render() {
+        itemsEl.innerHTML = '';
+        allLinks.slice(page * N, (page + 1) * N).forEach(function (a) {
+          var cl = a.cloneNode(true);
+          var lh = (a.getAttribute('href') || '').replace(/\/$/, '') || '/';
+          if (lh === cp) cl.classList.add('nav-current');
+          itemsEl.appendChild(cl);
+        });
+        prevBtn.disabled = page === 0;
+        nextBtn.disabled = page >= total - 1;
+      }
+      prevBtn.addEventListener('click', function () { if (page > 0) { page--; render(); } });
+      nextBtn.addEventListener('click', function () { if (page < total - 1) { page++; render(); } });
+      render();
+      var forced = false;
+      function forceOn() {
+        if (forced) return; forced = true;
+        allLinks.forEach(function (a) { a.style.display = 'none'; });
+        if (spacer) spacer.style.display = 'none';
+        carousel.style.display = 'flex';
+      }
+      function forceOff() {
+        if (!forced) return; forced = false;
+        allLinks.forEach(function (a) { a.style.display = ''; });
+        if (spacer) spacer.style.display = '';
+        if (window.innerWidth > 720) carousel.style.display = 'none';
+      }
+      if (window.innerWidth > 720 && header.scrollHeight > 100) forceOn();
+      var rt;
+      window.addEventListener('resize', function () {
+        clearTimeout(rt);
+        rt = setTimeout(function () {
+          if (window.innerWidth <= 720) { forceOff(); return; }
+          forceOff();
+          requestAnimationFrame(function () { if (header.scrollHeight > 100) forceOn(); });
+        }, 150);
+      });
+    }());
+  </script>
+</body>
+</html>
