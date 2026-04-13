@@ -304,10 +304,16 @@
     var prevBtn = document.getElementById('gamePrev');
     var nextBtn = document.getElementById('gameNext');
 
-    var games = ['Flappy Bird', 'Tetris'];
+    var games = ['Flappy Chicken', 'Blocktris'];
     var currentGame = 0;
     var activeGame = null;
     var animId = null;
+
+    // Load Minecraft terrain spritesheet
+    var terrainImg = new Image();
+    terrainImg.src = '../images/minecraft/terrain.png';
+    var terrainReady = false;
+    terrainImg.onload = function () { terrainReady = true; };
 
     function stopGame() {
       if (animId) { cancelAnimationFrame(animId); animId = null; }
@@ -335,7 +341,7 @@
     });
 
     /* ================================================================
-       FLAPPY BIRD
+       FLAPPY CHICKEN
        ================================================================ */
     function flappyBird(cvs, c, sEl, bEl, sbEl, hEl, setAnim) {
       cvs.width = 320; cvs.height = 480;
@@ -344,15 +350,90 @@
       var W = cvs.width, H = cvs.height;
       var bird = { x: 60, y: 200, vy: 0, r: 12 };
       var pipes = [];
-      var gap = 130, pipeW = 44, pipeSpeed = 2, gravity = 0.45, flapForce = -7;
+      var gap = 130, pipeW = 48, pipeSpeed = 2, gravity = 0.45, flapForce = -7;
       var score = 0, best = parseInt(localStorage.getItem('r2b_flappy_best') || '0', 10);
       var siteBest = parseInt(localStorage.getItem('r2b_flappy_site') || '0', 10);
-      var state = 'idle'; // idle, playing, dead
+      var state = 'idle';
       var frame = 0;
-      var groundY = H - 40;
+      var groundY = H - 48;
+      var wingFrame = 0;
+
+      // terrain.png tile coords (col, row) — each tile 16x16
+      var T = 16; // tile size in spritesheet
+      var TILE_GRASS_TOP = [0, 0];
+      var TILE_DIRT = [2, 0];
+      var TILE_LEAVES = [4, 3];
+      var TILE_LOG = [4, 1];
+      var TILE_STONE = [1, 0];
+      var TILE_COBBLE = [0, 1];
 
       bEl.textContent = best;
       sbEl.textContent = siteBest;
+
+      // Draw a terrain tile scaled to fill a rect
+      function drawTile(tile, dx, dy, dw, dh) {
+        if (!terrainReady) { c.fillRect(dx, dy, dw, dh); return; }
+        c.drawImage(terrainImg, tile[0] * T, tile[1] * T, T, T, dx, dy, dw, dh);
+      }
+
+      // Draw a Minecraft chicken (pixel art style)
+      function drawChicken(cx, cy, flapAngle) {
+        var s = 2; // pixel scale
+        c.save();
+        c.translate(cx, cy);
+        // tilt based on velocity
+        var tilt = Math.max(-0.4, Math.min(0.5, bird.vy * 0.04));
+        c.rotate(tilt);
+        c.imageSmoothingEnabled = false;
+
+        // Body (white)
+        c.fillStyle = '#f0f0f0';
+        c.fillRect(-6*s, -4*s, 12*s, 10*s);
+        // Body shading
+        c.fillStyle = '#ddd';
+        c.fillRect(-6*s, 4*s, 12*s, 2*s);
+
+        // Wing
+        c.fillStyle = flapAngle ? '#e8e8e8' : '#ddd';
+        var wingY = flapAngle ? -6*s : -1*s;
+        c.fillRect(-7*s, wingY, 4*s, 6*s);
+
+        // Head (white)
+        c.fillStyle = '#f0f0f0';
+        c.fillRect(2*s, -8*s, 8*s, 8*s);
+
+        // Eye (black)
+        c.fillStyle = '#111';
+        c.fillRect(7*s, -7*s, 2*s, 2*s);
+
+        // Comb (red)
+        c.fillStyle = '#cc2222';
+        c.fillRect(4*s, -10*s, 2*s, 2*s);
+        c.fillRect(6*s, -11*s, 2*s, 3*s);
+        c.fillRect(8*s, -10*s, 2*s, 2*s);
+
+        // Beak (orange)
+        c.fillStyle = '#dd8833';
+        c.fillRect(10*s, -5*s, 4*s, 2*s);
+
+        // Wattle (red, under beak)
+        c.fillStyle = '#cc2222';
+        c.fillRect(8*s, -3*s, 2*s, 3*s);
+
+        // Feet (orange)
+        c.fillStyle = '#dd8833';
+        c.fillRect(-2*s, 6*s, 2*s, 3*s);
+        c.fillRect(2*s, 6*s, 2*s, 3*s);
+        c.fillRect(-4*s, 8*s, 3*s, 1*s);
+        c.fillRect(0*s, 8*s, 3*s, 1*s);
+
+        // Tail
+        c.fillStyle = '#e0e0e0';
+        c.fillRect(-8*s, -6*s, 2*s, 4*s);
+        c.fillRect(-9*s, -7*s, 2*s, 3*s);
+
+        c.restore();
+      }
 
       function spawnPipe() {
         var topH = 60 + Math.random() * (groundY - gap - 120);
@@ -362,7 +443,7 @@
       function reset() {
         bird.y = 200; bird.vy = 0;
         pipes.length = 0;
-        score = 0; frame = 0;
+        score = 0; frame = 0; wingFrame = 0;
         sEl.textContent = '0';
         state = 'idle';
         hEl.textContent = 'Press Space or Tap to flap';
@@ -378,6 +459,7 @@
       function update() {
         if (state !== 'playing') return;
         frame++;
+        wingFrame++;
         bird.vy += gravity;
         bird.y += bird.vy;
 
@@ -410,64 +492,75 @@
       }
 
       function drawFrame() {
-        // sky
+        // sky gradient
         c.fillStyle = '#1a1a2e';
         c.fillRect(0, 0, W, H);
+        // sky tint
+        var skyGrad = c.createLinearGradient(0, 0, 0, groundY);
+        skyGrad.addColorStop(0, '#0a0a1e');
+        skyGrad.addColorStop(1, '#1a2a1e');
+        c.fillStyle = skyGrad;
+        c.fillRect(0, 0, W, groundY);
 
-        // ground
-        c.fillStyle = '#2d5a1e';
-        c.fillRect(0, groundY, W, H - groundY);
-        c.fillStyle = '#4a8c2a';
-        c.fillRect(0, groundY, W, 4);
+        // ground — tiled with grass and dirt from terrain.png
+        c.imageSmoothingEnabled = false;
+        var tileS = 24;
+        for (var gx = 0; gx < W; gx += tileS) {
+          drawTile(TILE_GRASS_TOP, gx, groundY, tileS, tileS);
+          for (var gy = groundY + tileS; gy < H; gy += tileS) {
+            drawTile(TILE_DIRT, gx, gy, tileS, tileS);
+          }
+        }
 
-        // pipes
-        c.fillStyle = '#55ff55';
+        // pipes — tiled with log/leaves from terrain.png
+        var pipeTile = 16;
         for (var i = 0; i < pipes.length; i++) {
           var p = pipes[i];
-          // top pipe
-          c.fillRect(p.x, 0, pipeW, p.top);
-          c.fillRect(p.x - 3, p.top - 16, pipeW + 6, 16);
-          // bottom pipe
+
+          // top pipe body
+          for (var py = 0; py < p.top - 20; py += pipeTile) {
+            for (var px = 0; px < pipeW; px += pipeTile) {
+              var th = Math.min(pipeTile, p.top - 20 - py);
+              var tw = Math.min(pipeTile, pipeW - px);
+              drawTile(TILE_LOG, p.x + px, py, tw, th);
+            }
+          }
+          // top pipe cap
+          for (var px = -4; px < pipeW + 4; px += pipeTile) {
+            var tw = Math.min(pipeTile, pipeW + 8 - (px + 4));
+            drawTile(TILE_LEAVES, p.x + px, p.top - 20, tw, 20);
+          }
+
+          // bottom pipe cap
           var botY = p.top + gap;
-          c.fillRect(p.x, botY, pipeW, groundY - botY);
-          c.fillRect(p.x - 3, botY, pipeW + 6, 16);
-        }
-        // pipe dark inner
-        c.fillStyle = '#33aa33';
-        for (var i = 0; i < pipes.length; i++) {
-          var p = pipes[i];
-          c.fillRect(p.x + 4, 0, pipeW - 8, p.top - 16);
-          var botY = p.top + gap + 16;
-          c.fillRect(p.x + 4, botY, pipeW - 8, groundY - botY);
+          for (var px = -4; px < pipeW + 4; px += pipeTile) {
+            var tw = Math.min(pipeTile, pipeW + 8 - (px + 4));
+            drawTile(TILE_LEAVES, p.x + px, botY, tw, 20);
+          }
+          // bottom pipe body
+          for (var py = botY + 20; py < groundY; py += pipeTile) {
+            for (var px = 0; px < pipeW; px += pipeTile) {
+              var th = Math.min(pipeTile, groundY - py);
+              var tw = Math.min(pipeTile, pipeW - px);
+              drawTile(TILE_LOG, p.x + px, py, tw, th);
+            }
+          }
         }
 
-        // bird
-        c.fillStyle = '#ffdd55';
-        c.beginPath();
-        c.arc(bird.x, bird.y, bird.r, 0, Math.PI * 2);
-        c.fill();
-        c.fillStyle = '#fff';
-        c.beginPath();
-        c.arc(bird.x + 4, bird.y - 3, 4, 0, Math.PI * 2);
-        c.fill();
-        c.fillStyle = '#111';
-        c.beginPath();
-        c.arc(bird.x + 5, bird.y - 3, 2, 0, Math.PI * 2);
-        c.fill();
-        // beak
-        c.fillStyle = '#ff8844';
-        c.beginPath();
-        c.moveTo(bird.x + bird.r, bird.y);
-        c.lineTo(bird.x + bird.r + 8, bird.y + 2);
-        c.lineTo(bird.x + bird.r, bird.y + 5);
-        c.fill();
+        // chicken
+        var flapAnim = Math.sin(wingFrame * 0.4) > 0;
+        if (state === 'idle') flapAnim = Math.sin(Date.now() * 0.005) > 0;
+        drawChicken(bird.x, bird.y, flapAnim);
 
         // score overlay
         if (state === 'playing') {
           c.fillStyle = '#fff';
           c.font = '24px Minecraft, sans-serif';
           c.textAlign = 'center';
+          c.shadowColor = 'rgba(0,0,0,0.8)';
+          c.shadowBlur = 4;
           c.fillText(score, W / 2, 50);
+          c.shadowBlur = 0;
         }
       }
 
@@ -500,7 +593,7 @@
     }
 
     /* ================================================================
-       TETRIS
+       BLOCKTRIS
        ================================================================ */
     function tetris(cvs, c, sEl, bEl, sbEl, hEl, setAnim) {
       var COLS = 10, ROWS = 20;
@@ -513,21 +606,47 @@
       var OFFX = 2;
       var OFFY = 2;
 
-      var SHAPES = [
-        { blocks: [[0,0],[1,0],[2,0],[3,0]], color: '#55ffff' },   // I
-        { blocks: [[0,0],[1,0],[0,1],[1,1]], color: '#ffdd55' },   // O
-        { blocks: [[0,0],[1,0],[2,0],[1,1]], color: '#cc55ff' },   // T
-        { blocks: [[0,0],[1,0],[2,0],[2,1]], color: '#ff8844' },   // L
-        { blocks: [[0,0],[1,0],[2,0],[0,1]], color: '#5555ff' },   // J
-        { blocks: [[1,0],[2,0],[0,1],[1,1]], color: '#55ff55' },   // S
-        { blocks: [[0,0],[1,0],[1,1],[2,1]], color: '#ff5555' }    // Z
+      // terrain.png tile coords [col, row] for each piece type
+      var T = 16;
+      var TILE_MAP = [
+        [9, 6],    // I — diamond block (cyan)
+        [7, 1],    // O — gold block
+        [4, 3],    // T — leaves (purple-ish)
+        [7, 2],    // L — pumpkin (orange)
+        [0, 4],    // J — lapis block (blue)
+        [4, 1],    // S — log top (green/brown)
+        [8, 0]     // Z — TNT (red)
       ];
+
+      var SHAPES = [
+        { blocks: [[0,0],[1,0],[2,0],[3,0]], tileIdx: 0 },   // I
+        { blocks: [[0,0],[1,0],[0,1],[1,1]], tileIdx: 1 },   // O
+        { blocks: [[0,0],[1,0],[2,0],[1,1]], tileIdx: 2 },   // T
+        { blocks: [[0,0],[1,0],[2,0],[2,1]], tileIdx: 3 },   // L
+        { blocks: [[0,0],[1,0],[2,0],[0,1]], tileIdx: 4 },   // J
+        { blocks: [[1,0],[2,0],[0,1],[1,1]], tileIdx: 5 },   // S
+        { blocks: [[0,0],[1,0],[1,1],[2,1]], tileIdx: 6 }    // Z
+      ];
+
+      // Fallback colors if terrain not loaded
+      var FALLBACK_COLORS = ['#55ffff','#ffdd55','#cc55ff','#ff8844','#5555ff','#55ff55','#ff5555'];
+
+      function drawBlock(tileIdx, dx, dy, size) {
+        if (terrainReady) {
+          var tile = TILE_MAP[tileIdx];
+          c.imageSmoothingEnabled = false;
+          c.drawImage(terrainImg, tile[0] * T, tile[1] * T, T, T, dx, dy, size, size);
+        } else {
+          c.fillStyle = FALLBACK_COLORS[tileIdx];
+          c.fillRect(dx, dy, size, size);
+        }
+      }
 
       var board = [], score = 0, best = parseInt(localStorage.getItem('r2b_tetris_best') || '0', 10);
       var siteBest = parseInt(localStorage.getItem('r2b_tetris_site') || '0', 10);
       var current = null, nextPiece = null;
       var dropTimer = 0, dropInterval = 45;
-      var state = 'idle'; // idle, playing, dead
+      var state = 'idle';
 
       bEl.textContent = best;
       sbEl.textContent = siteBest;
@@ -536,15 +655,16 @@
         board = [];
         for (var r = 0; r < ROWS; r++) {
           board[r] = [];
-          for (var cl = 0; cl < COLS; cl++) board[r][cl] = null;
+          for (var cl = 0; cl < COLS; cl++) board[r][cl] = -1;
         }
       }
 
       function randomPiece() {
-        var s = SHAPES[Math.floor(Math.random() * SHAPES.length)];
+        var idx = Math.floor(Math.random() * SHAPES.length);
+        var s = SHAPES[idx];
         return {
           blocks: s.blocks.map(function (b) { return [b[0], b[1]]; }),
-          color: s.color,
+          tileIdx: s.tileIdx,
           x: Math.floor(COLS / 2) - 1,
           y: 0
         };
@@ -556,7 +676,7 @@
           var nx = piece.x + bl[i][0] + dx;
           var ny = piece.y + bl[i][1] + dy;
           if (nx < 0 || nx >= COLS || ny >= ROWS) return false;
-          if (ny >= 0 && board[ny][nx]) return false;
+          if (ny >= 0 && board[ny][nx] >= 0) return false;
         }
         return true;
       }
@@ -566,17 +686,17 @@
           var bx = current.x + current.blocks[i][0];
           var by = current.y + current.blocks[i][1];
           if (by < 0) { die(); return; }
-          board[by][bx] = current.color;
+          board[by][bx] = current.tileIdx;
         }
         // clear lines
         var cleared = 0;
         for (var r = ROWS - 1; r >= 0; r--) {
           var full = true;
-          for (var cl = 0; cl < COLS; cl++) { if (!board[r][cl]) { full = false; break; } }
+          for (var cl = 0; cl < COLS; cl++) { if (board[r][cl] < 0) { full = false; break; } }
           if (full) {
             board.splice(r, 1);
             var row = [];
-            for (var cl = 0; cl < COLS; cl++) row.push(null);
+            for (var cl = 0; cl < COLS; cl++) row.push(-1);
             board.unshift(row);
             cleared++;
             r++; // re-check this row
@@ -665,21 +785,19 @@
         // locked blocks
         for (var r = 0; r < ROWS; r++) {
           for (var cl = 0; cl < COLS; cl++) {
-            if (board[r][cl]) {
-              c.fillStyle = board[r][cl];
-              c.fillRect(OFFX + cl * CELL + 1, OFFY + r * CELL + 1, CELL - 2, CELL - 2);
+            if (board[r][cl] >= 0) {
+              drawBlock(board[r][cl], OFFX + cl * CELL + 1, OFFY + r * CELL + 1, CELL - 2);
             }
           }
         }
 
         // current piece
         if (current) {
-          c.fillStyle = current.color;
           for (var i = 0; i < current.blocks.length; i++) {
             var bx = current.x + current.blocks[i][0];
             var by = current.y + current.blocks[i][1];
             if (by >= 0) {
-              c.fillRect(OFFX + bx * CELL + 1, OFFY + by * CELL + 1, CELL - 2, CELL - 2);
+              drawBlock(current.tileIdx, OFFX + bx * CELL + 1, OFFY + by * CELL + 1, CELL - 2);
             }
           }
         }
@@ -707,11 +825,10 @@
           var pieceW = (maxBx + 1) * CELL;
           var startX = previewCenterX - pieceW / 2;
 
-          c.fillStyle = nextPiece.color;
           for (var i = 0; i < nextPiece.blocks.length; i++) {
             var px = startX + nextPiece.blocks[i][0] * CELL;
             var py = OFFY + CELL * 2 + nextPiece.blocks[i][1] * CELL;
-            c.fillRect(px + 1, py + 1, CELL - 2, CELL - 2);
+            drawBlock(nextPiece.tileIdx, px + 1, py + 1, CELL - 2);
           }
         }
 
