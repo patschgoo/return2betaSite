@@ -178,7 +178,40 @@
       text-shadow: 1px 1px 0 rgba(0,0,0,0.8);
     }
     .game-scores span { color: #ffdd55; }
-    /* Nav carousel */
+    /* Version switcher for Paper Minecraft */
+    .version-switcher {
+      display: none;
+      align-items: center;
+      gap: 12px;
+      margin-top: 12px;
+      font-size: clamp(0.6rem, 1vw, 0.75rem);
+      color: #aaa;
+      text-shadow: 1px 1px 0 rgba(0,0,0,0.8);
+    }
+    .version-switcher .version-arrow {
+      background: rgba(8,14,8,0.82);
+      border: 2px solid rgba(85,255,85,0.45);
+      border-radius: 4px;
+      color: #55ff55;
+      font-family: 'Minecraft', sans-serif;
+      font-size: 0.9rem;
+      width: 28px;
+      height: 28px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-shadow: 1px 1px 0 rgba(0,0,0,0.9);
+      transition: background 0.15s, color 0.15s;
+      user-select: none;
+    }
+    .version-switcher .version-arrow:hover {
+      background: rgba(20,40,20,0.9);
+      color: #aaff88;
+    }
+    .version-switcher .version-label {
+      color: #ffdd55;
+    }
     .nav-carousel { display: none; width: 100%; align-items: center; justify-content: center; height: 48px; }
     .nav-caret { background: none; border: none; color: rgba(255,255,255,0.8); font-size: 1.1rem; cursor: pointer; padding: 0 14px; height: 48px; display: flex; align-items: center; flex-shrink: 0; transition: color 0.15s; }
     .nav-caret:hover { color: #fff; }
@@ -237,6 +270,11 @@
       <div>Score: <span id="scoreDisplay">0</span></div>
       <div>Your Best: <span id="bestDisplay">0</span></div>
       <div>Site Record: <span id="siteBestDisplay">0</span></div>
+    </div>
+    <div class="version-switcher" id="versionSwitcher">
+      <button class="version-arrow" id="versionPrev" title="Previous version">&#9664;</button>
+      <span class="version-label" id="versionLabel">Version 11.7</span>
+      <button class="version-arrow" id="versionNext" title="Next version">&#9654;</button>
     </div>
   </main>
 
@@ -329,6 +367,16 @@
     var animId = null;
     var iframeEl = document.getElementById('gameIframe');
     var scoresEl = document.querySelector('.game-scores');
+    var versionSwitcherEl = document.getElementById('versionSwitcher');
+    var versionLabelEl = document.getElementById('versionLabel');
+    var versionPrevBtn = document.getElementById('versionPrev');
+    var versionNextBtn = document.getElementById('versionNext');
+
+    var paperVersions = [
+      { label: 'Version 11.7', url: 'https://scratch.mit.edu/projects/10128407/embed' },
+      { label: 'Version 1.21', url: 'https://albertcancode.itch.io/paper-minecraft-121-update/embed' }
+    ];
+    var currentPaperVersion = 0;
 
     // Load Minecraft terrain spritesheet
     var terrainImg = new Image();
@@ -402,6 +450,20 @@
     });
     nextBtn.addEventListener('click', function () {
       startGame((currentGame + 1) % games.length);
+    });
+
+    // Version switcher for Paper Minecraft
+    versionPrevBtn.addEventListener('click', function () {
+      if (currentGame !== 2) return;
+      currentPaperVersion = (currentPaperVersion - 1 + paperVersions.length) % paperVersions.length;
+      iframeEl.src = paperVersions[currentPaperVersion].url;
+      versionLabelEl.textContent = paperVersions[currentPaperVersion].label;
+    });
+    versionNextBtn.addEventListener('click', function () {
+      if (currentGame !== 2) return;
+      currentPaperVersion = (currentPaperVersion + 1) % paperVersions.length;
+      iframeEl.src = paperVersions[currentPaperVersion].url;
+      versionLabelEl.textContent = paperVersions[currentPaperVersion].label;
     });
 
     /* ================================================================
