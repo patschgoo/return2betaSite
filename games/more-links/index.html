@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>More Game Links – Return2Beta</title>
+  <link rel="icon" type="image/png" href="../../images/icon.png" />
+  <style>
+    @font-face {
+      font-family: 'Minecraft';
+      src: url('https://cdn.jsdelivr.net/gh/IdreesInc/Minecraft-Font@main/Minecraft.otf') format('opentype');
+      font-weight: normal;
+      font-style: normal;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      width: 100%;
+      min-height: 100%;
+      font-family: 'Minecraft', sans-serif;
+      background-image: url("../../images/background.png");
+      background-repeat: repeat;
+      background-size: auto;
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      padding-top: 48px;
+    }
+    .header-band {
+      min-height: 48px;
+      width: 100%;
+      background-image: url("../../images/header.png");
+      background-repeat: repeat-x;
+      background-position: top left;
+      background-size: auto 48px;
+      flex-shrink: 0;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0 48px;
+      padding: 0 48px;
+      position: fixed;
+      top: 0;
+      z-index: 10;
+    }
+    .header-band::after {
+      content: '';
+      position: absolute;
+      top: 48px;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image: url("../../images/header.png");
+      background-repeat: repeat-x;
+      background-size: auto 48px;
+      transform: scaleY(-1);
+      z-index: 0;
+      pointer-events: none;
+    }
+    .header-band > * {
+      position: relative;
+      z-index: 1;
+    }
+    .header-band.wrapped .howto-link {
+      flex-direction: row-reverse;
+    }
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      height: 48px;
+      text-decoration: none;
+      color: #fff;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+    }
+    .nav-link img {
+      height: 32px;
+      width: 32px;
+      object-fit: contain;
+    }
+    .nav-dropdown { position: relative; }
+    .nav-dropdown-menu { display: none; position: absolute; top: 48px; left: 50%; transform: translateX(-50%); background: rgba(10,16,10,0.96); border: 2px solid rgba(85,255,85,0.3); border-radius: 4px; padding: 8px 0; min-width: 180px; z-index: 100; box-shadow: 0 6px 20px rgba(0,0,0,0.7); }
+    .nav-dropdown:hover .nav-dropdown-menu, .nav-dropdown.open .nav-dropdown-menu { display: block; }
+    .nav-dropdown-menu .dropdown-link { display: block; padding: 6px 16px; color: #ccc; text-decoration: none; font-size: 0.75rem; font-family: 'Minecraft', sans-serif; text-shadow: 1px 1px 0 rgba(0,0,0,0.7); white-space: nowrap; }
+    .nav-dropdown-menu .dropdown-link:hover { background: rgba(85,255,85,0.1); color: #fff; }
+    .nav-dropdown-menu hr { border: none; border-top: 1px solid rgba(85,255,85,0.12); margin: 4px 10px; }
+    .nav-dropdown-menu .dropdown-more { display: block; padding: 6px 16px; color: #55ff55; text-decoration: none; font-size: 0.7rem; font-family: 'Minecraft', sans-serif; text-shadow: 1px 1px 0 rgba(0,0,0,0.7); white-space: nowrap; }
+    .nav-dropdown-menu .dropdown-more:hover { background: rgba(85,255,85,0.1); color: #aaff88; }
+    .nav-spacer { flex: 1; }
+    .howto-text {
+      font-size: 0.65rem;
+      font-weight: 600;
+      line-height: 1.1;
+      text-align: right;
+      max-width: 80px;
+    }
+    .howto-link { flex-direction: row-reverse; }
+
+    /* ── Carousel ────────────────────────── */
+    .nav-carousel { display: none; width: 100%; align-items: center; gap: 6px; overflow: hidden; }
+    .nav-carousel-items { display: flex; gap: 24px; overflow: hidden; flex: 1; justify-content: center; }
+    .nav-caret { background: none; border: none; color: #55ff55; font-size: 1.1rem; cursor: pointer; padding: 4px; font-family: 'Minecraft', sans-serif; }
+    .nav-caret:disabled { opacity: 0.3; cursor: default; }
+    .nav-current { text-shadow: 0 0 6px rgba(85,255,85,0.6), 1px 1px 2px rgba(0,0,0,0.7) !important; color: #55ff55 !important; }
+    @media (max-width: 720px) {
+      .header-band > .nav-link,
+      .header-band > .nav-dropdown,
+      .header-band > .nav-spacer,
+      .header-band > .howto-link { display: none; }
+      .nav-carousel { display: flex; }
+      .nav-carousel-items { gap: 8px; }
+    }
+
+    /* ── Content ─────────────────────────── */
+    .content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 24px 40px;
+      color: #fff;
+    }
+    .content h1 {
+      font-size: clamp(1.4rem, 3vw, 2.2rem);
+      color: #55ff55;
+      text-shadow: 3px 3px 0 rgba(0,0,0,0.7);
+      margin-bottom: 8px;
+      text-align: center;
+    }
+    .content .subtitle {
+      font-size: 0.75rem;
+      color: #aaa;
+      text-shadow: 1px 1px 0 rgba(0,0,0,0.7);
+      margin-bottom: 28px;
+    }
+    .back-link {
+      display: inline-block;
+      margin-bottom: 24px;
+      color: #55ff55;
+      text-decoration: none;
+      font-size: 0.8rem;
+      text-shadow: 1px 1px 0 rgba(0,0,0,0.7);
+    }
+    .back-link:hover { color: #aaff88; }
+
+    /* ── Section headings ────────────────── */
+    .section-heading {
+      font-size: clamp(0.85rem, 1.5vw, 1rem);
+      color: #aaffaa;
+      text-shadow: 2px 2px 0 rgba(0,0,0,0.7);
+      margin: 24px 0 12px;
+      text-align: center;
+    }
+
+    /* ── Link cards ──────────────────────── */
+    .link-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 16px;
+      width: 100%;
+      max-width: 700px;
+    }
+    .link-card {
+      background: rgba(8,14,8,0.82);
+      border: 2px solid rgba(85,255,85,0.22);
+      border-radius: 4px;
+      overflow: hidden;
+      text-decoration: none;
+      color: #fff;
+      transition: border-color 0.15s, background 0.15s;
+      display: flex;
+      flex-direction: column;
+    }
+    .link-card:hover {
+      border-color: rgba(85,255,85,0.5);
+      background: rgba(14,24,14,0.9);
+    }
+    .link-card-body {
+      padding: 12px 14px;
+    }
+    .link-card-title {
+      font-size: 0.85rem;
+      color: #55ff55;
+      text-shadow: 1px 1px 0 rgba(0,0,0,0.7);
+      margin-bottom: 6px;
+    }
+    .link-card-desc {
+      font-size: 0.65rem;
+      color: #ccc;
+      text-shadow: 1px 1px 0 rgba(0,0,0,0.5);
+      line-height: 1.5;
+    }
+    .link-card-tag {
+      display: inline-block;
+      margin-top: 8px;
+      font-size: 0.55rem;
+      color: #888;
+      text-shadow: 1px 1px 0 rgba(0,0,0,0.5);
+    }
+  </style>
+</head>
+<body>
+  <header class="header-band" aria-label="Header">
+    <a class="nav-link" href="/"><img src="../../images/home_icon.png" alt="Home icon" />Home</a>
+    <a class="nav-link" href="/map/"><img src="../../images/map_icon.webp" alt="Map icon" />Map</a>
+    <a class="nav-link" href="/plugins/"><img src="../../images/plugins_icon.png" alt="Plugins icon" />Plugins</a>
+    <a class="nav-link" href="/wiki/"><img src="../../images/wiki_icon.png" alt="Wiki icon" />Wiki</a>
+    <a class="nav-link" href="/chat/"><img src="../../images/chat_icon.png" alt="Chat icon" />Chat</a>
+    <div class="nav-dropdown" id="gamesDropdown">
+      <a class="nav-link" href="/games/"><img src="../../images/game_icon.png" alt="Games icon" />Games</a>
+      <div class="nav-dropdown-menu">
+        <a class="dropdown-link" href="/games/?game=0">Flappy Chicken</a>
+        <a class="dropdown-link" href="/games/?game=1">Blocktris</a>
+        <a class="dropdown-link" href="/games/?game=2">Mine Blocks</a>
+        <hr />
+        <a class="dropdown-more" href="/games/more-links/">More Links &#8250;</a>
+      </div>
+    </div>
+    <a class="nav-link" href="https://discord.gg/vVvs7tN5p7" target="_blank" rel="noopener noreferrer"><img src="../../images/discord_icon.png" alt="Discord icon" />Discord</a>
+    <div class="nav-spacer"></div>
+    <a class="nav-link howto-link" href="/how-to/"><span class="howto-text">How to Join &amp; more</span><img src="../../images/how-to_icon.gif" alt="How to icon" /></a>
+    <div class="nav-carousel" id="navCarousel">
+      <button class="nav-caret" id="navPrev" aria-label="Previous pages">&#9664;</button>
+      <div class="nav-carousel-items" id="navCarouselItems"></div>
+      <button class="nav-caret" id="navNext" aria-label="Next pages">&#9654;</button>
+    </div>
+  </header>
+
+  <main class="content">
+    <a class="back-link" href="/games/">&#9664; Back to Games</a>
+    <h1>More Game Links</h1>
+    <p class="subtitle">External Minecraft-related games &amp; downloads</p>
+
+    <h2 class="section-heading">Website Games</h2>
+    <div class="link-grid">
+      <a class="link-card" href="https://mine-craft.io/" target="_blank" rel="noopener noreferrer">
+        <div class="link-card-body">
+          <div class="link-card-title">mine-craft.io</div>
+          <div class="link-card-desc">A free multiplayer Minecraft-style voxel game that runs in the browser. Build, mine, and survive with other players online.</div>
+          <span class="link-card-tag">Browser &middot; Multiplayer</span>
+        </div>
+      </a>
+      <a class="link-card" href="https://classic.minecraft.net/" target="_blank" rel="noopener noreferrer">
+        <div class="link-card-body">
+          <div class="link-card-title">Minecraft Classic</div>
+          <div class="link-card-desc">The official Minecraft Classic creative mode, free in your browser. Place and break blocks in a shared world — just like the 2009 original.</div>
+          <span class="link-card-tag">Browser &middot; Creative</span>
+        </div>
+      </a>
+    </div>
+
+    <h2 class="section-heading">Downloadable Games</h2>
+    <div class="link-grid">
+      <a class="link-card" href="https://creative-alchemy.itch.io/creactris" target="_blank" rel="noopener noreferrer">
+        <div class="link-card-body">
+          <div class="link-card-title">C::Reactris</div>
+          <div class="link-card-desc">A Tetris-style puzzle game with a creative twist. Stack and clear blocks in this polished indie title.</div>
+          <span class="link-card-tag">itch.io &middot; Download</span>
+        </div>
+      </a>
+      <a class="link-card" href="https://tonoisern.itch.io/mine-souls-3" target="_blank" rel="noopener noreferrer">
+        <div class="link-card-body">
+          <div class="link-card-title">Mine Souls 3</div>
+          <div class="link-card-desc">A Dark Souls-inspired action game set in a Minecraft-style world. Fight challenging bosses with blocky weapons and armour.</div>
+          <span class="link-card-tag">itch.io &middot; Download</span>
+        </div>
+      </a>
+    </div>
+  </main>
+
+  <script>
+    (function () {
+      var header = document.querySelector('.header-band');
+      if (!header) return;
+      function checkHeader() { header.classList.toggle('wrapped', header.scrollHeight > 48); }
+      function updatePadding() { document.body.style.paddingTop = header.offsetHeight + 'px'; }
+      var obs = new ResizeObserver(function () { checkHeader(); updatePadding(); });
+      obs.observe(header);
+      checkHeader();
+      updatePadding();
+    })();
+  </script>
+  <script>
+    (function () {
+      var header = document.querySelector('.header-band');
+      if (!header) return;
+      var allLinks = Array.from(header.querySelectorAll(':scope > .nav-link, :scope > .nav-dropdown > .nav-link'));
+      var spacer = header.querySelector(':scope > .nav-spacer');
+      var carousel = document.getElementById('navCarousel');
+      var prevBtn = document.getElementById('navPrev');
+      var nextBtn = document.getElementById('navNext');
+      var itemsEl = document.getElementById('navCarouselItems');
+      if (!carousel || !prevBtn || !nextBtn || !itemsEl || !allLinks.length) return;
+      var N = 3, page = 0;
+      var total = Math.ceil(allLinks.length / N);
+      var cp = location.pathname.replace(/\/$/, '') || '/';
+      for (var i = 0; i < allLinks.length; i++) {
+        var lh = (allLinks[i].getAttribute('href') || '').replace(/\/$/, '') || '/';
+        if (lh === cp) { page = Math.floor(i / N); break; }
+      }
+      function render() {
+        itemsEl.innerHTML = '';
+        allLinks.slice(page * N, (page + 1) * N).forEach(function (a) {
+          var cl = a.cloneNode(true);
+          var lh = (a.getAttribute('href') || '').replace(/\/$/, '') || '/';
+          if (lh === cp) cl.classList.add('nav-current');
+          itemsEl.appendChild(cl);
+        });
+        prevBtn.disabled = page === 0;
+        nextBtn.disabled = page >= total - 1;
+      }
+      prevBtn.addEventListener('click', function () { if (page > 0) { page--; render(); } });
+      nextBtn.addEventListener('click', function () { if (page < total - 1) { page++; render(); } });
+      render();
+    })();
+  </script>
+  <script>
+  (function(){var dd=document.getElementById('gamesDropdown');if(!dd)return;dd.addEventListener('click',function(e){if(window.innerWidth<=720){e.stopPropagation();dd.classList.toggle('open');}});document.addEventListener('click',function(){dd.classList.remove('open');});})();
+  </script>
+</body>
+</html>
