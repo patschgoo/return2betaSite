@@ -87,8 +87,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      padding: 48px 24px;
+      padding: 24px 24px 40px;
       text-align: center;
       color: #fff;
     }
@@ -98,11 +97,69 @@
       text-shadow: 3px 3px 0 rgba(0,0,0,0.7);
       margin-bottom: 16px;
     }
-    .content p {
-      font-size: clamp(0.65rem, 1.1vw, 0.85rem);
-      color: #888;
+
+    /* ── Game switcher ──────────────────────────────────── */
+    .game-switcher {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .game-arrow {
+      background: rgba(8,14,8,0.82);
+      border: 2px solid rgba(85,255,85,0.45);
+      border-radius: 4px;
+      color: #55ff55;
+      font-family: 'Minecraft', sans-serif;
+      font-size: 1.2rem;
+      width: 36px;
+      height: 36px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-shadow: 1px 1px 0 rgba(0,0,0,0.9);
+      transition: background 0.15s, color 0.15s;
+      user-select: none;
+    }
+    .game-arrow:hover {
+      background: rgba(20,40,20,0.9);
+      color: #aaff88;
+    }
+    .game-title {
+      font-size: clamp(0.85rem, 1.6vw, 1.1rem);
+      color: #aaffaa;
+      text-shadow: 2px 2px 0 rgba(0,0,0,0.7);
+      min-width: 140px;
+    }
+
+    /* ── Game container ─────────────────────────────────── */
+    .game-container {
+      position: relative;
+      background: rgba(0,0,0,0.68);
+      border: 2px solid rgba(85,255,85,0.22);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .game-container canvas {
+      display: block;
+    }
+    .game-hint {
+      font-size: clamp(0.55rem, 0.9vw, 0.7rem);
+      color: #666;
+      text-shadow: 1px 1px 0 rgba(0,0,0,0.8);
+      margin-top: 10px;
+    }
+    .game-scores {
+      display: flex;
+      gap: 24px;
+      justify-content: center;
+      margin-top: 8px;
+      font-size: clamp(0.6rem, 1vw, 0.75rem);
+      color: #aaa;
       text-shadow: 1px 1px 0 rgba(0,0,0,0.8);
     }
+    .game-scores span { color: #ffdd55; }
     /* Nav carousel */
     .nav-carousel { display: none; width: 100%; align-items: center; justify-content: center; height: 48px; }
     .nav-caret { background: none; border: none; color: rgba(255,255,255,0.8); font-size: 1.1rem; cursor: pointer; padding: 0 14px; height: 48px; display: flex; align-items: center; flex-shrink: 0; transition: color 0.15s; }
@@ -148,7 +205,19 @@
 
   <main class="content">
     <h1>Games</h1>
-    <p>Coming soon...</p>
+    <div class="game-switcher">
+      <button class="game-arrow" id="gamePrev" title="Previous game">&#9664;</button>
+      <span class="game-title" id="gameTitle">Flappy Bird</span>
+      <button class="game-arrow" id="gameNext" title="Next game">&#9654;</button>
+    </div>
+    <div class="game-container">
+      <canvas id="gameCanvas" width="320" height="480"></canvas>
+    </div>
+    <p class="game-hint" id="gameHint">Press Space or Tap to play</p>
+    <div class="game-scores">
+      <div>Score: <span id="scoreDisplay">0</span></div>
+      <div>Best: <span id="bestDisplay">0</span></div>
+    </div>
   </main>
 
   <script>
@@ -219,6 +288,461 @@
         }, 150);
       });
     }());
+  </script>
+
+  <!-- ── Game engine ─────────────────────────────────────── -->
+  <script>
+  (function () {
+    var canvas = document.getElementById('gameCanvas');
+    var ctx = canvas.getContext('2d');
+    var titleEl = document.getElementById('gameTitle');
+    var hintEl = document.getElementById('gameHint');
+    var scoreEl = document.getElementById('scoreDisplay');
+    var bestEl = document.getElementById('bestDisplay');
+    var prevBtn = document.getElementById('gamePrev');
+    var nextBtn = document.getElementById('gameNext');
+
+    var games = ['Flappy Bird', 'Tetris'];
+    var currentGame = 0;
+    var activeGame = null;
+    var animId = null;
+
+    function stopGame() {
+      if (animId) { cancelAnimationFrame(animId); animId = null; }
+      if (activeGame && activeGame.cleanup) activeGame.cleanup();
+      activeGame = null;
+    }
+
+    function startGame(idx) {
+      stopGame();
+      currentGame = idx;
+      titleEl.textContent = games[idx];
+      scoreEl.textContent = '0';
+      if (idx === 0) {
+        activeGame = flappyBird(canvas, ctx, scoreEl, bestEl, hintEl, function (id) { animId = id; });
+      } else {
+        activeGame = tetris(canvas, ctx, scoreEl, bestEl, hintEl, function (id) { animId = id; });
+      }
+    }
+
+    prevBtn.addEventListener('click', function () {
+      startGame((currentGame - 1 + games.length) % games.length);
+    });
+    nextBtn.addEventListener('click', function () {
+      startGame((currentGame + 1) % games.length);
+    });
+
+    /* ================================================================
+       FLAPPY BIRD
+       ================================================================ */
+    function flappyBird(cvs, c, sEl, bEl, hEl, setAnim) {
+      cvs.width = 320; cvs.height = 480;
+      hEl.textContent = 'Press Space or Tap to flap';
+
+      var W = cvs.width, H = cvs.height;
+      var bird = { x: 60, y: 200, vy: 0, r: 12 };
+      var pipes = [];
+      var gap = 130, pipeW = 44, pipeSpeed = 2, gravity = 0.45, flapForce = -7;
+      var score = 0, best = parseInt(localStorage.getItem('r2b_flappy_best') || '0', 10);
+      var state = 'idle'; // idle, playing, dead
+      var frame = 0;
+      var groundY = H - 40;
+
+      bEl.textContent = best;
+
+      function spawnPipe() {
+        var topH = 60 + Math.random() * (groundY - gap - 120);
+        pipes.push({ x: W, top: topH, scored: false });
+      }
+
+      function reset() {
+        bird.y = 200; bird.vy = 0;
+        pipes.length = 0;
+        score = 0; frame = 0;
+        sEl.textContent = '0';
+        state = 'idle';
+        hEl.textContent = 'Press Space or Tap to flap';
+        drawFrame();
+      }
+
+      function flap() {
+        if (state === 'dead') { reset(); return; }
+        if (state === 'idle') { state = 'playing'; hEl.textContent = ''; }
+        bird.vy = flapForce;
+      }
+
+      function update() {
+        if (state !== 'playing') return;
+        frame++;
+        bird.vy += gravity;
+        bird.y += bird.vy;
+
+        if (frame % 90 === 0) spawnPipe();
+
+        for (var i = pipes.length - 1; i >= 0; i--) {
+          var p = pipes[i];
+          p.x -= pipeSpeed;
+          if (p.x + pipeW < 0) { pipes.splice(i, 1); continue; }
+          if (!p.scored && p.x + pipeW < bird.x) {
+            p.scored = true;
+            score++;
+            sEl.textContent = score;
+          }
+          // collision
+          if (bird.x + bird.r > p.x && bird.x - bird.r < p.x + pipeW) {
+            if (bird.y - bird.r < p.top || bird.y + bird.r > p.top + gap) {
+              die(); return;
+            }
+          }
+        }
+        if (bird.y + bird.r > groundY || bird.y - bird.r < 0) { die(); }
+      }
+
+      function die() {
+        state = 'dead';
+        if (score > best) { best = score; localStorage.setItem('r2b_flappy_best', best); bEl.textContent = best; }
+        hEl.textContent = 'Game Over! Press Space or Tap to restart';
+      }
+
+      function drawFrame() {
+        // sky
+        c.fillStyle = '#1a1a2e';
+        c.fillRect(0, 0, W, H);
+
+        // ground
+        c.fillStyle = '#2d5a1e';
+        c.fillRect(0, groundY, W, H - groundY);
+        c.fillStyle = '#4a8c2a';
+        c.fillRect(0, groundY, W, 4);
+
+        // pipes
+        c.fillStyle = '#55ff55';
+        for (var i = 0; i < pipes.length; i++) {
+          var p = pipes[i];
+          // top pipe
+          c.fillRect(p.x, 0, pipeW, p.top);
+          c.fillRect(p.x - 3, p.top - 16, pipeW + 6, 16);
+          // bottom pipe
+          var botY = p.top + gap;
+          c.fillRect(p.x, botY, pipeW, groundY - botY);
+          c.fillRect(p.x - 3, botY, pipeW + 6, 16);
+        }
+        // pipe dark inner
+        c.fillStyle = '#33aa33';
+        for (var i = 0; i < pipes.length; i++) {
+          var p = pipes[i];
+          c.fillRect(p.x + 4, 0, pipeW - 8, p.top - 16);
+          var botY = p.top + gap + 16;
+          c.fillRect(p.x + 4, botY, pipeW - 8, groundY - botY);
+        }
+
+        // bird
+        c.fillStyle = '#ffdd55';
+        c.beginPath();
+        c.arc(bird.x, bird.y, bird.r, 0, Math.PI * 2);
+        c.fill();
+        c.fillStyle = '#fff';
+        c.beginPath();
+        c.arc(bird.x + 4, bird.y - 3, 4, 0, Math.PI * 2);
+        c.fill();
+        c.fillStyle = '#111';
+        c.beginPath();
+        c.arc(bird.x + 5, bird.y - 3, 2, 0, Math.PI * 2);
+        c.fill();
+        // beak
+        c.fillStyle = '#ff8844';
+        c.beginPath();
+        c.moveTo(bird.x + bird.r, bird.y);
+        c.lineTo(bird.x + bird.r + 8, bird.y + 2);
+        c.lineTo(bird.x + bird.r, bird.y + 5);
+        c.fill();
+
+        // score overlay
+        if (state === 'playing') {
+          c.fillStyle = '#fff';
+          c.font = '24px Minecraft, sans-serif';
+          c.textAlign = 'center';
+          c.fillText(score, W / 2, 50);
+        }
+      }
+
+      function loop() {
+        update();
+        drawFrame();
+        setAnim(requestAnimationFrame(loop));
+      }
+
+      function onKey(e) {
+        if (e.code === 'Space' || e.key === ' ') { e.preventDefault(); flap(); }
+      }
+      function onTouch(e) {
+        if (e.target === cvs) { e.preventDefault(); flap(); }
+      }
+
+      document.addEventListener('keydown', onKey);
+      cvs.addEventListener('touchstart', onTouch);
+      cvs.addEventListener('mousedown', function (e) { flap(); });
+
+      reset();
+      loop();
+
+      return {
+        cleanup: function () {
+          document.removeEventListener('keydown', onKey);
+          cvs.removeEventListener('touchstart', onTouch);
+        }
+      };
+    }
+
+    /* ================================================================
+       TETRIS
+       ================================================================ */
+    function tetris(cvs, c, sEl, bEl, hEl, setAnim) {
+      cvs.width = 320; cvs.height = 480;
+      hEl.textContent = 'Press Space or Tap to start. Arrow keys / Swipe to move.';
+
+      var COLS = 10, ROWS = 20;
+      var CELL = Math.floor(Math.min(cvs.width / (COLS + 6), cvs.height / ROWS));
+      var OFFX = Math.floor((cvs.width - COLS * CELL) / 2);
+      var OFFY = Math.floor((cvs.height - ROWS * CELL) / 2);
+
+      var SHAPES = [
+        { blocks: [[0,0],[1,0],[2,0],[3,0]], color: '#55ffff' },   // I
+        { blocks: [[0,0],[1,0],[0,1],[1,1]], color: '#ffdd55' },   // O
+        { blocks: [[0,0],[1,0],[2,0],[1,1]], color: '#cc55ff' },   // T
+        { blocks: [[0,0],[1,0],[2,0],[2,1]], color: '#ff8844' },   // L
+        { blocks: [[0,0],[1,0],[2,0],[0,1]], color: '#5555ff' },   // J
+        { blocks: [[1,0],[2,0],[0,1],[1,1]], color: '#55ff55' },   // S
+        { blocks: [[0,0],[1,0],[1,1],[2,1]], color: '#ff5555' }    // Z
+      ];
+
+      var board = [], score = 0, best = parseInt(localStorage.getItem('r2b_tetris_best') || '0', 10);
+      var current = null, nextPiece = null;
+      var dropTimer = 0, dropInterval = 45;
+      var state = 'idle'; // idle, playing, dead
+
+      bEl.textContent = best;
+
+      function clearBoard() {
+        board = [];
+        for (var r = 0; r < ROWS; r++) {
+          board[r] = [];
+          for (var cl = 0; cl < COLS; cl++) board[r][cl] = null;
+        }
+      }
+
+      function randomPiece() {
+        var s = SHAPES[Math.floor(Math.random() * SHAPES.length)];
+        return {
+          blocks: s.blocks.map(function (b) { return [b[0], b[1]]; }),
+          color: s.color,
+          x: Math.floor(COLS / 2) - 1,
+          y: 0
+        };
+      }
+
+      function fits(piece, dx, dy, blocks) {
+        var bl = blocks || piece.blocks;
+        for (var i = 0; i < bl.length; i++) {
+          var nx = piece.x + bl[i][0] + dx;
+          var ny = piece.y + bl[i][1] + dy;
+          if (nx < 0 || nx >= COLS || ny >= ROWS) return false;
+          if (ny >= 0 && board[ny][nx]) return false;
+        }
+        return true;
+      }
+
+      function lock() {
+        for (var i = 0; i < current.blocks.length; i++) {
+          var bx = current.x + current.blocks[i][0];
+          var by = current.y + current.blocks[i][1];
+          if (by < 0) { die(); return; }
+          board[by][bx] = current.color;
+        }
+        // clear lines
+        var cleared = 0;
+        for (var r = ROWS - 1; r >= 0; r--) {
+          var full = true;
+          for (var cl = 0; cl < COLS; cl++) { if (!board[r][cl]) { full = false; break; } }
+          if (full) {
+            board.splice(r, 1);
+            var row = [];
+            for (var cl = 0; cl < COLS; cl++) row.push(null);
+            board.unshift(row);
+            cleared++;
+            r++; // re-check this row
+          }
+        }
+        if (cleared > 0) {
+          var pts = [0, 100, 300, 500, 800];
+          score += pts[cleared] || cleared * 200;
+          sEl.textContent = score;
+        }
+        spawn();
+      }
+
+      function spawn() {
+        current = nextPiece || randomPiece();
+        nextPiece = randomPiece();
+        if (!fits(current, 0, 0)) die();
+      }
+
+      function rotate() {
+        if (!current) return;
+        var rotated = current.blocks.map(function (b) { return [-b[1], b[0]]; });
+        // normalize
+        var minX = Infinity, minY = Infinity;
+        for (var i = 0; i < rotated.length; i++) {
+          if (rotated[i][0] < minX) minX = rotated[i][0];
+          if (rotated[i][1] < minY) minY = rotated[i][1];
+        }
+        rotated = rotated.map(function (b) { return [b[0] - minX, b[1] - minY]; });
+        if (fits(current, 0, 0, rotated)) current.blocks = rotated;
+      }
+
+      function die() {
+        state = 'dead';
+        if (score > best) { best = score; localStorage.setItem('r2b_tetris_best', best); bEl.textContent = best; }
+        hEl.textContent = 'Game Over! Press Space or Tap to restart';
+      }
+
+      function reset() {
+        clearBoard();
+        score = 0; dropTimer = 0;
+        sEl.textContent = '0';
+        state = 'idle';
+        current = null; nextPiece = null;
+        hEl.textContent = 'Press Space or Tap to start. Arrow keys to move.';
+        drawFrame();
+      }
+
+      function begin() {
+        state = 'playing';
+        hEl.textContent = '';
+        spawn();
+      }
+
+      function update() {
+        if (state !== 'playing') return;
+        dropTimer++;
+        if (dropTimer >= dropInterval) {
+          dropTimer = 0;
+          if (fits(current, 0, 1)) {
+            current.y++;
+          } else {
+            lock();
+          }
+        }
+      }
+
+      function drawFrame() {
+        c.fillStyle = '#1a1a2e';
+        c.fillRect(0, 0, cvs.width, cvs.height);
+
+        // board border
+        c.strokeStyle = 'rgba(85,255,85,0.3)';
+        c.lineWidth = 2;
+        c.strokeRect(OFFX - 1, OFFY - 1, COLS * CELL + 2, ROWS * CELL + 2);
+
+        // grid
+        c.fillStyle = 'rgba(255,255,255,0.03)';
+        for (var r = 0; r < ROWS; r++) {
+          for (var cl = 0; cl < COLS; cl++) {
+            if ((r + cl) % 2 === 0) c.fillRect(OFFX + cl * CELL, OFFY + r * CELL, CELL, CELL);
+          }
+        }
+
+        // locked blocks
+        for (var r = 0; r < ROWS; r++) {
+          for (var cl = 0; cl < COLS; cl++) {
+            if (board[r][cl]) {
+              c.fillStyle = board[r][cl];
+              c.fillRect(OFFX + cl * CELL + 1, OFFY + r * CELL + 1, CELL - 2, CELL - 2);
+            }
+          }
+        }
+
+        // current piece
+        if (current) {
+          c.fillStyle = current.color;
+          for (var i = 0; i < current.blocks.length; i++) {
+            var bx = current.x + current.blocks[i][0];
+            var by = current.y + current.blocks[i][1];
+            if (by >= 0) {
+              c.fillRect(OFFX + bx * CELL + 1, OFFY + by * CELL + 1, CELL - 2, CELL - 2);
+            }
+          }
+        }
+
+        // next piece preview
+        if (nextPiece) {
+          c.fillStyle = 'rgba(255,255,255,0.15)';
+          c.font = (CELL * 0.6) + 'px Minecraft, sans-serif';
+          c.textAlign = 'center';
+          c.fillText('NEXT', OFFX + COLS * CELL + CELL * 2.5, OFFY + CELL);
+          c.fillStyle = nextPiece.color;
+          for (var i = 0; i < nextPiece.blocks.length; i++) {
+            var px = OFFX + COLS * CELL + CELL + nextPiece.blocks[i][0] * CELL;
+            var py = OFFY + CELL * 1.5 + nextPiece.blocks[i][1] * CELL;
+            c.fillRect(px + 1, py + 1, CELL - 2, CELL - 2);
+          }
+        }
+      }
+
+      function loop() {
+        update();
+        drawFrame();
+        setAnim(requestAnimationFrame(loop));
+      }
+
+      function onKey(e) {
+        if (state === 'dead' && (e.code === 'Space' || e.key === ' ')) { e.preventDefault(); reset(); return; }
+        if (state === 'idle' && (e.code === 'Space' || e.key === ' ')) { e.preventDefault(); begin(); return; }
+        if (state !== 'playing') return;
+        if (e.code === 'ArrowLeft' || e.key === 'ArrowLeft') { if (fits(current, -1, 0)) current.x--; e.preventDefault(); }
+        else if (e.code === 'ArrowRight' || e.key === 'ArrowRight') { if (fits(current, 1, 0)) current.x++; e.preventDefault(); }
+        else if (e.code === 'ArrowDown' || e.key === 'ArrowDown') { if (fits(current, 0, 1)) { current.y++; dropTimer = 0; } e.preventDefault(); }
+        else if (e.code === 'ArrowUp' || e.key === 'ArrowUp') { rotate(); e.preventDefault(); }
+        else if (e.code === 'Space' || e.key === ' ') {
+          // hard drop
+          while (fits(current, 0, 1)) current.y++;
+          lock();
+          e.preventDefault();
+        }
+      }
+
+      function onTouch(e) {
+        if (e.target !== cvs) return;
+        e.preventDefault();
+        if (state === 'dead') { reset(); return; }
+        if (state === 'idle') { begin(); return; }
+        // simple: tap left half = move left, right half = move right, top area = rotate
+        var rect = cvs.getBoundingClientRect();
+        var tx = (e.touches[0].clientX - rect.left) / rect.width;
+        var ty = (e.touches[0].clientY - rect.top) / rect.height;
+        if (ty < 0.3) { rotate(); }
+        else if (tx < 0.35) { if (fits(current, -1, 0)) current.x--; }
+        else if (tx > 0.65) { if (fits(current, 1, 0)) current.x++; }
+        else { if (fits(current, 0, 1)) { current.y++; dropTimer = 0; } }
+      }
+
+      document.addEventListener('keydown', onKey);
+      cvs.addEventListener('touchstart', onTouch);
+
+      reset();
+      loop();
+
+      return {
+        cleanup: function () {
+          document.removeEventListener('keydown', onKey);
+          cvs.removeEventListener('touchstart', onTouch);
+        }
+      };
+    }
+
+    // Start with Flappy Bird
+    startGame(0);
+  })();
   </script>
 </body>
 </html>
