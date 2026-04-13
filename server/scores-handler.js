@@ -18,6 +18,47 @@ const SCORES_FILE = path.join(__dirname, 'scores.json');
 const VALID_GAMES = ['flappy', 'tetris', 'hatch', 'mine', 'bcrush'];
 const MAX_SCORE = 999999; // sanity cap to prevent abuse
 
+// ── Chat rate limiting ──────────────────────────────────
+
+const RATE_WINDOW = 10000;  // 10-second window
+const RATE_MAX = 5;         // max 5 messages per window
+const MUTE_DURATION = 30000; // 30s mute if exceeded
+
+const rateLimits = new WeakMap(); // ws → { timestamps: [], mutedUntil: 0 }
+
+function getRateState(ws) {
+  if (!rateLimits.has(ws)) rateLimits.set(ws, { timestamps: [], mutedUntil: 0 });
+  return rateLimits.get(ws);
+}
+
+/**
+ * Check if a chat/set_username message should be allowed.
+ * Returns true if message is OK, false if rate-limited (caller should drop it).
+ */
+function allowMessage(ws) {
+  const state = getRateState(ws);
+  const now = Date.now();
+
+  // Currently muted?
+  if (state.mutedUntil > now) {
+    ws.send(JSON.stringify({ type: 'error', message: 'Slow down! Wait a few seconds before sending again.' }));
+    return false;
+  }
+
+  // Prune old timestamps outside the window
+  state.timestamps = state.timestamps.filter(t => now - t < RATE_WINDOW);
+
+  if (state.timestamps.length >= RATE_MAX) {
+    state.mutedUntil = now + MUTE_DURATION;
+    ws.send(JSON.stringify({ type: 'error', message: 'You are sending messages too fast. Muted for 30 seconds.' }));
+    console.log('[ratelimit] Client muted for spam');
+    return false;
+  }
+
+  state.timestamps.push(now);
+  return true;
+}
+
 // ── Load / Save ─────────────────────────────────────────
 
 function loadScores() {
@@ -88,6 +129,12 @@ function handleMessage(ws, data, allClients) {
   if (data.type === 'presence') {
     registerPresence(ws);
     return true;
+  }
+
+  // Rate-limit chat and username changes
+  if (data.type === 'chat' || data.type === 'set_username') {
+    if (!allowMessage(ws)) return true; // drop silently (error already sent)
+    return false; // allow the main server to process it
   }
 
   if (data.type === 'get_scores') {

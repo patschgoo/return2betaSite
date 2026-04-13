@@ -496,9 +496,13 @@
       ws.onerror = () => ws.close();
     }
 
+    var lastSendTime = 0;
     function sendMessage() {
       const text = chatInput.value.trim();
       if (!text || !ws || ws.readyState !== 1) return;
+      var now = Date.now();
+      if (now - lastSendTime < 1500) return;
+      lastSendTime = now;
       ws.send(JSON.stringify({ type: 'chat', text }));
       chatInput.value = '';
       chatInput.focus();
