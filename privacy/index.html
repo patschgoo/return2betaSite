@@ -262,7 +262,7 @@
 
     <h2>3. Hosting</h2>
     <p>The static website is hosted via <strong>GitHub Pages</strong> (GitHub Inc., USA). When you visit the site, GitHub may collect your IP address in server logs. GitHub&rsquo;s privacy policy: <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement" target="_blank" rel="noopener noreferrer">GitHub Privacy Statement</a>.</p>
-    <p>The chat server and WebSocket backend run on a <strong>STRATO VPS</strong> (STRATO AG, Germany). Connection data (IP address) is processed to maintain the WebSocket connection. Server logs may temporarily contain IP addresses.</p>
+    <p>The chat server and WebSocket backend run on a <strong>STRATO VPS</strong> (STRATO AG, Germany). Connection data (IP address) is processed to maintain the WebSocket connection. IP addresses are recorded in server and connection logs as a technical necessity.</p>
     <p>Legal basis: Art. 6(1)(f) GDPR (legitimate interest in providing a reliable and secure website).</p>
 
     <h2>4. Data We Collect</h2>
@@ -274,7 +274,7 @@
       <li><strong>Chat messages</strong> &ndash; the text content you send</li>
       <li><strong>IP address</strong> &ndash; transmitted via the WebSocket connection</li>
     </ul>
-    <p>Chat messages are stored in memory on the server to provide message history to new visitors. They are not permanently stored on disk and are cleared when the server restarts. Messages are also forwarded to a <strong>Discord</strong> server (Discord Inc., USA) via a chat bridge, where they may be stored according to Discord&rsquo;s retention policies. Legal basis: Art. 6(1)(f) GDPR (legitimate interest in providing a community chat).</p>
+    <p>Chat messages are stored temporarily in server memory to provide message history to new visitors and are cleared when the server restarts. In addition, messages are forwarded to a <strong>Discord</strong> server (Discord Inc., USA) via a chat bridge, where they are processed and stored according to Discord&rsquo;s own policies. Legal basis: Art. 6(1)(f) GDPR (legitimate interest in providing a community chat).</p>
 
     <h3>4.2 Local Storage (Browser)</h3>
     <p>We use your browser&rsquo;s localStorage to remember your preferences. The following keys are stored <strong>locally on your device only</strong> and are never transmitted to our servers unless noted:</p>
@@ -286,7 +286,7 @@
       <li>Game high score keys &ndash; locally cached personal best scores</li>
       <li><code>r2b_starred_plugins</code> &ndash; bookmarked plugins on the plugins page</li>
     </ul>
-    <p>Legal basis: Art. 6(1)(f) GDPR / &sect; 25(2) TTDSG (strictly necessary for the requested service functionality).</p>
+    <p>Legal basis: Art. 6(1)(f) GDPR / &sect; 25(2) TDDDG (strictly necessary for the requested service functionality).</p>
 
     <h3>4.3 Game High Scores</h3>
     <p>Site-wide high scores for the browser games are stored on our server in a JSON file. Only the highest score per game is stored &ndash; no usernames or IP addresses are associated with scores. Legal basis: Art. 6(1)(f) GDPR (legitimate interest in providing game functionality).</p>
@@ -307,7 +307,7 @@
       <li><strong>Mine Blocks 2</strong> (zanzlanz.com) &ndash; third-party game</li>
       <li><strong>Wayback Machine</strong> (web.archive.org) &ndash; archived Minecraft Wiki</li>
     </ul>
-    <p>These third-party sites may process your data according to their own privacy policies. Legal basis: Art. 6(1)(f) GDPR (legitimate interest in embedding relevant content).</p>
+    <p>Third-party iframes are loaded only after you explicitly click a consent placeholder. No data is transmitted to these third parties until you choose to load the content. These third-party sites may then process your data according to their own privacy policies. Legal basis: Art. 6(1)(f) GDPR (legitimate interest in embedding relevant content).</p>
 
     <h3>5.3 CORS Proxy</h3>
     <p>To check if the Dynmap server is online, we may send requests through <strong>corsproxy.io</strong> (operated by Hiroki Zenigami) as a fallback. Your IP address may be transmitted to this service. Legal basis: Art. 6(1)(f) GDPR (legitimate interest in verifying server status).</p>
@@ -317,8 +317,9 @@
 
     <h2>7. Data Retention</h2>
     <ul>
-      <li>Chat messages: kept in server memory only, cleared on restart</li>
-      <li>Server logs: may contain IP addresses, rotated regularly</li>
+      <li>Chat messages: stored temporarily in server memory, cleared on restart; additionally stored on Discord according to their retention policies</li>
+      <li>Nginx server logs (containing IP addresses): rotated daily, deleted after 14 days</li>
+      <li>Chat application log: does not contain IP addresses or personal data</li>
       <li>localStorage data: persists in your browser until you clear it</li>
       <li>High scores: stored indefinitely (no personal data)</li>
     </ul>
@@ -348,7 +349,7 @@
     <p>You have the right to lodge a complaint with a data protection supervisory authority, in particular in the EU member state of your habitual residence, place of work, or the place of the alleged infringement.</p>
 
     <h2>11. Children &amp; Minors</h2>
-    <p>This website is not intentionally directed at children under 16 years of age. We do not knowingly collect personal data from children. The chat feature does not require registration or age verification. If you are a parent or guardian and believe your child has provided personal data via the chat, please contact us at return2beta@hotmail.com and we will delete that data.</p>
+    <p>This website is not intentionally directed at children under 16 years of age. We do not knowingly process personal data from children under 16. The chat feature does not require registration or age verification. If you are a parent or guardian and believe your child has provided personal data via the chat, please contact us at return2beta@hotmail.com and we will delete that data.</p>
   </div>
 
   <!-- German version -->
@@ -370,7 +371,7 @@
 
     <h2>3. Hosting</h2>
     <p>Die statische Website wird &uuml;ber <strong>GitHub Pages</strong> (GitHub Inc., USA) gehostet. Beim Besuch der Seite kann GitHub Ihre IP-Adresse in Server-Logs erfassen. Datenschutzerkl&auml;rung von GitHub: <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement" target="_blank" rel="noopener noreferrer">GitHub Privacy Statement</a>.</p>
-    <p>Der Chat-Server und das WebSocket-Backend laufen auf einem <strong>STRATO VPS</strong> (STRATO AG, Deutschland). Verbindungsdaten (IP-Adresse) werden zur Aufrechterhaltung der WebSocket-Verbindung verarbeitet. Server-Logs k&ouml;nnen zeitweise IP-Adressen enthalten.</p>
+    <p>Der Chat-Server und das WebSocket-Backend laufen auf einem <strong>STRATO VPS</strong> (STRATO AG, Deutschland). Verbindungsdaten (IP-Adresse) werden zur Aufrechterhaltung der WebSocket-Verbindung verarbeitet. IP-Adressen werden technisch bedingt in Server- und Verbindungsprotokollen erfasst.</p>
     <p>Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an der Bereitstellung einer zuverl&auml;ssigen und sicheren Website).</p>
 
     <h2>4. Welche Daten wir erheben</h2>
@@ -382,7 +383,7 @@
       <li><strong>Chat-Nachrichten</strong> &ndash; der Textinhalt Ihrer Nachrichten</li>
       <li><strong>IP-Adresse</strong> &ndash; &uuml;bertragen &uuml;ber die WebSocket-Verbindung</li>
     </ul>
-    <p>Chat-Nachrichten werden im Arbeitsspeicher des Servers gespeichert, um neuen Besuchern den Nachrichtenverlauf bereitzustellen. Sie werden nicht dauerhaft auf der Festplatte gespeichert und bei einem Neustart des Servers gel&ouml;scht. Nachrichten werden au&szlig;erdem &uuml;ber eine Chat-Bridge an einen <strong>Discord</strong>-Server (Discord Inc., USA) weitergeleitet, wo sie gem&auml;&szlig; den Aufbewahrungsrichtlinien von Discord gespeichert werden k&ouml;nnen. Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an der Bereitstellung eines Community-Chats).</p>
+    <p>Chat-Nachrichten werden lokal nur tempor&auml;r im Arbeitsspeicher des Servers gehalten und bei einem Neustart gel&ouml;scht. Zus&auml;tzlich werden sie an einen <strong>Discord</strong>-Server (Discord Inc., USA) &uuml;bermittelt und dort nach den Regeln von Discord verarbeitet und gespeichert. Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an der Bereitstellung eines Community-Chats).</p>
 
     <h3>4.2 Lokaler Speicher (Browser)</h3>
     <p>Wir nutzen den localStorage Ihres Browsers, um Ihre Einstellungen zu speichern. Folgende Schl&uuml;ssel werden <strong>ausschlie&szlig;lich lokal auf Ihrem Ger&auml;t</strong> gespeichert und nur wie angegeben an unsere Server &uuml;bermittelt:</p>
@@ -394,7 +395,7 @@
       <li>Spielstand-Schl&uuml;ssel &ndash; lokal gespeicherte pers&ouml;nliche Bestleistungen</li>
       <li><code>r2b_starred_plugins</code> &ndash; markierte Plugins auf der Plugins-Seite</li>
     </ul>
-    <p>Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO / &sect; 25 Abs. 2 TTDSG (technisch notwendig f&uuml;r die angeforderte Dienstfunktionalit&auml;t).</p>
+    <p>Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO / &sect; 25 Abs. 2 TDDDG (technisch notwendig f&uuml;r die angeforderte Dienstfunktionalit&auml;t).</p>
 
     <h3>4.3 Spiel-Highscores</h3>
     <p>Seitenweite Highscores f&uuml;r die Browserspiele werden auf unserem Server in einer JSON-Datei gespeichert. Es wird nur der h&ouml;chste Punktestand pro Spiel gespeichert &ndash; keine Benutzernamen oder IP-Adressen werden mit den Punktest&auml;nden verkn&uuml;pft. Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an der Bereitstellung der Spielfunktionalit&auml;t).</p>
@@ -415,7 +416,7 @@
       <li><strong>Mine Blocks 2</strong> (zanzlanz.com) &ndash; Drittanbieter-Spiel</li>
       <li><strong>Wayback Machine</strong> (web.archive.org) &ndash; archiviertes Minecraft Wiki</li>
     </ul>
-    <p>Diese Drittanbieter-Seiten k&ouml;nnen Ihre Daten gem&auml;&szlig; ihren eigenen Datenschutzerkl&auml;rungen verarbeiten. Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an der Einbettung relevanter Inhalte).</p>
+    <p>Drittanbieter-iframes werden erst geladen, nachdem Sie explizit auf einen Zustimmungshinweis geklickt haben. Bis dahin werden keine Daten an diese Drittanbieter &uuml;bermittelt. Diese Drittanbieter-Seiten k&ouml;nnen Ihre Daten anschlie&szlig;end gem&auml;&szlig; ihren eigenen Datenschutzerkl&auml;rungen verarbeiten. Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an der Einbettung relevanter Inhalte).</p>
 
     <h3>5.3 CORS-Proxy</h3>
     <p>Um zu pr&uuml;fen, ob der Dynmap-Server online ist, k&ouml;nnen Anfragen als Fallback &uuml;ber <strong>corsproxy.io</strong> (betrieben von Hiroki Zenigami) geleitet werden. Dabei kann Ihre IP-Adresse an diesen Dienst &uuml;bermittelt werden. Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an der Pr&uuml;fung des Serverstatus).</p>
@@ -425,8 +426,9 @@
 
     <h2>7. Speicherdauer</h2>
     <ul>
-      <li>Chat-Nachrichten: nur im Arbeitsspeicher des Servers, werden bei Neustart gel&ouml;scht</li>
-      <li>Server-Logs: k&ouml;nnen IP-Adressen enthalten, werden regelm&auml;&szlig;ig rotiert</li>
+      <li>Chat-Nachrichten: tempor&auml;r im Arbeitsspeicher des Servers, werden bei Neustart gel&ouml;scht; zus&auml;tzlich bei Discord gem&auml;&szlig; deren Aufbewahrungsrichtlinien gespeichert</li>
+      <li>Nginx-Server-Logs (mit IP-Adressen): t&auml;gliche Rotation, L&ouml;schung nach 14 Tagen</li>
+      <li>Chat-Anwendungslog: enth&auml;lt keine IP-Adressen oder personenbezogenen Daten</li>
       <li>localStorage-Daten: bleiben in Ihrem Browser, bis Sie sie l&ouml;schen</li>
       <li>Highscores: werden auf unbestimmte Zeit gespeichert (keine personenbezogenen Daten)</li>
     </ul>
@@ -456,7 +458,7 @@
     <p>Sie haben das Recht, sich bei einer Datenschutz-Aufsichtsbeh&ouml;rde zu beschweren, insbesondere in dem EU-Mitgliedstaat Ihres gew&ouml;hnlichen Aufenthaltsorts, Ihres Arbeitsplatzes oder des Orts des mutma&szlig;lichen Versto&szlig;es.</p>
 
     <h2>11. Kinder und Minderj&auml;hrige</h2>
-    <p>Diese Website richtet sich nicht gezielt an Kinder unter 16 Jahren. Wir erheben wissentlich keine personenbezogenen Daten von Kindern. Die Chat-Funktion erfordert keine Registrierung oder Altersverifikation. Wenn Sie als Elternteil oder Erziehungsberechtigter glauben, dass Ihr Kind &uuml;ber den Chat personenbezogene Daten angegeben hat, kontaktieren Sie uns bitte unter return2beta@hotmail.com &ndash; wir werden diese Daten l&ouml;schen.</p>
+    <p>Diese Website richtet sich nicht gezielt an Kinder unter 16 Jahren. Wir verarbeiten wissentlich keine personenbezogenen Daten von Kindern unter 16 Jahren. Die Chat-Funktion erfordert keine Registrierung oder Altersverifikation. Wenn Sie als Elternteil oder Erziehungsberechtigter glauben, dass Ihr Kind &uuml;ber den Chat personenbezogene Daten angegeben hat, kontaktieren Sie uns bitte unter return2beta@hotmail.com &ndash; wir werden diese Daten l&ouml;schen.</p>
   </div>
 
   <div class="legal-footer">
