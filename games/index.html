@@ -166,6 +166,7 @@
       padding: 24px 24px 40px;
       text-align: center;
       color: #fff;
+      position: relative;
     }
     .content h1 {
       font-size: clamp(1.4rem, 3vw, 2.2rem);
@@ -416,6 +417,13 @@
       <button class="version-arrow" id="versionNext" title="Next version">&#9654;</button>
     </div>
     <div class="mineblocks-link" id="mineblocksLink">Visit Mine Blocks on their official Website: <a href="https://mineblocks.com/" target="_blank" rel="noopener noreferrer">MineBlocks.com</a></div>
+    <div id="perfWarning" style="display:none;position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(10,16,10,0.92);z-index:20;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;padding:24px;">
+      <p style="color:#ff5555;font-size:1.1rem;">This game doesn't run smoothly on your device.</p>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;">
+        <button id="perfContinue" style="font-family:inherit;background:#2a5a2a;color:#55ff55;border:1px solid #55ff55;padding:6px 16px;cursor:pointer;font-size:0.85rem;">Continue Anyway</button>
+        <button id="perfSkip" style="font-family:inherit;background:#5a2a2a;color:#ff5555;border:1px solid #ff5555;padding:6px 16px;cursor:pointer;font-size:0.85rem;">Next Game &#9654;</button>
+      </div>
+    </div>
   </main>
 
   <script>
@@ -601,6 +609,39 @@
     var mineModeBtn = document.getElementById('mineModeToggle');
     var mineFlag = false;
 
+    // ── Performance monitoring ─────────────────────────────
+    var perfWarningEl = document.getElementById('perfWarning');
+    var perfFrameTimes = [];
+    var perfChecked = false;
+    var perfDismissed = {};  // gameName → true if user chose "Continue Anyway"
+    var PERF_SAMPLE = 90;   // ~1.5 seconds of frames
+    var PERF_MIN_FPS = 20;
+
+    function perfSetAnim(id) {
+      animId = id;
+      if (perfChecked) return;
+      var now = performance.now();
+      perfFrameTimes.push(now);
+      if (perfFrameTimes.length >= PERF_SAMPLE) {
+        var elapsed = perfFrameTimes[perfFrameTimes.length - 1] - perfFrameTimes[0];
+        var avgFps = (perfFrameTimes.length - 1) / (elapsed / 1000);
+        perfChecked = true;
+        var name = games[currentGame];
+        if (avgFps < PERF_MIN_FPS && !perfDismissed[name]) {
+          perfWarningEl.style.display = 'flex';
+        }
+      }
+    }
+
+    document.getElementById('perfContinue').addEventListener('click', function () {
+      perfDismissed[games[currentGame]] = true;
+      perfWarningEl.style.display = 'none';
+    });
+    document.getElementById('perfSkip').addEventListener('click', function () {
+      perfWarningEl.style.display = 'none';
+      startGame((currentGame + 1) % games.length);
+    });
+
     // Dynamic canvas scaling
     var TARGET_W = 464; // target visual width on desktop
     function scaleGame() {
@@ -634,26 +675,29 @@
     var terrainReady = false;
     terrainImg.onload = function () { terrainReady = true; };
 
-    // Off-screen canvas for tinting grayscale textures (grass, leaves)
-    var tintCvs = document.createElement('canvas');
-    tintCvs.width = 16; tintCvs.height = 16;
-    var tintCtx = tintCvs.getContext('2d');
-
-    // Draw a terrain tile with optional color tint (for grass/leaves which are grayscale)
+    // Tile tint cache — composite tint operations are expensive; cache each unique tile+tint
+    var tileCache = {};
     function drawTileTinted(ctx, tile, dx, dy, dw, dh, tint) {
       if (!terrainReady) { ctx.fillRect(dx, dy, dw, dh); return; }
       var T = 16;
       if (tint) {
-        tintCtx.clearRect(0, 0, 16, 16);
-        tintCtx.drawImage(terrainImg, tile[0] * T, tile[1] * T, T, T, 0, 0, 16, 16);
-        tintCtx.globalCompositeOperation = 'multiply';
-        tintCtx.fillStyle = tint;
-        tintCtx.fillRect(0, 0, 16, 16);
-        tintCtx.globalCompositeOperation = 'destination-in';
-        tintCtx.drawImage(terrainImg, tile[0] * T, tile[1] * T, T, T, 0, 0, 16, 16);
-        tintCtx.globalCompositeOperation = 'source-over';
+        var key = tile[0] + ',' + tile[1] + ',' + tint;
+        var cached = tileCache[key];
+        if (!cached) {
+          cached = document.createElement('canvas');
+          cached.width = T; cached.height = T;
+          var cc = cached.getContext('2d');
+          cc.drawImage(terrainImg, tile[0] * T, tile[1] * T, T, T, 0, 0, T, T);
+          cc.globalCompositeOperation = 'multiply';
+          cc.fillStyle = tint;
+          cc.fillRect(0, 0, T, T);
+          cc.globalCompositeOperation = 'destination-in';
+          cc.drawImage(terrainImg, tile[0] * T, tile[1] * T, T, T, 0, 0, T, T);
+          cc.globalCompositeOperation = 'source-over';
+          tileCache[key] = cached;
+        }
         ctx.imageSmoothingEnabled = false;
-        ctx.drawImage(tintCvs, dx, dy, dw, dh);
+        ctx.drawImage(cached, dx, dy, dw, dh);
       } else {
         ctx.imageSmoothingEnabled = false;
         ctx.drawImage(terrainImg, tile[0] * T, tile[1] * T, T, T, dx, dy, dw, dh);
@@ -672,6 +716,11 @@
       titleEl.textContent = games[idx];
       scoreEl.textContent = '0';
 
+      // Reset perf monitor for new game
+      perfFrameTimes = [];
+      perfChecked = false;
+      perfWarningEl.style.display = 'none';
+
       // Hide iframe / show canvas by default
       iframeEl.style.display = 'none';
       iframeEl.src = '';
@@ -689,20 +738,20 @@
 
       if (idx === 0) {
         gameContainer.classList.add('flappy-game');
-        activeGame = flappyBird(canvas, ctx, scoreEl, bestEl, siteBestEl, hintEl, function (id) { animId = id; });
+        activeGame = flappyBird(canvas, ctx, scoreEl, bestEl, siteBestEl, hintEl, perfSetAnim);
       } else if (idx === 1) {
         gameContainer.classList.add('tetris-game');
-        activeGame = tetris(canvas, ctx, scoreEl, bestEl, siteBestEl, hintEl, function (id) { animId = id; });
+        activeGame = tetris(canvas, ctx, scoreEl, bestEl, siteBestEl, hintEl, perfSetAnim);
       } else if (idx === 2) {
         gameContainer.classList.add('hatch-game');
-        activeGame = hatchSnake(canvas, ctx, scoreEl, bestEl, siteBestEl, hintEl, function (id) { animId = id; });
+        activeGame = hatchSnake(canvas, ctx, scoreEl, bestEl, siteBestEl, hintEl, perfSetAnim);
       } else if (idx === 3) {
         gameContainer.classList.add('minesweeper-game');
         mineModeBtn.classList.add('visible');
-        activeGame = minesweeper(canvas, ctx, scoreEl, bestEl, siteBestEl, hintEl, function (id) { animId = id; });
+        activeGame = minesweeper(canvas, ctx, scoreEl, bestEl, siteBestEl, hintEl, perfSetAnim);
       } else if (idx === 4) {
         gameContainer.classList.add('blockcrush-game');
-        activeGame = blockCrush(canvas, ctx, scoreEl, bestEl, siteBestEl, hintEl, function (id) { animId = id; });
+        activeGame = blockCrush(canvas, ctx, scoreEl, bestEl, siteBestEl, hintEl, perfSetAnim);
       } else if (idx === 5) {
         // Mine Blocks — embed
         canvas.style.display = 'none';
@@ -806,6 +855,9 @@
 
       bEl.textContent = best;
       sbEl.textContent = siteBest;
+
+      var flappyGroundCvs = null;
+      var skyGrad = null;
 
       function drawTile(tile, dx, dy, dw, dh, tint) {
         drawTileTinted(c, tile, dx, dy, dw, dh, tint);
@@ -924,11 +976,13 @@
       }
 
       function drawFrame() {
-        // night sky gradient
-        var skyGrad = c.createLinearGradient(0, 0, 0, groundY);
-        skyGrad.addColorStop(0, '#070b1a');
-        skyGrad.addColorStop(0.5, '#0e1a30');
-        skyGrad.addColorStop(1, '#1a2a1e');
+        // night sky gradient (cached)
+        if (!skyGrad) {
+          skyGrad = c.createLinearGradient(0, 0, 0, groundY);
+          skyGrad.addColorStop(0, '#070b1a');
+          skyGrad.addColorStop(0.5, '#0e1a30');
+          skyGrad.addColorStop(1, '#1a2a1e');
+        }
         c.fillStyle = skyGrad;
         c.fillRect(0, 0, W, H);
 
@@ -965,18 +1019,29 @@
           }
         }
 
-        // ground — tiled grass (tinted green) over dirt
-        c.imageSmoothingEnabled = false;
-        var tileS = 24;
-        for (var gx = 0; gx < W; gx += tileS) {
-          drawTile(TILE_GRASS_TOP, gx, groundY, tileS, tileS, '#5a8f32');
-          for (var gy = groundY + tileS; gy < H; gy += tileS) {
-            drawTile(TILE_DIRT, gx, gy, tileS, tileS);
+        // ground — cached tiled grass/dirt/stone strip
+        if (!flappyGroundCvs && terrainReady) {
+          var gh = H - groundY;
+          flappyGroundCvs = document.createElement('canvas');
+          flappyGroundCvs.width = W; flappyGroundCvs.height = gh;
+          var gc = flappyGroundCvs.getContext('2d');
+          gc.imageSmoothingEnabled = false;
+          var ts = 24;
+          for (var gx = 0; gx < W; gx += ts) {
+            drawTileTinted(gc, TILE_GRASS_TOP, gx, 0, ts, ts, '#5a8f32');
+            for (var gy = ts; gy < gh; gy += ts) {
+              drawTileTinted(gc, TILE_DIRT, gx, gy, ts, ts);
+            }
+          }
+          for (var gx = 0; gx < W; gx += ts) {
+            drawTileTinted(gc, TILE_STONE, gx, gh - ts, ts, ts);
           }
         }
-        // stone layer at very bottom
-        for (var gx = 0; gx < W; gx += tileS) {
-          drawTile(TILE_STONE, gx, H - tileS, tileS, tileS);
+        if (flappyGroundCvs) {
+          c.drawImage(flappyGroundCvs, 0, groundY);
+        } else {
+          c.fillStyle = '#5a8f32';
+          c.fillRect(0, groundY, W, H - groundY);
         }
 
         // pipes — log body with tinted leaves cap
@@ -1654,30 +1719,44 @@
         if (moveTimer >= moveInterval) { moveTimer = 0; move(); }
       }
 
-      function drawFrame() {
-        c.imageSmoothingEnabled = false;
-        // Dark background behind border
-        c.fillStyle = '#0e0e12';
-        c.fillRect(0, 0, W, H);
-
-        // Stone/cobble border
+      // Pre-render static background (border + grass) to offscreen canvas
+      var bgCvs = null;
+      function ensureBg() {
+        if (bgCvs) return true;
+        if (!terrainReady) return false;
+        bgCvs = document.createElement('canvas');
+        bgCvs.width = W; bgCvs.height = H;
+        var bc = bgCvs.getContext('2d');
+        bc.imageSmoothingEnabled = false;
+        bc.fillStyle = '#0e0e12';
+        bc.fillRect(0, 0, W, H);
         var bTiles = [TILE_STONE, TILE_COBBLE, TILE_STONE, TILE_COBBLE];
-        // Top and bottom borders
         for (var bx = 0; bx < COLS + 2; bx++) {
-          drawTile(bTiles[bx % 4], bx * CELL, 0, CELL, CELL);
-          drawTile(bTiles[(bx + 1) % 4], bx * CELL, OY + ROWS * CELL, CELL, CELL);
+          drawTileTinted(bc, bTiles[bx % 4], bx * CELL, 0, CELL, CELL);
+          drawTileTinted(bc, bTiles[(bx + 1) % 4], bx * CELL, OY + ROWS * CELL, CELL, CELL);
         }
-        // Left and right borders
         for (var by = 0; by < ROWS; by++) {
-          drawTile(bTiles[by % 4], 0, OY + by * CELL, CELL, CELL);
-          drawTile(bTiles[(by + 1) % 4], OX + COLS * CELL, OY + by * CELL, CELL, CELL);
+          drawTileTinted(bc, bTiles[by % 4], 0, OY + by * CELL, CELL, CELL);
+          drawTileTinted(bc, bTiles[(by + 1) % 4], OX + COLS * CELL, OY + by * CELL, CELL, CELL);
         }
-
-        // Grass field with checkerboard tint
         for (var gy = 0; gy < ROWS; gy++) {
           for (var gx = 0; gx < COLS; gx++) {
-            drawTile(TILE_GRASS_TOP, OX + gx * CELL, OY + gy * CELL, CELL, CELL, (gx + gy) % 2 === 0 ? '#5a8f32' : '#4e7f2a');
+            drawTileTinted(bc, TILE_GRASS_TOP, OX + gx * CELL, OY + gy * CELL, CELL, CELL, (gx + gy) % 2 === 0 ? '#5a8f32' : '#4e7f2a');
           }
+        }
+        return true;
+      }
+
+      function drawFrame() {
+        c.imageSmoothingEnabled = false;
+        // Blit cached background (border + grass) or draw fallback
+        if (ensureBg()) {
+          c.drawImage(bgCvs, 0, 0);
+        } else {
+          c.fillStyle = '#0e0e12';
+          c.fillRect(0, 0, W, H);
+          c.fillStyle = '#4e7f2a';
+          c.fillRect(OX, OY, COLS * CELL, ROWS * CELL);
         }
 
         // Egg
