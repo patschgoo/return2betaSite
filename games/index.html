@@ -417,6 +417,10 @@
       <button class="version-arrow" id="versionNext" title="Next version">&#9654;</button>
     </div>
     <div class="mineblocks-link" id="mineblocksLink">Visit Mine Blocks on their official Website: <a href="https://mineblocks.com/" target="_blank" rel="noopener noreferrer">MineBlocks.com</a></div>
+    <div id="iframeConsent" style="display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center;padding:24px;color:#d8d8d8;font-size:0.72rem;text-shadow:1px 1px 0 rgba(0,0,0,0.6);min-height:300px;">
+      <p id="iframeConsentText" style="max-width:420px;line-height:1.7;"></p>
+      <button id="iframeConsentBtn" style="font-family:inherit;background:rgba(6,10,6,0.88);color:#55ff55;border:2px solid rgba(85,255,85,0.5);border-radius:4px;padding:10px 24px;font-size:0.75rem;cursor:pointer;">Load Game</button>
+    </div>
     <div id="perfWarning" style="display:none;position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(10,16,10,0.92);z-index:20;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;padding:24px;">
       <p style="color:#ff5555;font-size:1.1rem;">This game doesn't run smoothly on your device.</p>
       <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;">
@@ -609,6 +613,18 @@
     var mineModeBtn = document.getElementById('mineModeToggle');
     var mineFlag = false;
 
+    // ── Iframe consent ─────────────────────────────────────
+    var iframeConsentEl = document.getElementById('iframeConsent');
+    var iframeConsentText = document.getElementById('iframeConsentText');
+    var iframeConsentBtn = document.getElementById('iframeConsentBtn');
+    var iframeConsentGranted = false;
+
+    iframeConsentBtn.addEventListener('click', function () {
+      iframeConsentGranted = true;
+      iframeConsentEl.style.display = 'none';
+      loadMineBlocksIframe();
+    });
+
     // ── Performance monitoring ─────────────────────────────
     var perfWarningEl = document.getElementById('perfWarning');
     var perfFrameTimes = [];
@@ -724,6 +740,7 @@
       // Hide iframe / show canvas by default
       iframeEl.style.display = 'none';
       iframeEl.src = '';
+      iframeConsentEl.style.display = 'none';
       canvas.style.display = 'block';
       scoresEl.style.display = '';
       hintEl.style.display = '';
@@ -753,23 +770,35 @@
         gameContainer.classList.add('blockcrush-game');
         activeGame = blockCrush(canvas, ctx, scoreEl, bestEl, siteBestEl, hintEl, perfSetAnim);
       } else if (idx === 5) {
-        // Mine Blocks — embed
+        // Mine Blocks — embed with consent
         canvas.style.display = 'none';
         scoresEl.style.display = 'none';
         hintEl.style.display = 'none';
         versionSwitcherEl.style.display = 'flex';
         mineblocksLink.style.display = 'block';
         gameContainer.className = 'game-container embed-game';
-        iframeEl.style.display = 'block';
-        iframeEl.style.width = '100%';
-        iframeEl.style.height = '';
-        iframeEl.removeAttribute('width');
-        iframeEl.removeAttribute('height');
-        var ver = mineblocksVersions[currentMineblocksVersion];
-        iframeEl.src = ver.url;
-        versionLabelEl.textContent = ver.label;
+        versionLabelEl.textContent = mineblocksVersions[currentMineblocksVersion].label;
+
+        if (iframeConsentGranted) {
+          loadMineBlocksIframe();
+        } else {
+          var ver = mineblocksVersions[currentMineblocksVersion];
+          var host = ver.label === 'Mine Blocks' ? 'mineblocks.com' : 'zanzlanz.com';
+          iframeConsentText.innerHTML = 'This embeds content from <strong>' + host + '</strong>. By clicking below, you consent to loading this third-party content. Your IP address and browser data will be transmitted to the provider.';
+          iframeConsentEl.style.display = 'flex';
+        }
       }
       scaleGame();
+    }
+
+    function loadMineBlocksIframe() {
+      var ver = mineblocksVersions[currentMineblocksVersion];
+      iframeEl.style.display = 'block';
+      iframeEl.style.width = '100%';
+      iframeEl.style.height = '';
+      iframeEl.removeAttribute('width');
+      iframeEl.removeAttribute('height');
+      iframeEl.src = ver.url;
     }
 
     mineModeBtn.addEventListener('click', function () {
@@ -788,8 +817,13 @@
     // Version switcher for Mine Blocks
     function loadMineblocksVersion() {
       var ver = mineblocksVersions[currentMineblocksVersion];
-      iframeEl.src = ver.url;
       versionLabelEl.textContent = ver.label;
+      if (iframeConsentGranted) {
+        iframeEl.src = ver.url;
+      } else {
+        var host = ver.label === 'Mine Blocks' ? 'mineblocks.com' : 'zanzlanz.com';
+        iframeConsentText.innerHTML = 'This embeds content from <strong>' + host + '</strong>. By clicking below, you consent to loading this third-party content. Your IP address and browser data will be transmitted to the provider.';
+      }
     }
     versionPrevBtn.addEventListener('click', function () {
       if (currentGame !== 5) return;

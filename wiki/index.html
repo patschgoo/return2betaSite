@@ -104,6 +104,33 @@
     .wiki-frame.dark {
       filter: invert(0.9) hue-rotate(180deg);
     }
+    .iframe-consent {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      text-align: center;
+      padding: 32px;
+      color: #d8d8d8;
+      font-family: 'Minecraft', sans-serif;
+      font-size: 0.72rem;
+      text-shadow: 1px 1px 0 rgba(0,0,0,0.6);
+    }
+    .iframe-consent p { max-width: 480px; line-height: 1.7; }
+    .iframe-consent button {
+      font-family: 'Minecraft', sans-serif;
+      background: rgba(6,10,6,0.88);
+      color: #55ff55;
+      border: 2px solid rgba(85,255,85,0.5);
+      border-radius: 4px;
+      padding: 10px 24px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .iframe-consent button:hover { background: rgba(20,40,20,0.95); }
     .dark-toggle {
       position: fixed;
       top: 58px;
@@ -226,9 +253,33 @@
     </div>
   </header>
 
-  <iframe class="wiki-frame" id="wikiFrame" src="https://web.archive.org/web/20110902065819/http://www.minecraftwiki.net:80/wiki/Minecraft_Wiki" title="Minecraft Wiki (Beta era)"></iframe>
-  <button class="dark-toggle" id="darkToggle" title="Toggle dark mode">☾</button>
-  <div class="wiki-disclaimer" id="wikiDisclaimer">Disclaimer: this is a redirection to the archived <a href="https://web.archive.org/web/20110902065819/http://www.minecraftwiki.net:80/wiki/Minecraft_Wiki" target="_blank" rel="noopener noreferrer">Minecraft Wiki</a></div>
+  <div class="iframe-consent" id="wikiConsent">
+    <p>This page embeds content from <strong>web.archive.org</strong> (Wayback Machine). By clicking the button below, you consent to loading this third-party content. Your IP address and browser data will be transmitted to the Internet Archive.</p>
+    <button id="wikiConsentBtn">Load Minecraft Wiki</button>
+  </div>
+  <iframe class="wiki-frame" id="wikiFrame" data-src="https://web.archive.org/web/20110902065819/http://www.minecraftwiki.net:80/wiki/Minecraft_Wiki" title="Minecraft Wiki (Beta era)" style="display:none"></iframe>
+  <button class="dark-toggle" id="darkToggle" title="Toggle dark mode" style="display:none">☾</button>
+  <div class="wiki-disclaimer" id="wikiDisclaimer" style="display:none">Disclaimer: this is a redirection to the archived <a href="https://web.archive.org/web/20110902065819/http://www.minecraftwiki.net:80/wiki/Minecraft_Wiki" target="_blank" rel="noopener noreferrer">Minecraft Wiki</a></div>
+
+  <script>
+    (function() {
+      var consent = document.getElementById('wikiConsent');
+      var frame = document.getElementById('wikiFrame');
+      var btn = document.getElementById('wikiConsentBtn');
+      var darkBtn = document.getElementById('darkToggle');
+      var disclaimer = document.getElementById('wikiDisclaimer');
+
+      function loadWiki() {
+        frame.src = frame.getAttribute('data-src');
+        frame.style.display = '';
+        darkBtn.style.display = '';
+        disclaimer.style.display = '';
+        consent.style.display = 'none';
+      }
+
+      btn.addEventListener('click', loadWiki);
+    })();
+  </script>
 
   <script>
     (function() {
