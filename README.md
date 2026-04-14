@@ -20,6 +20,6 @@ The official website for **Return2Beta**, a Minecraft Beta 1.7.3 community serve
 
 - Static site hosted on GitHub Pages
 - Chat backend: Node.js + WebSocket server bridged to Discord via discord.js
-- Self-hosted Minecraft font (`/fonts/Minecraft.otf`)
+- Self-hosted Minecraft font via [IdreesInc/Minecraft-Font](https://github.com/IdreesInc/Minecraft-Font)
 - Chat widget present on all pages (floating panel with WebSocket connection)
 - Third-party iframes (Mine Blocks, Wayback Machine Wiki) use click-to-load consent wrappers for GDPR/TDDDG compliance
