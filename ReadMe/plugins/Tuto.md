@@ -45,7 +45,6 @@ Members (and Visitors) can list and read available tutorials to learn about the 
 | MossyGrow | Mossy cobblestone growth |
 | NaturalGiants | Giant mob spawning |
 | NaturalHumans | Human NPC spawning |
-| NetherText | Nether text features |
 | NoFloatingTrees | Floating tree prevention |
 | NoFullHealthEating | Eating restrictions at full health |
 | Pickup | Auto item pickup |
