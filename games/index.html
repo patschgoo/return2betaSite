@@ -2645,100 +2645,52 @@
     }
 
     // ── Mine Dungeon ──────────────────────────────────────
-    // Dungeon slider + escape room + combat adventure
+    // Dungeon slider with lives, max moves, mob/item textures
     function mineDungeon(cvs, c, sEl, bEl, sbEl, hEl, setAnim) {
       var CELL = 24;
       var COLS = 12, ROWS = 12;
       var BORDER = 2;
-      var HUD_H = CELL + 12;
+      var HUD_H = CELL + 14;
       cvs.width = COLS * CELL + BORDER * 2;
       cvs.height = ROWS * CELL + BORDER * 2 + HUD_H;
       var OX = BORDER, OY = BORDER;
-
-      // ── Terrain sprite helpers ────────────────────────
       var T = 16;
+
+      // ── Load mob/player head images ───────────────
+      var imgPlayer = new Image(); imgPlayer.src = '../images/mobs/2d/Player_Head.png';
+      var imgZombie = new Image(); imgZombie.src = '../images/mobs/2d/Zombie_Head.png';
+      var imgSkeleton = new Image(); imgSkeleton.src = '../images/mobs/2d/Skeleton_Skull.png';
+      var imgCreeper = new Image(); imgCreeper.src = '../images/mobs/2d/Creeper_Head.png';
+      var imgItems = new Image(); imgItems.src = '../images/minecraft/items.png';
+      var itemsReady = false; imgItems.onload = function () { itemsReady = true; };
+
+      // terrain.png sprite draw
       function dt(col, row, dx, dy) {
         if (!terrainReady) { c.fillStyle = '#444'; c.fillRect(dx, dy, CELL, CELL); return; }
         c.drawImage(terrainImg, col * T, row * T, T, T, dx, dy, CELL, CELL);
       }
-      // items.png
-      var itImg = new Image(); itImg.src = '../images/minecraft/items.png';
-      var itReady = false; itImg.onload = function () { itReady = true; };
+      // items.png sprite draw
       function di(col, row, dx, dy, sz) {
         sz = sz || CELL;
-        if (!itReady) { c.fillStyle = '#a0a'; c.fillRect(dx + 2, dy + 2, sz - 4, sz - 4); return; }
-        c.drawImage(itImg, col * T, row * T, T, T, dx, dy, sz, sz);
+        if (!itemsReady) return;
+        c.drawImage(imgItems, col * T, row * T, T, T, dx, dy, sz, sz);
+      }
+      // mob head draw
+      function dm(img, dx, dy) {
+        if (img.complete && img.naturalWidth) c.drawImage(img, dx, dy, CELL, CELL);
       }
 
-      // ── Correct sprite coordinates from terrain.png ───
-      // Row 0: grass, stone, dirt, grass_side, planks, stone_slab_side, stone_slab_top, bricks, tnt_side, ...
-      // Row 1: cobble, bedrock, sand, gravel, log_side, log_top, iron_block, gold_block, diamond_block, emerald_ore...
-      // Row 2: gold_ore, iron_ore, coal_ore, bookshelf, mossy_cobble, obsidian, ...
-      // Row 3: sponge, glass, red_wool, ...
-      // Row 5: chest_top, furnace_front_on?, ...
-      var SPR = {
-        stone:    [1, 0],
-        dirt:     [2, 0],
-        planks:   [4, 0],
-        bricks:   [7, 0],
-        cobble:   [0, 1],
-        bedrock:  [1, 1],
-        sand:     [2, 1],
-        log:      [4, 1],
-        iron_blk: [6, 1],
-        gold_blk: [7, 1],
-        dia_blk:  [8, 1],
-        gold_ore: [0, 2],
-        iron_ore: [1, 2],
-        coal_ore: [2, 2],
-        mossy:    [4, 2],
-        obsidian: [5, 2],
-        sponge:   [0, 3],
-        glass:    [1, 3],
-        chest:    [11, 1], // chest front
-        lava:     [13, 14],
-        water:    [13, 12],
-        portal:   [14, 1],
-        tnt:      [8, 0],
-        gravel:   [3, 1],
-        ice:      [3, 4],
-        snow:     [2, 4],
-        leaves:   [4, 3],
-        grass_top:[0, 0],
-        wool:     [0, 4],
-        netherrack:[7,6],
-        soul_sand: [8,6],
-        nether_brick:[0,14],
-        glowstone: [9,6]
-      };
-
-      // Items from items.png — row 0: tools, row 1: swords, row 2: picks, etc.
-      var ISPR = {
-        sword_iron: [2, 1],
-        sword_dia:  [3, 1],
-        pick_iron:  [2, 2],
-        pick_dia:   [3, 2],
-        key:        [7, 0],  // gold helmet = key stand-in
-        apple:      [10, 0],
-        heart:      [8, 0],  // leather helmet ~ heart
-        potion:     [0, 5],  // compass-ish
-        shield:     [5, 0],  // chain helmet = shield
-        bow:        [5, 1],
-        arrow_item: [5, 2],
-        torch:      [5, 3]
-      };
-
-      // ── Tile types ───────────────────────────────────
+      // ── Tile types ───────────────────────────────
       var EMPTY = 0, WALL = 1, ICE = 2, CHEST_T = 3, DOOR = 4, PORTAL = 5,
-          LAVA = 6, WATER = 7, ZOMBIE = 8, SKELETON = 9, SPIDER = 10,
+          LAVA = 6, WATER = 7, ZOMBIE = 8, SKELETON = 9, CREEPER = 10,
           CRACK = 11, SPIKE = 12, CRATE = 13, PLATE = 14, KEY_T = 15,
-          HEART_T = 16, SWORD_T = 17, PICK_T = 18, TORCH_T = 19, ARROW_T = 20,
-          DARK = 21, STONE_W = 22, GRAVEL_T = 23;
+          HEART_T = 16, SWORD_T = 17, PICK_T = 18, TORCH_T = 19, STONE_W = 20,
+          DARK = 21, GRAVEL_T = 22;
 
-      // ── Game state ───────────────────────────────────
-      var level = 0, grid = [], player, hp, maxHp, inventory, moves, score,
-          totalScore = 0, state = 'playing', msg = '', msgTimer = 0,
-          litCells = {}, slideTrail = [], slideAnim = 0;
+      // ── Game state ───────────────────────────────
+      var level = 0, grid = [], player, lives, maxMoves, movesLeft, inventory,
+          score, totalScore = 0, state = 'playing', msg = '', msgTimer = 0,
+          litCells = {}, slideTrail = [], slideAnim = 0, heartsTaken = 0;
 
       var best = parseInt(localStorage.getItem('r2b_mdungeon_best') || '0', 10);
       var siteBest = R2BScores.get('mdungeon');
@@ -2749,235 +2701,230 @@
       });
 
       // ── LEVELS ─────────────────────────────────────
-      // Legend: 0=floor, 1=wall, 2=ice, 3=chest, 4=door, 5=portal, 6=lava,
-      //   7=water, 8=zombie, 9=skeleton, 10=spider, 11=cracked_floor, 12=spikes,
-      //   13=crate(pushable), 14=pressure_plate, 15=key, 16=heart, 17=sword,
-      //   18=pickaxe, 19=torch, 20=arrow_pickup, 21=dark, 22=stone(mineable), 23=gravel(slow)
-
       var LEVELS = [
-        // 1: Slide basics — slide on ice to reach portal
-        { hp: 5, grid: [
+        // Lv1: Slide basics — slide right on ice, stop at wall, step up, step right to portal
+        { par: 3, grid: [
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,0,0,0,0,0,5,1,1,1],
+          [1,1,1,'P',2,2,2,0,1,1,1,1],
+          [1,1,1,1,0,0,0,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1]
+        ]},
+        // Lv2: Ice L-shape
+        { par: 3, grid: [
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,0,5,1,1,1],
+          [1,1,1,1,1,1,1,2,1,1,1,1],
+          [1,1,1,1,1,1,1,2,1,1,1,1],
+          [1,1,1,'P',2,2,2,2,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1]
+        ]},
+        // Lv3: Key + door
+        { par: 3, grid: [
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
           [1,1,1,1,1,1,1,1,1,1,1,1],
           [1,1,1,1,1,1,1,1,1,1,1,1],
           [1,1,1,0,0,0,0,0,0,1,1,1],
-          [1,1,1,0,2,2,2,0,0,1,1,1],
-          [1,1,0,0,2,2,2,2,0,1,1,1],
-          [1,1,'P',0,2,2,2,0,5,1,1,1],
-          [1,1,0,0,2,2,2,0,0,1,1,1],
+          [1,1,'P',0,15,0,4,0,5,1,1,1],
           [1,1,1,0,0,0,0,0,0,1,1,1],
           [1,1,1,1,1,1,1,1,1,1,1,1],
           [1,1,1,1,1,1,1,1,1,1,1,1],
           [1,1,1,1,1,1,1,1,1,1,1,1],
-          [1,1,1,1,1,1,1,1,1,1,1,1]
-        ]},
-        // 2: Collect key, unlock door
-        { hp: 5, grid: [
-          [1,1,1,1,1,1,1,1,1,1,1,1],
-          [1,1,1,1,1,1,1,1,1,1,1,1],
-          [1,1,0,0,0,0,0,1,1,1,1,1],
-          [1,1,0,2,2,15,0,1,1,1,1,1],
-          [1,1,0,2,2,2,0,1,1,1,1,1],
-          [1,1,'P',2,2,2,0,4,0,5,1,1],
-          [1,1,0,2,2,2,0,1,1,1,1,1],
-          [1,1,0,0,0,0,0,1,1,1,1,1],
-          [1,1,1,1,1,1,1,1,1,1,1,1],
-          [1,1,1,1,1,1,1,1,1,1,1,1],
           [1,1,1,1,1,1,1,1,1,1,1,1],
           [1,1,1,1,1,1,1,1,1,1,1,1]
         ]},
-        // 3: Sword + zombie combat — slide into zombie with sword
-        { hp: 5, grid: [
+        // Lv4: Sword + zombie — lava distraction below
+        { par: 4, grid: [
           [1,1,1,1,1,1,1,1,1,1,1,1],
           [1,1,1,1,1,1,1,1,1,1,1,1],
-          [1,1,0,0,0,0,0,0,0,0,1,1],
-          [1,1,0,2,2,2,0,0,0,0,1,1],
-          [1,1,0,2,17,2,1,8,0,0,1,1],
-          [1,1,'P',2,2,2,0,0,0,5,1,1],
-          [1,1,0,2,2,2,0,0,0,0,1,1],
-          [1,1,0,0,0,0,0,0,0,0,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,0,0,0,0,0,0,0,1,1,1],
+          [1,1,'P',0,17,0,8,0,5,1,1,1],
+          [1,1,0,0,0,6,0,0,0,1,1,1],
+          [1,1,1,0,6,6,6,0,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
           [1,1,1,1,1,1,1,1,1,1,1,1],
           [1,1,1,1,1,1,1,1,1,1,1,1],
           [1,1,1,1,1,1,1,1,1,1,1,1],
           [1,1,1,1,1,1,1,1,1,1,1,1]
         ]},
-        // 4: Lava + spikes — navigate around hazards
-        { hp: 5, grid: [
+        // Lv5: Ice + lava trap — must go up first
+        { par: 4, grid: [
           [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,0,0,0,0,0,1,1,1,1],
+          [1,1,1,0,2,2,2,0,5,1,1,1],
+          [1,1,1,'P',2,2,6,1,1,1,1,1],
+          [1,1,1,0,0,0,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1]
+        ]},
+        // Lv6: Pickaxe + stone — dead-end distraction
+        { par: 5, grid: [
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,0,0,0,20,0,5,1,1,1],
+          [1,1,1,0,0,0,1,0,0,1,1,1],
+          [1,1,'P',0,18,0,1,1,1,1,1,1],
+          [1,1,1,0,0,0,0,1,1,1,1,1],
+          [1,1,1,0,0,6,0,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1]
+        ]},
+        // Lv7: Crate + plate — spikes distraction
+        { par: 5, grid: [
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,0,0,13,14,0,0,1,1,1],
+          [1,1,1,0,0,0,1,0,5,1,1,1],
+          [1,1,'P',0,0,0,0,0,0,1,1,1],
+          [1,1,1,0,12,12,0,0,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1]
+        ]},
+        // Lv8: Dark room + torch
+        { par: 5, grid: [
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,21,5,0,21,21,1,1,1,1],
+          [1,1,1,21,0,2,2,21,1,1,1,1],
+          [1,1,1,21,0,2,2,21,1,1,1,1],
+          [1,1,1,21,'P',0,19,21,1,1,1,1],
+          [1,1,1,21,21,21,21,21,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1]
+        ]},
+        // Lv9: Ice puzzle + lava + heart temptation
+        { par: 4, grid: [
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,0,0,0,0,0,0,1,1,1,1],
+          [1,1,0,2,2,6,2,0,1,1,1,1],
+          [1,1,'P',2,16,2,2,0,1,1,1,1],
+          [1,1,0,2,2,2,2,0,5,1,1,1],
+          [1,1,0,0,0,0,0,0,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1]
+        ]},
+        // Lv10: Cracked floor — collapses behind you
+        { par: 5, grid: [
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,0,0,0,5,1,1,1,1],
+          [1,1,1,'P',11,11,11,0,1,1,1,1],
+          [1,1,1,1,11,0,0,0,1,1,1,1],
+          [1,1,1,1,0,0,0,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1]
+        ]},
+        // Lv11: Sword + multiple mobs
+        { par: 6, grid: [
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,0,0,8,0,0,1,1,1,1],
+          [1,1,1,0,0,0,0,9,0,1,1,1],
+          [1,1,'P',0,17,0,0,0,5,1,1,1],
+          [1,1,1,0,0,0,6,0,0,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1]
+        ]},
+        // Lv12: Lava bridge — push crates into lava
+        { par: 7, grid: [
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,0,0,13,6,0,0,1,1,1,1],
+          [1,1,0,0,0,1,0,0,1,1,1,1],
+          [1,1,'P',0,0,1,0,5,1,1,1,1],
+          [1,1,0,0,0,6,13,0,1,1,1,1],
+          [1,1,0,0,0,0,0,0,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1]
+        ]},
+        // Lv13: Key/door + ice + sword + mob + heart temptation
+        { par: 6, grid: [
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,0,0,0,0,15,4,5,1,1,1],
+          [1,1,0,2,2,2,2,1,1,1,1,1],
+          [1,1,'P',0,17,0,0,0,1,1,1,1],
+          [1,1,0,0,16,0,8,0,1,1,1,1],
+          [1,1,1,0,0,0,0,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1]
+        ]},
+        // Lv14: Dark dungeon full experience
+        { par: 8, grid: [
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,21,21,21,21,21,21,21,21,21,1,1],
+          [1,21,0,0,0,15,0,4,0,5,1,1],
+          [1,21,0,0,2,2,2,1,0,21,1,1],
+          [1,21,0,0,2,0,17,1,0,21,1,1],
+          [1,21,'P',0,19,0,8,0,0,21,1,1],
+          [1,21,0,0,0,0,0,0,0,21,1,1],
+          [1,21,21,21,21,21,21,21,21,21,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1]
+        ]},
+        // Lv15: Grand finale — all mechanics
+        { par: 10, grid: [
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,0,0,20,0,17,1,0,0,0,0,1],
+          [1,0,0,0,0,0,1,0,15,4,5,1],
+          [1,'P',0,18,0,0,8,2,2,0,0,1],
           [1,0,0,0,0,0,0,0,0,0,0,1],
-          [1,0,2,2,6,2,2,0,0,0,0,1],
-          [1,0,2,2,0,2,6,0,0,0,0,1],
-          [1,'P',2,2,2,2,0,0,12,0,0,1],
-          [1,0,2,6,2,2,0,12,0,0,0,1],
-          [1,0,0,0,0,0,0,0,0,0,5,1],
-          [1,0,16,0,0,0,0,0,0,0,0,1],
-          [1,1,1,1,1,1,1,1,1,1,1,1],
-          [1,1,1,1,1,1,1,1,1,1,1,1],
-          [1,1,1,1,1,1,1,1,1,1,1,1],
-          [1,1,1,1,1,1,1,1,1,1,1,1]
-        ]},
-        // 5: Dark dungeon + torch
-        { hp: 5, grid: [
-          [1,1,1,1,1,1,1,1,1,1,1,1],
-          [1,21,21,21,21,21,21,21,21,21,21,1],
-          [1,21,0,0,0,21,21,0,0,0,21,1],
-          [1,21,0,19,0,21,21,0,15,0,21,1],
-          [1,21,0,0,0,0,0,0,0,0,21,1],
-          [1,21,'P',0,0,21,21,0,0,0,21,1],
-          [1,21,0,0,0,21,21,0,4,0,21,1],
-          [1,21,0,0,0,21,21,0,0,5,21,1],
-          [1,21,21,21,21,21,21,21,21,21,21,1],
-          [1,1,1,1,1,1,1,1,1,1,1,1],
-          [1,1,1,1,1,1,1,1,1,1,1,1],
-          [1,1,1,1,1,1,1,1,1,1,1,1]
-        ]},
-        // 6: Crate push over plate to open path
-        { hp: 5, grid: [
-          [1,1,1,1,1,1,1,1,1,1,1,1],
-          [1,0,0,0,0,0,0,0,0,0,0,1],
-          [1,0,0,0,0,0,0,0,0,0,0,1],
-          [1,0,0,2,2,2,2,0,0,0,0,1],
-          [1,'P',0,13,2,2,14,1,0,0,0,1],
-          [1,0,0,2,2,2,2,1,0,5,0,1],
-          [1,0,0,0,0,0,0,0,0,0,0,1],
-          [1,0,0,0,0,0,0,0,0,0,0,1],
-          [1,1,1,1,1,1,1,1,1,1,1,1],
-          [1,1,1,1,1,1,1,1,1,1,1,1],
-          [1,1,1,1,1,1,1,1,1,1,1,1],
-          [1,1,1,1,1,1,1,1,1,1,1,1]
-        ]},
-        // 7: Pickaxe + stone walls
-        { hp: 5, grid: [
-          [1,1,1,1,1,1,1,1,1,1,1,1],
-          [1,0,0,0,0,0,1,1,1,1,1,1],
-          [1,0,2,18,2,0,1,1,1,1,1,1],
-          [1,0,2,2,2,0,1,0,0,0,0,1],
-          [1,'P',2,2,2,22,22,0,0,5,0,1],
-          [1,0,2,2,2,0,1,0,0,0,0,1],
-          [1,0,0,0,0,0,1,1,1,1,1,1],
+          [1,0,16,0,0,13,6,0,0,0,0,1],
+          [1,0,0,0,12,0,0,0,0,0,0,1],
           [1,1,1,1,1,1,1,1,1,1,1,1],
           [1,1,1,1,1,1,1,1,1,1,1,1],
           [1,1,1,1,1,1,1,1,1,1,1,1],
           [1,1,1,1,1,1,1,1,1,1,1,1],
-          [1,1,1,1,1,1,1,1,1,1,1,1]
-        ]},
-        // 8: Multi-enemy gauntlet
-        { hp: 6, grid: [
-          [1,1,1,1,1,1,1,1,1,1,1,1],
-          [1,0,0,0,0,0,0,0,0,0,0,1],
-          [1,0,2,2,0,8,0,0,9,0,0,1],
-          [1,0,2,17,2,0,0,0,0,0,0,1],
-          [1,'P',2,2,2,0,1,0,0,16,0,1],
-          [1,0,2,2,0,0,1,0,10,0,0,1],
-          [1,0,0,0,0,0,0,0,0,0,5,1],
-          [1,0,0,0,0,0,0,0,0,0,0,1],
-          [1,1,1,1,1,1,1,1,1,1,1,1],
-          [1,1,1,1,1,1,1,1,1,1,1,1],
-          [1,1,1,1,1,1,1,1,1,1,1,1],
-          [1,1,1,1,1,1,1,1,1,1,1,1]
-        ]},
-        // 9: Ice slide puzzle — deliberate path + lava
-        { hp: 5, grid: [
-          [1,1,1,1,1,1,1,1,1,1,1,1],
-          [1,0,0,0,1,0,0,0,0,0,0,1],
-          [1,0,2,2,1,2,2,2,0,0,0,1],
-          [1,0,2,2,0,2,6,2,0,15,0,1],
-          [1,0,2,2,2,2,2,2,0,0,0,1],
-          [1,'P',2,6,2,2,2,0,0,0,0,1],
-          [1,0,2,2,2,6,2,0,4,0,0,1],
-          [1,0,0,0,0,0,0,0,1,0,5,1],
-          [1,1,1,1,1,1,1,1,1,1,1,1],
-          [1,1,1,1,1,1,1,1,1,1,1,1],
-          [1,1,1,1,1,1,1,1,1,1,1,1],
-          [1,1,1,1,1,1,1,1,1,1,1,1]
-        ]},
-        // 10: Full dungeon — dark + mobs + items + door + ice
-        { hp: 6, grid: [
-          [1,1,1,1,1,1,1,1,1,1,1,1],
-          [1,21,21,21,21,1,0,0,0,0,0,1],
-          [1,21,0,19,0,1,0,2,2,0,0,1],
-          [1,21,0,0,17,1,0,2,9,0,0,1],
-          [1,21,'P',0,0,22,0,2,2,0,0,1],
-          [1,21,0,0,0,1,0,0,0,0,0,1],
-          [1,21,21,18,21,1,0,0,0,0,0,1],
-          [1,1,1,1,1,1,8,0,16,0,0,1],
-          [1,1,1,1,1,1,0,0,0,15,0,1],
-          [1,1,1,1,1,1,0,0,0,4,0,1],
-          [1,1,1,1,1,1,0,0,0,0,5,1],
-          [1,1,1,1,1,1,1,1,1,1,1,1]
-        ]},
-        // 11: Spike maze + hearts
-        { hp: 4, grid: [
-          [1,1,1,1,1,1,1,1,1,1,1,1],
-          [1,0,0,12,0,0,0,12,0,0,0,1],
-          [1,0,2,2,2,12,2,2,2,0,0,1],
-          [1,'P',2,2,2,2,2,12,2,16,0,1],
-          [1,0,2,12,2,2,2,2,2,0,0,1],
-          [1,0,2,2,2,12,2,2,2,0,0,1],
-          [1,0,12,2,2,2,2,12,0,0,0,1],
-          [1,0,0,0,16,0,0,0,0,0,5,1],
-          [1,1,1,1,1,1,1,1,1,1,1,1],
-          [1,1,1,1,1,1,1,1,1,1,1,1],
-          [1,1,1,1,1,1,1,1,1,1,1,1],
-          [1,1,1,1,1,1,1,1,1,1,1,1]
-        ]},
-        // 12: Lava bridge — push crates into lava
-        { hp: 5, grid: [
-          [1,1,1,1,1,1,1,1,1,1,1,1],
-          [1,0,0,0,0,0,1,0,0,0,0,1],
-          [1,0,2,2,2,0,1,0,0,0,0,1],
-          [1,0,13,2,2,0,1,0,0,0,0,1],
-          [1,'P',2,2,13,0,6,6,0,0,5,1],
-          [1,0,2,2,2,0,1,0,0,0,0,1],
-          [1,0,0,0,0,0,1,0,0,0,0,1],
-          [1,1,1,1,1,1,1,1,1,1,1,1],
-          [1,1,1,1,1,1,1,1,1,1,1,1],
-          [1,1,1,1,1,1,1,1,1,1,1,1],
-          [1,1,1,1,1,1,1,1,1,1,1,1],
-          [1,1,1,1,1,1,1,1,1,1,1,1]
-        ]},
-        // 13: Big escape — multiple rooms
-        { hp: 6, grid: [
-          [1,1,1,1,1,1,1,1,1,1,1,1],
-          [1,0,0,0,1,0,17,0,1,0,0,1],
-          [1,'P',2,0,1,0,2,0,1,0,15,1],
-          [1,0,2,0,22,0,2,0,4,0,0,1],
-          [1,0,0,0,1,0,0,8,1,0,0,1],
-          [1,1,18,1,1,1,1,1,1,1,0,1],
-          [1,0,0,0,0,0,0,0,0,0,0,1],
-          [1,0,2,2,6,2,2,13,0,16,0,1],
-          [1,0,2,2,2,2,6,2,14,0,0,1],
-          [1,0,2,6,2,2,2,2,0,0,0,1],
-          [1,0,0,0,0,0,0,0,0,0,5,1],
-          [1,1,1,1,1,1,1,1,1,1,1,1]
-        ]},
-        // 14: Dark zombie fortress
-        { hp: 6, grid: [
-          [1,1,1,1,1,1,1,1,1,1,1,1],
-          [1,21,21,21,21,21,21,21,21,21,21,1],
-          [1,21,'P',0,0,21,21,0,0,0,21,1],
-          [1,21,0,19,0,21,21,0,8,0,21,1],
-          [1,21,0,17,0,0,0,0,0,0,21,1],
-          [1,21,0,0,0,21,21,0,0,0,21,1],
-          [1,21,21,21,0,21,21,0,21,21,21,1],
-          [1,21,0,0,0,21,21,0,0,0,21,1],
-          [1,21,0,9,15,21,21,16,10,0,21,1],
-          [1,21,0,0,0,21,21,0,0,4,21,1],
-          [1,21,21,21,21,21,21,21,21,5,21,1],
-          [1,1,1,1,1,1,1,1,1,1,1,1]
-        ]},
-        // 15: Grand finale — everything
-        { hp: 7, grid: [
-          [1,1,1,1,1,1,1,1,1,1,1,1],
-          [1,'P',0,0,22,0,17,0,1,0,0,1],
-          [1,0,2,2,22,2,2,0,1,0,0,1],
-          [1,0,2,18,0,2,2,0,4,0,15,1],
-          [1,0,2,2,2,12,2,0,1,0,0,1],
-          [1,0,0,0,0,0,0,0,1,0,0,1],
-          [1,1,1,1,1,1,1,0,1,0,0,1],
-          [1,0,0,0,0,8,0,0,0,0,0,1],
-          [1,0,2,2,6,2,13,0,10,0,0,1],
-          [1,0,2,6,2,2,2,14,0,16,0,1],
-          [1,0,0,0,0,0,0,0,0,0,5,1],
           [1,1,1,1,1,1,1,1,1,1,1,1]
         ]}
       ];
@@ -2988,6 +2935,7 @@
         var lv = LEVELS[n];
         grid = [];
         player = null;
+        heartsTaken = 0;
         for (var r = 0; r < ROWS; r++) {
           grid[r] = [];
           for (var cl = 0; cl < COLS; cl++) {
@@ -2996,66 +2944,37 @@
             else grid[r][cl] = v;
           }
         }
-        hp = lv.hp; maxHp = lv.hp;
+        maxMoves = lv.par + 2;
+        movesLeft = maxMoves;
         inventory = {};
-        moves = 0;
         score = 0;
         state = 'playing';
         msg = ''; msgTimer = 0;
         litCells = {};
         slideTrail = [];
         slideAnim = 0;
-        // Count initial light around player
         updateLight();
-        hEl.textContent = 'Lv ' + (n + 1) + '/' + LEVELS.length + ' | Slide: Arrow/WASD/Swipe | R: Restart';
+        updateHUD();
       }
 
-      // ── Fog of war / torch light ──────────────────
+      // ── Fog of war ────────────────────────────────
       function updateLight() {
-        // Always light 2-radius around player
-        for (var dr = -3; dr <= 3; dr++) {
-          for (var dc = -3; dc <= 3; dc++) {
-            if (Math.abs(dr) + Math.abs(dc) <= 3) {
+        var rad = inventory.torch ? 5 : 3;
+        for (var dr = -rad; dr <= rad; dr++) {
+          for (var dc = -rad; dc <= rad; dc++) {
+            if (Math.abs(dr) + Math.abs(dc) <= rad) {
               var lr = player.r + dr, lc = player.c + dc;
-              if (lr >= 0 && lr < ROWS && lc >= 0 && lc < COLS) {
-                litCells[lr + ',' + lc] = true;
-              }
-            }
-          }
-        }
-        // Torch expands to 5-radius
-        if (inventory.torch) {
-          for (var dr2 = -5; dr2 <= 5; dr2++) {
-            for (var dc2 = -5; dc2 <= 5; dc2++) {
-              if (Math.abs(dr2) + Math.abs(dc2) <= 5) {
-                var lr2 = player.r + dr2, lc2 = player.c + dc2;
-                if (lr2 >= 0 && lr2 < ROWS && lc2 >= 0 && lc2 < COLS) {
-                  litCells[lr2 + ',' + lc2] = true;
-                }
-              }
+              if (lr >= 0 && lr < ROWS && lc >= 0 && lc < COLS) litCells[lr + ',' + lc] = true;
             }
           }
         }
       }
-
       function isLit(r, cl) { return litCells[r + ',' + cl]; }
-
-      // ── Plates / gates logic ──────────────────────
-      // If all PLATE tiles have CRATEs on them, remove one WALL marked as gate
-      // For simplicity: plates next to walls open the wall segment on their right
-      function checkPlates() {
-        for (var r = 0; r < ROWS; r++)
-          for (var cl = 0; cl < COLS; cl++)
-            if (grid[r][cl] === PLATE) return; // still an open plate
-        // All plates covered → remove first wall to the right of where a plate was
-        // Actually just scan for walls adjacent to where plates were and open them
-        // Simple: open any WALL tile that's at [r][COLS-1 side] of completed plates
-        // Better approach: turn any remaining DOOR into EMPTY as a secondary effect
-      }
 
       // ── Slide mechanic ────────────────────────────
       function slide(dr, dc) {
         if (state !== 'playing' || !player) return;
+        if (movesLeft <= 0) { state = 'outofmoves'; draw(); return; }
         var r = player.r, cl = player.c;
         var slid = false;
         slideTrail = [{r: r, c: cl}];
@@ -3063,127 +2982,95 @@
         while (true) {
           var nr = r + dr, nc = cl + dc;
           if (nr < 0 || nr >= ROWS || nc < 0 || nc >= COLS) break;
-
           var tile = grid[nr][nc];
 
-          // Solid blockers — stop sliding
-          if (tile === WALL || tile === DOOR || tile === STONE_W || tile === DARK) {
-            // Door — if has key, open it and stop
-            if (tile === DOOR) {
-              if (inventory.key) {
-                delete inventory.key;
-                grid[nr][nc] = EMPTY;
-                showMsg('Door unlocked!');
-              }
+          // Solid blockers
+          if (tile === WALL || tile === DARK || tile === STONE_W || tile === DOOR) {
+            if (tile === DOOR && inventory.key) {
+              delete inventory.key; grid[nr][nc] = EMPTY; showMsg('Unlocked!');
             }
-            // Stone — if has pick, mine it and stop
-            if (tile === STONE_W) {
-              if (inventory.pick) {
-                grid[nr][nc] = EMPTY;
-                showMsg('Mined!');
-              }
+            if (tile === STONE_W && inventory.pick) {
+              grid[nr][nc] = EMPTY; showMsg('Mined!');
             }
             break;
           }
 
-          // Crate — push it if possible, then stop
+          // Crate — push
           if (tile === CRATE) {
             var br = nr + dr, bc = nc + dc;
             if (br >= 0 && br < ROWS && bc >= 0 && bc < COLS) {
               var behind = grid[br][bc];
-              if (behind === EMPTY || behind === PLATE || behind === LAVA) {
-                if (behind === LAVA) {
-                  grid[br][bc] = EMPTY; // crate fills lava
-                  showMsg('Crate bridges lava!');
-                } else if (behind === PLATE) {
-                  grid[br][bc] = EMPTY; // plate pressed
-                  checkPlates();
-                  showMsg('Plate pressed!');
-                } else {
-                  grid[br][bc] = CRATE;
-                }
+              if (behind === EMPTY || behind === LAVA || behind === PLATE) {
+                if (behind === LAVA) { grid[br][bc] = EMPTY; showMsg('Bridged lava!'); }
+                else if (behind === PLATE) { grid[br][bc] = EMPTY; showMsg('Plate pressed!'); }
+                else { grid[br][bc] = CRATE; }
                 grid[nr][nc] = EMPTY;
-                // Player moves to crate's old position
                 r = nr; cl = nc; slid = true;
                 slideTrail.push({r: r, c: cl});
               }
             }
-            break; // always stop after crate interaction
-          }
-
-          // Lava — damage and stop (don't enter)
-          if (tile === LAVA) {
-            takeDamage(2);
-            showMsg('Too hot!');
             break;
           }
 
-          // Spikes — enter but take damage
+          // Lava — lose a life
+          if (tile === LAVA) { loseLife(); break; }
+
+          // Spikes — pass through, lose a life
           if (tile === SPIKE) {
             r = nr; cl = nc; slid = true;
             slideTrail.push({r: r, c: cl});
-            takeDamage(1);
-            showMsg('Ouch! Spikes!');
-            // Continue sliding thru spikes
+            loseLife();
+            if (state === 'dead') break;
             continue;
           }
 
-          // Water — enter and stop immediately (friction)
-          if (tile === WATER) {
+          // Water/gravel — stop on
+          if (tile === WATER || tile === GRAVEL_T) {
             r = nr; cl = nc; slid = true;
             slideTrail.push({r: r, c: cl});
             break;
           }
 
-          // Gravel — enter and stop (friction)
-          if (tile === GRAVEL_T) {
-            r = nr; cl = nc; slid = true;
-            slideTrail.push({r: r, c: cl});
-            break;
-          }
-
-          // Mob — fight or take damage, stop
-          if (tile === ZOMBIE || tile === SKELETON || tile === SPIDER) {
+          // Mobs
+          if (tile === ZOMBIE || tile === SKELETON || tile === CREEPER) {
             if (inventory.sword) {
               grid[nr][nc] = EMPTY;
-              var pts = tile === SPIDER ? 100 : tile === SKELETON ? 150 : 120;
-              score += pts;
-              showMsg('+' + pts + ' Kill!');
+              score += (tile === CREEPER ? 200 : tile === SKELETON ? 150 : 100);
+              showMsg('Kill! +' + (tile === CREEPER ? 200 : tile === SKELETON ? 150 : 100));
               r = nr; cl = nc; slid = true;
               slideTrail.push({r: r, c: cl});
-              // Slide thru after killing
               continue;
             } else {
-              // Bounce off, take damage
-              takeDamage(tile === SPIDER ? 1 : 2);
-              showMsg('Need a sword!');
+              loseLife();
               break;
             }
           }
 
-          // Pickups — collect and continue sliding
+          // Pickups
           if (tile === KEY_T) { inventory.key = true; grid[nr][nc] = EMPTY; showMsg('+Key'); }
-          else if (tile === HEART_T) { hp = Math.min(hp + 2, maxHp + 2); grid[nr][nc] = EMPTY; showMsg('+Health'); }
+          else if (tile === HEART_T) {
+            lives = Math.min(lives + 1, 5);
+            grid[nr][nc] = EMPTY;
+            heartsTaken++;
+            maxMoves = LEVELS[level].par + 2 - heartsTaken;
+            if (movesLeft > maxMoves) movesLeft = maxMoves;
+            showMsg('+Life! Max moves -1');
+          }
           else if (tile === SWORD_T) { inventory.sword = true; grid[nr][nc] = EMPTY; showMsg('+Sword'); }
           else if (tile === PICK_T) { inventory.pick = true; grid[nr][nc] = EMPTY; showMsg('+Pickaxe'); }
           else if (tile === TORCH_T) { inventory.torch = true; grid[nr][nc] = EMPTY; showMsg('+Torch'); }
-          else if (tile === ARROW_T) { inventory.arrows = (inventory.arrows || 0) + 3; grid[nr][nc] = EMPTY; showMsg('+3 Arrows'); }
 
           // Chest — loot and stop
           if (tile === CHEST_T) {
             grid[nr][nc] = EMPTY;
             score += 200;
-            // Random loot
-            var loot = Math.random();
-            if (loot < 0.4) { hp = Math.min(hp + 2, maxHp + 2); showMsg('+200 & Health!'); }
-            else if (loot < 0.7) { score += 100; showMsg('+300 Treasure!'); }
-            else { showMsg('+200 Chest!'); }
+            showMsg('+200 Loot!');
             r = nr; cl = nc; slid = true;
             slideTrail.push({r: r, c: cl});
-            break; // stop at chest
+            break;
           }
 
-          // Portal — check if accessible
+          // Portal
           if (tile === PORTAL) {
             r = nr; cl = nc; slid = true;
             slideTrail.push({r: r, c: cl});
@@ -3191,304 +3078,226 @@
             break;
           }
 
-          // Cracked floor — one-time pass, becomes lava after
+          // Cracked floor — becomes lava after stepping
           if (tile === CRACK) {
             r = nr; cl = nc; slid = true;
             slideTrail.push({r: r, c: cl});
-            grid[nr][nc] = LAVA; // collapses behind you
-            continue; // keep sliding
+            grid[nr][nc] = LAVA;
+            continue;
           }
 
-          // Ice/floor — keep sliding on ice, stop on floor
+          // Ice — keep sliding
           if (tile === ICE) {
             r = nr; cl = nc; slid = true;
             slideTrail.push({r: r, c: cl});
-            continue; // keep sliding
+            continue;
           }
 
-          // Empty floor — move here and stop
-          if (tile === EMPTY || tile === PLATE) {
-            r = nr; cl = nc; slid = true;
-            slideTrail.push({r: r, c: cl});
-            if (tile === PLATE) {
-              // Player on plate has no extra effect, only crates
-            }
-            break; // friction stops on normal floor
-          }
-
-          break; // unknown — stop
+          // Empty/plate — stop
+          r = nr; cl = nc; slid = true;
+          slideTrail.push({r: r, c: cl});
+          break;
         }
 
         if (slid) {
           player.r = r; player.c = cl;
-          moves++;
+          movesLeft--;
           updateLight();
-          slideAnim = 6; // frames of trail animation
+          slideAnim = 6;
+          if (movesLeft <= 0 && state === 'playing') {
+            state = 'outofmoves';
+          }
         }
 
-        if (state === 'dead') return;
+        updateHUD();
         sEl.textContent = totalScore + score;
       }
 
-      function takeDamage(amt) {
-        hp -= amt;
-        if (hp <= 0) { hp = 0; state = 'dead'; }
+      function loseLife() {
+        lives--;
+        showMsg('Ouch! -1 Life');
+        if (lives <= 0) { lives = 0; state = 'dead'; }
       }
 
-      function showMsg(m) { msg = m; msgTimer = 90; }
+      function showMsg(m) { msg = m; msgTimer = 80; }
 
-      // ── Level complete ────────────────────────────
+      function updateHUD() {
+        hEl.textContent = 'Lv ' + (level + 1) + '/' + LEVELS.length + ' | Moves: ' + movesLeft + '/' + maxMoves + ' | Lives: ' + lives;
+      }
+
       function completeLevel() {
-        var par = 15 + level * 3;
-        var timeBonus = Math.max(0, 500 - moves * 10);
-        var hpBonus = hp * 50;
-        score += 500 + timeBonus + hpBonus;
+        var moveBonus = movesLeft * 30;
+        score += 300 + moveBonus;
         totalScore += score;
         sEl.textContent = totalScore;
         state = 'levelcomplete';
       }
 
-      // ── Draw ──────────────────────────────────────
+      // ── DRAW ──────────────────────────────────────
       function draw() {
         var W = cvs.width, H = cvs.height;
-        // Background
-        c.fillStyle = '#111';
-        c.fillRect(0, 0, W, H);
+        c.fillStyle = '#111'; c.fillRect(0, 0, W, H);
 
         for (var r = 0; r < ROWS; r++) {
           for (var cl = 0; cl < COLS; cl++) {
             var px = OX + cl * CELL, py = OY + r * CELL;
             var tile = grid[r][cl];
 
-            // Fog of war for DARK tiles
+            // Fog
             if (tile === DARK && !isLit(r, cl)) {
-              c.fillStyle = '#0a0a0a';
-              c.fillRect(px, py, CELL, CELL);
-              continue;
+              c.fillStyle = '#0a0a0a'; c.fillRect(px, py, CELL, CELL); continue;
             }
-            if (tile === DARK) { tile = EMPTY; } // lit dark = floor
+            if (tile === DARK) tile = EMPTY;
 
             // Floor base
-            dt(SPR.cobble[0], SPR.cobble[1], px, py);
+            dt(0, 1, px, py);
 
-            // Tile overlays
-            if (tile === WALL) { dt(SPR.bricks[0], SPR.bricks[1], px, py); }
-            else if (tile === ICE) { dt(SPR.ice[0], SPR.ice[1], px, py); }
-            else if (tile === STONE_W) { dt(SPR.stone[0], SPR.stone[1], px, py); }
-            else if (tile === CHEST_T) { dt(SPR.chest[0], SPR.chest[1], px, py); }
-            else if (tile === DOOR) {
-              dt(SPR.iron_blk[0], SPR.iron_blk[1], px, py);
-              // Key symbol
-              c.fillStyle = '#fc0'; c.font = (CELL * 0.5) + 'px sans-serif';
-              c.textAlign = 'center'; c.fillText('\u{1F511}', px + CELL / 2, py + CELL * 0.7);
-            }
+            if (tile === WALL) dt(7, 0, px, py);
+            else if (tile === ICE) dt(2, 4, px, py);
+            else if (tile === STONE_W) dt(1, 0, px, py);
+            else if (tile === CHEST_T) dt(11, 1, px, py);
+            else if (tile === DOOR) dt(6, 1, px, py);
             else if (tile === PORTAL) {
-              dt(SPR.obsidian[0], SPR.obsidian[1], px, py);
-              var pulse = 0.4 + 0.3 * Math.sin(Date.now() / 250);
+              dt(5, 2, px, py);
+              var pulse = 0.3 + 0.3 * Math.sin(Date.now() / 250);
               c.fillStyle = 'rgba(128,0,255,' + pulse + ')';
               c.fillRect(px + 3, py + 3, CELL - 6, CELL - 6);
-              c.fillStyle = '#d0f'; c.font = (CELL * 0.5) + 'px sans-serif';
-              c.textAlign = 'center'; c.fillText('\u2726', px + CELL / 2, py + CELL * 0.72);
             }
-            else if (tile === LAVA) { dt(SPR.lava[0], SPR.lava[1], px, py); }
-            else if (tile === WATER) { dt(SPR.water[0], SPR.water[1], px, py); }
-            else if (tile === GRAVEL_T) { dt(SPR.gravel[0], SPR.gravel[1], px, py); }
-            else if (tile === CRATE) { dt(SPR.planks[0], SPR.planks[1], px, py); }
+            else if (tile === LAVA) dt(13, 14, px, py);
+            else if (tile === WATER) dt(13, 12, px, py);
+            else if (tile === GRAVEL_T) dt(3, 1, px, py);
+            else if (tile === CRATE) dt(4, 0, px, py);
             else if (tile === PLATE) {
-              // Pressure plate indicator
-              c.fillStyle = '#777';
-              c.fillRect(px + 5, py + CELL - 5, CELL - 10, 3);
-              c.fillStyle = '#555';
-              c.fillRect(px + 6, py + CELL - 4, CELL - 12, 1);
+              c.fillStyle = '#777'; c.fillRect(px + 5, py + CELL - 5, CELL - 10, 3);
             }
             else if (tile === SPIKE) {
-              c.fillStyle = '#666';
-              // Draw spike triangles
+              c.fillStyle = '#888';
               for (var si = 0; si < 3; si++) {
                 c.beginPath();
-                c.moveTo(px + 3 + si * 8, py + CELL);
-                c.lineTo(px + 7 + si * 8, py + 6);
-                c.lineTo(px + 11 + si * 8, py + CELL);
+                c.moveTo(px + 2 + si * 8, py + CELL - 2);
+                c.lineTo(px + 6 + si * 8, py + 4);
+                c.lineTo(px + 10 + si * 8, py + CELL - 2);
                 c.fill();
               }
             }
             else if (tile === CRACK) {
-              c.fillStyle = '#5a4a3a';
-              c.fillRect(px, py, CELL, CELL);
+              c.fillStyle = '#5a4830'; c.fillRect(px, py, CELL, CELL);
               c.strokeStyle = '#333'; c.lineWidth = 1;
-              c.beginPath(); c.moveTo(px + 4, py + 4); c.lineTo(px + CELL - 8, py + CELL - 4); c.stroke();
-              c.beginPath(); c.moveTo(px + CELL - 4, py + 6); c.lineTo(px + 6, py + CELL - 6); c.stroke();
+              c.beginPath(); c.moveTo(px + 3, py + 3); c.lineTo(px + CELL - 6, py + CELL - 3); c.stroke();
+              c.beginPath(); c.moveTo(px + CELL - 3, py + 5); c.lineTo(px + 5, py + CELL - 5); c.stroke();
             }
-            // Mobs
-            else if (tile === ZOMBIE) {
-              dt(SPR.cobble[0], SPR.cobble[1], px, py); // floor under mob
-              // Zombie: green face
-              c.fillStyle = '#3a7a3a'; c.fillRect(px + 4, py + 2, CELL - 8, CELL - 4);
-              c.fillStyle = '#1a4a1a';
-              c.fillRect(px + 6, py + 6, 4, 4);
-              c.fillRect(px + 14, py + 6, 4, 4);
-              c.fillStyle = '#2a5a2a';
-              c.fillRect(px + 8, py + 14, 8, 4);
-            }
-            else if (tile === SKELETON) {
-              dt(SPR.cobble[0], SPR.cobble[1], px, py);
-              c.fillStyle = '#ddd'; c.fillRect(px + 4, py + 2, CELL - 8, CELL - 4);
-              c.fillStyle = '#222';
-              c.fillRect(px + 6, py + 6, 4, 4);
-              c.fillRect(px + 14, py + 6, 4, 4);
-              c.fillStyle = '#444';
-              c.fillRect(px + 8, py + 14, 8, 3);
-            }
-            else if (tile === SPIDER) {
-              dt(SPR.cobble[0], SPR.cobble[1], px, py);
-              c.fillStyle = '#333'; c.fillRect(px + 3, py + 6, CELL - 6, CELL - 10);
-              c.fillStyle = '#d00'; // red eyes
-              c.fillRect(px + 6, py + 8, 3, 3);
-              c.fillRect(px + 15, py + 8, 3, 3);
-              // Legs
-              c.strokeStyle = '#333'; c.lineWidth = 1;
-              for (var leg = 0; leg < 4; leg++) {
-                c.beginPath(); c.moveTo(px + 3, py + 8 + leg * 3); c.lineTo(px - 2, py + 6 + leg * 4); c.stroke();
-                c.beginPath(); c.moveTo(px + CELL - 3, py + 8 + leg * 3); c.lineTo(px + CELL + 2, py + 6 + leg * 4); c.stroke();
-              }
-            }
-            // Item pickups on ground
-            else if (tile === KEY_T) { di(ISPR.key[0], ISPR.key[1], px, py); }
+            else if (tile === ZOMBIE) { dt(0, 1, px, py); dm(imgZombie, px, py); }
+            else if (tile === SKELETON) { dt(0, 1, px, py); dm(imgSkeleton, px, py); }
+            else if (tile === CREEPER) { dt(0, 1, px, py); dm(imgCreeper, px, py); }
+            else if (tile === KEY_T) { di(7, 1, px, py); }
             else if (tile === HEART_T) {
-              dt(SPR.cobble[0], SPR.cobble[1], px, py);
-              c.fillStyle = '#f22'; c.font = (CELL * 0.8) + 'px sans-serif';
-              c.textAlign = 'center'; c.fillText('\u2764', px + CELL / 2, py + CELL * 0.8);
+              dt(0, 1, px, py);
+              c.fillStyle = '#f22'; c.font = (CELL * 0.85) + 'px sans-serif'; c.textAlign = 'center';
+              c.fillText('\u2764', px + CELL / 2, py + CELL * 0.82);
             }
-            else if (tile === SWORD_T) { di(ISPR.sword_iron[0], ISPR.sword_iron[1], px, py); }
-            else if (tile === PICK_T) { di(ISPR.pick_iron[0], ISPR.pick_iron[1], px, py); }
+            else if (tile === SWORD_T) { dt(0, 1, px, py); di(2, 1, px, py); }
+            else if (tile === PICK_T) { dt(0, 1, px, py); di(2, 2, px, py); }
             else if (tile === TORCH_T) {
-              dt(SPR.cobble[0], SPR.cobble[1], px, py);
-              c.fillStyle = '#fa0'; c.font = (CELL * 0.7) + 'px sans-serif';
-              c.textAlign = 'center'; c.fillText('\u{1F525}', px + CELL / 2, py + CELL * 0.78);
-            }
-            else if (tile === ARROW_T) {
-              dt(SPR.cobble[0], SPR.cobble[1], px, py);
-              di(ISPR.arrow_item[0], ISPR.arrow_item[1], px + 2, py + 2, CELL - 4);
+              dt(0, 1, px, py);
+              c.fillStyle = '#fa0'; c.font = (CELL * 0.7) + 'px sans-serif'; c.textAlign = 'center';
+              c.fillText('\uD83D\uDD25', px + CELL / 2, py + CELL * 0.78);
             }
           }
         }
 
-        // Slide trail effect
+        // Slide trail
         if (slideAnim > 0) {
           slideAnim--;
-          var alpha = slideAnim / 6 * 0.3;
-          c.fillStyle = 'rgba(100,200,255,' + alpha + ')';
+          c.fillStyle = 'rgba(100,200,255,' + (slideAnim / 6 * 0.25) + ')';
           for (var ti = 0; ti < slideTrail.length - 1; ti++) {
             var tp = slideTrail[ti];
             c.fillRect(OX + tp.c * CELL + 4, OY + tp.r * CELL + 4, CELL - 8, CELL - 8);
           }
         }
 
-        // Player — Steve face using skin tone colors
+        // Player
         if (player && state !== 'dead') {
-          var ppx = OX + player.c * CELL, ppy = OY + player.r * CELL;
-          // Outline
-          c.fillStyle = '#000'; c.fillRect(ppx + 1, ppy + 1, CELL - 2, CELL - 2);
-          // Skin
-          c.fillStyle = '#c69c6d'; c.fillRect(ppx + 3, ppy + 3, CELL - 6, CELL - 6);
-          // Hair
-          c.fillStyle = '#4a2a0a'; c.fillRect(ppx + 3, ppy + 3, CELL - 6, 5);
-          // Eyes
-          c.fillStyle = '#fff';
-          c.fillRect(ppx + 6, ppy + 10, 4, 3);
-          c.fillRect(ppx + 14, ppy + 10, 4, 3);
-          c.fillStyle = '#29f';
-          c.fillRect(ppx + 7, ppy + 11, 2, 2);
-          c.fillRect(ppx + 15, ppy + 11, 2, 2);
-          // Mouth
-          c.fillStyle = '#7a4a2a';
-          c.fillRect(ppx + 9, ppy + 16, 6, 2);
+          dm(imgPlayer, OX + player.c * CELL, OY + player.r * CELL);
         }
 
-        // ── HUD ─────────────────────────────────────
+        // HUD
         var hudY = OY + ROWS * CELL + 2;
         c.fillStyle = '#1a1a1a'; c.fillRect(0, hudY, W, HUD_H);
-
-        // Hearts
-        for (var h = 0; h < maxHp; h++) {
-          var hx = OX + h * 11;
-          c.fillStyle = h < hp ? '#f22' : '#444';
-          c.font = '10px sans-serif';
-          c.textAlign = 'left';
-          c.fillText('\u2764', hx, hudY + 12);
+        for (var h = 0; h < 3; h++) {
+          c.fillStyle = h < lives ? '#f22' : '#333';
+          c.font = '12px sans-serif'; c.textAlign = 'left';
+          c.fillText('\u2764', OX + h * 14, hudY + 13);
         }
+        var invX = OX + 50;
+        c.font = '10px sans-serif'; c.fillStyle = '#aaa';
+        if (inventory.key) { c.fillText('Key', invX, hudY + 13); invX += 28; }
+        if (inventory.sword) { c.fillText('Swd', invX, hudY + 13); invX += 28; }
+        if (inventory.pick) { c.fillText('Pick', invX, hudY + 13); invX += 28; }
+        if (inventory.torch) { c.fillText('Trch', invX, hudY + 13); invX += 28; }
+        c.fillStyle = movesLeft <= 1 ? '#f44' : '#aaa';
+        c.textAlign = 'right'; c.font = '10px sans-serif';
+        c.fillText('Moves: ' + movesLeft + '/' + maxMoves, W - OX, hudY + 13);
+        c.fillStyle = '#fc0'; c.textAlign = 'left'; c.font = '9px sans-serif';
+        c.fillText('Score: ' + (totalScore + score), OX, hudY + 26);
+        c.fillStyle = '#666'; c.textAlign = 'right';
+        c.fillText('[R] Restart', W - OX, hudY + 26);
 
-        // Inventory icons
-        var invX = OX + maxHp * 11 + 10;
-        c.fillStyle = '#888'; c.font = '9px sans-serif';
-        if (inventory.key) { c.fillText('\u{1F511}', invX, hudY + 12); invX += 14; }
-        if (inventory.sword) { c.fillText('\u2694', invX, hudY + 12); invX += 14; }
-        if (inventory.pick) { c.fillText('\u26CF', invX, hudY + 12); invX += 14; }
-        if (inventory.torch) { c.fillText('\u{1F525}', invX, hudY + 12); invX += 14; }
-        if (inventory.arrows) { c.fillText('\u279B' + inventory.arrows, invX, hudY + 12); invX += 20; }
-
-        // Moves count
-        c.fillStyle = '#aaa'; c.font = '9px sans-serif'; c.textAlign = 'right';
-        c.fillText('Moves: ' + moves, W - OX, hudY + 12);
-
-        // Score on second row
-        c.textAlign = 'left'; c.fillStyle = '#fc0'; c.font = '9px sans-serif';
-        c.fillText('Score: ' + (totalScore + score), OX, hudY + 24);
-        c.textAlign = 'right'; c.fillStyle = '#888';
-        c.fillText('[R] Restart', W - OX, hudY + 24);
-
-        // Message popup
+        // Message
         if (msgTimer > 0) {
           msgTimer--;
-          var ma = Math.min(1, msgTimer / 30);
-          c.fillStyle = 'rgba(255,255,100,' + ma + ')';
-          c.font = 'bold 12px Minecraft, sans-serif'; c.textAlign = 'center';
-          c.fillText(msg, W / 2, OY - 4);
+          c.fillStyle = 'rgba(255,255,100,' + Math.min(1, msgTimer / 25) + ')';
+          c.font = 'bold 11px Minecraft, sans-serif'; c.textAlign = 'center';
+          c.fillText(msg, W / 2, OY - 2);
         }
 
-        // ── Overlays ────────────────────────────────
+        // Overlays
         if (state === 'dead') {
-          c.fillStyle = 'rgba(80,0,0,0.8)'; c.fillRect(0, 0, W, H);
+          c.fillStyle = 'rgba(80,0,0,0.85)'; c.fillRect(0, 0, W, H);
           c.fillStyle = '#f44'; c.font = '18px Minecraft, sans-serif'; c.textAlign = 'center';
-          c.fillText('You Died!', W / 2, H / 2 - 30);
+          c.fillText('You Died!', W / 2, H / 2 - 20);
           c.fillStyle = '#ccc'; c.font = '11px Minecraft, sans-serif';
-          c.fillText('Score: ' + (totalScore + score), W / 2, H / 2);
-          drawBtn(W / 2 - 45, H / 2 + 15, 90, 22, 'Try Again');
+          c.fillText('Final Score: ' + totalScore, W / 2, H / 2 + 5);
+          drawBtn(W / 2 - 50, H / 2 + 20, 100, 24, 'Restart Game');
         }
-
+        if (state === 'outofmoves') {
+          c.fillStyle = 'rgba(60,30,0,0.85)'; c.fillRect(0, 0, W, H);
+          c.fillStyle = '#fa0'; c.font = '16px Minecraft, sans-serif'; c.textAlign = 'center';
+          c.fillText('Out of Moves!', W / 2, H / 2 - 30);
+          c.fillStyle = '#ccc'; c.font = '10px Minecraft, sans-serif';
+          c.fillText('Lives remaining: ' + lives, W / 2, H / 2 - 5);
+          drawBtn(W / 2 - 55, H / 2 + 10, 50, 22, 'Retry');
+          drawBtn(W / 2 + 5, H / 2 + 10, 50, 22, 'Quit');
+        }
         if (state === 'levelcomplete') {
-          c.fillStyle = 'rgba(0,0,0,0.75)'; c.fillRect(0, 0, W, H);
+          c.fillStyle = 'rgba(0,0,0,0.8)'; c.fillRect(0, 0, W, H);
           c.fillStyle = '#5f5'; c.font = '16px Minecraft, sans-serif'; c.textAlign = 'center';
           c.fillText('Level ' + (level + 1) + ' Escaped!', W / 2, H / 2 - 40);
           c.fillStyle = '#fc0'; c.font = '12px Minecraft, sans-serif';
-          c.fillText('Score: +' + score, W / 2, H / 2 - 15);
-          c.fillStyle = '#ccc'; c.font = '10px Minecraft, sans-serif';
-          c.fillText('Moves: ' + moves + '  HP: ' + hp + '/' + maxHp, W / 2, H / 2 + 5);
-          drawBtn(W / 2 - 85, H / 2 + 20, 75, 22, 'Retry');
-          drawBtn(W / 2 + 10, H / 2 + 20, 75, 22, 'Next');
+          c.fillText('+' + score + ' pts', W / 2, H / 2 - 15);
+          c.fillStyle = '#ccc'; c.font = '10px sans-serif';
+          c.fillText('Moves left: ' + movesLeft + ' | Lives: ' + lives, W / 2, H / 2 + 5);
+          drawBtn(W / 2 - 80, H / 2 + 20, 70, 22, 'Retry');
+          drawBtn(W / 2 + 10, H / 2 + 20, 70, 22, 'Next');
         }
-
         if (state === 'victory') {
-          c.fillStyle = 'rgba(0,0,0,0.85)'; c.fillRect(0, 0, W, H);
+          c.fillStyle = 'rgba(0,0,0,0.9)'; c.fillRect(0, 0, W, H);
           c.fillStyle = '#fc0'; c.font = '20px Minecraft, sans-serif'; c.textAlign = 'center';
-          c.fillText('Dungeon Cleared!', W / 2, H / 2 - 45);
+          c.fillText('Dungeon Cleared!', W / 2, H / 2 - 40);
           c.fillStyle = '#5f5'; c.font = '14px Minecraft, sans-serif';
-          c.fillText('Total: ' + totalScore, W / 2, H / 2 - 15);
-          c.fillStyle = '#aaa'; c.font = '10px Minecraft, sans-serif';
-          c.fillText('Best: ' + best + '  Site: ' + siteBest, W / 2, H / 2 + 10);
-          drawBtn(W / 2 - 45, H / 2 + 25, 90, 22, 'Play Again');
+          c.fillText('Total: ' + totalScore, W / 2, H / 2 - 10);
+          c.fillStyle = '#aaa'; c.font = '10px sans-serif';
+          c.fillText('Best: ' + best + ' | Site: ' + siteBest, W / 2, H / 2 + 10);
+          drawBtn(W / 2 - 50, H / 2 + 25, 100, 22, 'Play Again');
           if (totalScore > best) {
-            best = totalScore;
-            localStorage.setItem('r2b_mdungeon_best', best);
-            bEl.textContent = best;
+            best = totalScore; localStorage.setItem('r2b_mdungeon_best', best); bEl.textContent = best;
           }
           R2BScores.submit('mdungeon', totalScore);
         }
       }
 
       function drawBtn(x, y, w, h, text) {
-        c.fillStyle = '#4a4'; c.fillRect(x, y, w, h);
-        c.fillStyle = '#5c5'; c.fillRect(x + 1, y + 1, w - 2, h - 2);
+        c.fillStyle = '#484'; c.fillRect(x, y, w, h);
+        c.fillStyle = '#5a5'; c.fillRect(x + 1, y + 1, w - 2, h - 2);
         c.fillStyle = '#fff'; c.font = '10px Minecraft, sans-serif'; c.textAlign = 'center';
         c.fillText(text, x + w / 2, y + h / 2 + 4);
       }
@@ -3498,103 +3307,108 @@
       }
 
       // ── Input ─────────────────────────────────────
-      function getCanvasPos(e) {
+      function getPos(e) {
         var rect = cvs.getBoundingClientRect();
         var sx = cvs.width / rect.width, sy = cvs.height / rect.height;
         var ex, ey;
         if (e.touches) { ex = e.touches[0].clientX; ey = e.touches[0].clientY; }
+        else if (e.changedTouches) { ex = e.changedTouches[0].clientX; ey = e.changedTouches[0].clientY; }
         else { ex = e.clientX; ey = e.clientY; }
         return {x: (ex - rect.left) * sx, y: (ey - rect.top) * sy};
       }
 
       var swipeStart = null;
+
+      function handleOverlayClick(pos) {
+        var W = cvs.width, H = cvs.height;
+        if (state === 'dead') {
+          if (inBtn(pos.x, pos.y, W / 2 - 50, H / 2 + 20, 100, 24)) {
+            level = 0; totalScore = 0; lives = 3; sEl.textContent = '0'; loadLevel(0);
+          }
+          return true;
+        }
+        if (state === 'outofmoves') {
+          if (inBtn(pos.x, pos.y, W / 2 - 55, H / 2 + 10, 50, 22)) {
+            lives--; if (lives <= 0) { state = 'dead'; draw(); return true; }
+            loadLevel(level);
+          }
+          if (inBtn(pos.x, pos.y, W / 2 + 5, H / 2 + 10, 50, 22)) {
+            state = 'dead'; lives = 0; draw();
+          }
+          return true;
+        }
+        if (state === 'levelcomplete') {
+          if (inBtn(pos.x, pos.y, W / 2 - 80, H / 2 + 20, 70, 22)) {
+            totalScore -= score; sEl.textContent = totalScore; loadLevel(level);
+          }
+          if (inBtn(pos.x, pos.y, W / 2 + 10, H / 2 + 20, 70, 22)) { level++; loadLevel(level); }
+          return true;
+        }
+        if (state === 'victory') {
+          if (inBtn(pos.x, pos.y, W / 2 - 50, H / 2 + 25, 100, 22)) {
+            level = 0; totalScore = 0; lives = 3; sEl.textContent = '0'; loadLevel(0);
+          }
+          return true;
+        }
+        return false;
+      }
+
       function onTouchStart(e) {
         if (e.target !== cvs) return;
         e.preventDefault();
-        swipeStart = getCanvasPos(e);
+        swipeStart = getPos(e);
       }
+
       function onTouchEnd(e) {
         if (e.target !== cvs) return;
         e.preventDefault();
         if (!swipeStart) return;
-        // For overlays, treat as click at swipeStart position
-        var pos = swipeStart;
-        var W = cvs.width, H = cvs.height;
-        swipeStart = null;
-
-        if (state === 'dead') {
-          if (inBtn(pos.x, pos.y, W / 2 - 45, H / 2 + 15, 90, 22)) { loadLevel(level); } return;
-        }
-        if (state === 'levelcomplete') {
-          if (inBtn(pos.x, pos.y, W / 2 - 85, H / 2 + 20, 75, 22)) { loadLevel(level); return; }
-          if (inBtn(pos.x, pos.y, W / 2 + 10, H / 2 + 20, 75, 22)) { level++; loadLevel(level); return; }
-          return;
-        }
-        if (state === 'victory') {
-          if (inBtn(pos.x, pos.y, W / 2 - 45, H / 2 + 25, 90, 22)) { level = 0; totalScore = 0; sEl.textContent = '0'; loadLevel(0); }
-          return;
-        }
-
-        // Detect swipe direction from touch movement
-        var rect = cvs.getBoundingClientRect();
-        var sx = cvs.width / rect.width, sy = cvs.height / rect.height;
-        var endX, endY;
-        if (e.changedTouches) { endX = (e.changedTouches[0].clientX - rect.left) * sx; endY = (e.changedTouches[0].clientY - rect.top) * sy; }
-        else return;
-        var dx = endX - pos.x, dy = endY - pos.y;
-        var dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < 8) return; // too small
-        if (Math.abs(dx) > Math.abs(dy)) {
-          slide(0, dx > 0 ? 1 : -1);
-        } else {
-          slide(dy > 0 ? 1 : -1, 0);
-        }
+        var start = swipeStart; swipeStart = null;
+        if (handleOverlayClick(start)) return;
+        var end = getPos(e);
+        var dx = end.x - start.x, dy = end.y - start.y;
+        if (Math.sqrt(dx * dx + dy * dy) < 10) return;
+        if (Math.abs(dx) > Math.abs(dy)) slide(0, dx > 0 ? 1 : -1);
+        else slide(dy > 0 ? 1 : -1, 0);
       }
 
       function onClick(e) {
-        var pos = getCanvasPos(e);
-        var W = cvs.width, H = cvs.height;
-
-        if (state === 'dead') {
-          if (inBtn(pos.x, pos.y, W / 2 - 45, H / 2 + 15, 90, 22)) { loadLevel(level); } return;
-        }
-        if (state === 'levelcomplete') {
-          if (inBtn(pos.x, pos.y, W / 2 - 85, H / 2 + 20, 75, 22)) { loadLevel(level); return; }
-          if (inBtn(pos.x, pos.y, W / 2 + 10, H / 2 + 20, 75, 22)) { level++; loadLevel(level); return; }
-          return;
-        }
-        if (state === 'victory') {
-          if (inBtn(pos.x, pos.y, W / 2 - 45, H / 2 + 25, 90, 22)) { level = 0; totalScore = 0; sEl.textContent = '0'; loadLevel(0); }
-          return;
-        }
-
-        // Click direction: determine from click relative to player
-        if (!player) return;
+        var pos = getPos(e);
+        if (handleOverlayClick(pos)) return;
+        if (!player || state !== 'playing') return;
         var pcx = OX + player.c * CELL + CELL / 2;
         var pcy = OY + player.r * CELL + CELL / 2;
         var dx = pos.x - pcx, dy = pos.y - pcy;
         if (Math.abs(dx) < 5 && Math.abs(dy) < 5) return;
-        if (Math.abs(dx) > Math.abs(dy)) {
-          slide(0, dx > 0 ? 1 : -1);
-        } else {
-          slide(dy > 0 ? 1 : -1, 0);
-        }
+        if (Math.abs(dx) > Math.abs(dy)) slide(0, dx > 0 ? 1 : -1);
+        else slide(dy > 0 ? 1 : -1, 0);
       }
 
       function onKey(e) {
         if (state === 'dead') {
-          if (e.key === ' ') { loadLevel(level); e.preventDefault(); } return;
+          if (e.key === ' ') { level = 0; totalScore = 0; lives = 3; sEl.textContent = '0'; loadLevel(0); e.preventDefault(); }
+          return;
+        }
+        if (state === 'outofmoves') {
+          if (e.key === ' ' || e.key === 'Enter') {
+            lives--; if (lives <= 0) { state = 'dead'; draw(); return; }
+            loadLevel(level); e.preventDefault();
+          }
+          return;
         }
         if (state === 'levelcomplete') {
           if (e.key === ' ' || e.key === 'Enter') { level++; loadLevel(level); e.preventDefault(); }
-          if (e.key === 'r' || e.key === 'R') { loadLevel(level); e.preventDefault(); }
+          if (e.key === 'r' || e.key === 'R') { totalScore -= score; sEl.textContent = totalScore; loadLevel(level); e.preventDefault(); }
           return;
         }
         if (state === 'victory') {
-          if (e.key === ' ') { level = 0; totalScore = 0; sEl.textContent = '0'; loadLevel(0); e.preventDefault(); } return;
+          if (e.key === ' ') { level = 0; totalScore = 0; lives = 3; sEl.textContent = '0'; loadLevel(0); e.preventDefault(); }
+          return;
         }
-        if (e.key === 'r' || e.key === 'R') { loadLevel(level); e.preventDefault(); return; }
-
+        if (e.key === 'r' || e.key === 'R') {
+          if (lives > 1) { lives--; loadLevel(level); } else { showMsg('Last life!'); }
+          e.preventDefault(); return;
+        }
         var dr = 0, dc = 0;
         if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') dr = -1;
         else if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') dr = 1;
@@ -3610,6 +3424,7 @@
       cvs.addEventListener('touchend', onTouchEnd);
       document.addEventListener('keydown', onKey);
 
+      lives = 3;
       loadLevel(0);
       function loop() { draw(); setAnim(requestAnimationFrame(loop)); }
       loop();
