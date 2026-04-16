@@ -2732,15 +2732,15 @@
           [1,1,1,1,1,1,1,1,1,1,1,1],
           [1,1,1,1,1,1,1,1,1,1,1,1]
         ]},
-        // Lv3: Key + door
+        // Lv3: Key + door — right(key), right(door opens+pass), right(portal) = 3
         { par: 3, grid: [
           [1,1,1,1,1,1,1,1,1,1,1,1],
           [1,1,1,1,1,1,1,1,1,1,1,1],
           [1,1,1,1,1,1,1,1,1,1,1,1],
           [1,1,1,1,1,1,1,1,1,1,1,1],
-          [1,1,1,0,0,0,0,0,0,1,1,1],
-          [1,1,'P',0,15,0,4,0,5,1,1,1],
-          [1,1,1,0,0,0,0,0,0,1,1,1],
+          [1,1,1,0,0,0,0,1,1,1,1,1],
+          [1,1,1,'P',15,4,5,1,1,1,1,1],
+          [1,1,1,0,0,0,0,1,1,1,1,1],
           [1,1,1,1,1,1,1,1,1,1,1,1],
           [1,1,1,1,1,1,1,1,1,1,1,1],
           [1,1,1,1,1,1,1,1,1,1,1,1],
@@ -2985,14 +2985,14 @@
           var tile = grid[nr][nc];
 
           // Solid blockers
-          if (tile === WALL || tile === DARK || tile === STONE_W || tile === DOOR) {
-            if (tile === DOOR && inventory.key) {
-              delete inventory.key; grid[nr][nc] = EMPTY; showMsg('Unlocked!');
-            }
-            if (tile === STONE_W && inventory.pick) {
-              grid[nr][nc] = EMPTY; showMsg('Mined!');
-            }
-            break;
+          if (tile === WALL || tile === DARK) break;
+          if (tile === DOOR) {
+            if (inventory.key) { delete inventory.key; grid[nr][nc] = EMPTY; showMsg('Unlocked!'); }
+            else break;
+          }
+          if (tile === STONE_W) {
+            if (inventory.pick) { grid[nr][nc] = EMPTY; showMsg('Mined!'); }
+            else break;
           }
 
           // Crate — push
@@ -3311,8 +3311,8 @@
         var rect = cvs.getBoundingClientRect();
         var sx = cvs.width / rect.width, sy = cvs.height / rect.height;
         var ex, ey;
-        if (e.touches) { ex = e.touches[0].clientX; ey = e.touches[0].clientY; }
-        else if (e.changedTouches) { ex = e.changedTouches[0].clientX; ey = e.changedTouches[0].clientY; }
+        if (e.touches && e.touches.length) { ex = e.touches[0].clientX; ey = e.touches[0].clientY; }
+        else if (e.changedTouches && e.changedTouches.length) { ex = e.changedTouches[0].clientX; ey = e.changedTouches[0].clientY; }
         else { ex = e.clientX; ey = e.clientY; }
         return {x: (ex - rect.left) * sx, y: (ey - rect.top) * sy};
       }
@@ -3420,8 +3420,8 @@
       }
 
       cvs.addEventListener('click', onClick);
-      cvs.addEventListener('touchstart', onTouchStart);
-      cvs.addEventListener('touchend', onTouchEnd);
+      cvs.addEventListener('touchstart', onTouchStart, {passive: false});
+      cvs.addEventListener('touchend', onTouchEnd, {passive: false});
       document.addEventListener('keydown', onKey);
 
       lives = 3;
