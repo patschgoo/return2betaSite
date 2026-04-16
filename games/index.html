@@ -379,8 +379,9 @@
         <a class="dropdown-link" href="/games/?game=2"><img src="../images/Game%20Links/hatch-snake.webp" alt="" />Hatch (Snake)</a>
         <a class="dropdown-link" href="/games/?game=3"><img src="../images/Game%20Links/minecreeper.png" alt="" />Minecreeper</a>
         <a class="dropdown-link" href="/games/?game=4"><img src="../images/Game%20Links/block-crush.png" alt="" />Block Crush</a>
-        <a class="dropdown-link" href="/games/?game=5"><img src="../images/Game%20Links/mine-blocks.png" alt="" />Mine Blocks</a>
-        <a class="dropdown-link" href="/games/?game=6"><img src="../images/Game%20Links/mine-blocks-2.png" alt="" />Mine Blocks 2</a>
+        <a class="dropdown-link" href="/games/?game=5"><img src="../images/Game%20Links/mine-dungeon.png" alt="" />Mine Dungeon</a>
+        <a class="dropdown-link" href="/games/?game=6"><img src="../images/Game%20Links/mine-blocks.png" alt="" />Mine Blocks</a>
+        <a class="dropdown-link" href="/games/?game=7"><img src="../images/Game%20Links/mine-blocks-2.png" alt="" />Mine Blocks 2</a>
         <hr />
         <a class="dropdown-more" href="/games/more-links/">More Links &#8250;</a>
       </div>
@@ -516,7 +517,7 @@
   <script>
   var R2BScores = (function () {
     var WS_URL = 'wss://chat.return2beta.com';
-    var GAMES = ['flappy', 'tetris', 'hatch', 'mine', 'bcrush'];
+    var GAMES = ['flappy', 'tetris', 'hatch', 'mine', 'bcrush', 'mdungeon'];
     var scores = {};
     var listeners = [];
     var ws = null;
@@ -597,7 +598,7 @@
     var prevBtn = document.getElementById('gamePrev');
     var nextBtn = document.getElementById('gameNext');
 
-    var games = ['Flappy Chicken', 'Blocktris', 'Hatch (Snake)', 'Minecreeper', 'Block Crush', 'Mine Blocks'];
+    var games = ['Flappy Chicken', 'Blocktris', 'Hatch (Snake)', 'Minecreeper', 'Block Crush', 'Mine Dungeon', 'Mine Blocks'];
     var currentGame = 0;
     var activeGame = null;
     var animId = null;
@@ -770,6 +771,9 @@
         gameContainer.classList.add('blockcrush-game');
         activeGame = blockCrush(canvas, ctx, scoreEl, bestEl, siteBestEl, hintEl, perfSetAnim);
       } else if (idx === 5) {
+        gameContainer.classList.add('dungeon-game');
+        activeGame = mineDungeon(canvas, ctx, scoreEl, bestEl, siteBestEl, hintEl, perfSetAnim);
+      } else if (idx === 6) {
         // Mine Blocks — embed with consent
         canvas.style.display = 'none';
         scoresEl.style.display = 'none';
@@ -2640,13 +2644,902 @@
       };
     }
 
+    // ── Mine Dungeon ──────────────────────────────────────
+    // Mine Dungeon — point-and-click puzzle adventure
+    // Combines Sokoban block-pushing, item collection/use, and dungeon escape
+    function mineDungeon(cvs, c, sEl, bEl, sbEl, hEl, setAnim) {
+      var CELL = 24;
+      var COLS = 10, ROWS = 10;
+      var BORDER = CELL;
+      cvs.width = COLS * CELL + BORDER * 2;
+      cvs.height = ROWS * CELL + BORDER * 2 + CELL * 2; // extra rows for HUD
+
+      // Terrain sprite helper (uses global terrainImg, terrainReady)
+      var T = 16; // terrain.png tile size
+      function drawTile(tile, dx, dy, dw, dh) {
+        if (!terrainReady) { c.fillStyle = '#555'; c.fillRect(dx, dy, dw, dh); return; }
+        c.drawImage(terrainImg, tile[0] * T, tile[1] * T, T, T, dx, dy, dw || CELL, dh || CELL);
+      }
+
+      // Items sprite helper (uses global itemsImg if loaded)
+      var itemsImg = new Image();
+      itemsImg.src = '../images/minecraft/items.png';
+      var itemsReady = false;
+      itemsImg.onload = function () { itemsReady = true; };
+      function drawItem(tile, dx, dy, dw, dh) {
+        if (!itemsReady) { c.fillStyle = '#a0a'; c.fillRect(dx + 4, dy + 4, (dw || CELL) - 8, (dh || CELL) - 8); return; }
+        c.drawImage(itemsImg, tile[0] * T, tile[1] * T, T, T, dx, dy, dw || CELL, dh || CELL);
+      }
+
+      // Tile IDs for the grid
+      var FLOOR = 0, WALL = 1, STONE = 2, DOOR = 3, CHEST = 4, PLATE = 5,
+          PORTAL = 6, LAVA = 7, ZOMBIE = 8, SKELETON = 9, WATER = 10, WOOD = 11;
+
+      // Terrain sprites [col, row] in terrain.png
+      var SPRITES = {};
+      SPRITES[FLOOR] = [6, 0];   // cobblestone
+      SPRITES[WALL] = [7, 0];    // stone bricks
+      SPRITES[STONE] = [1, 0];   // stone
+      SPRITES[DOOR] = [1, 6];    // iron door (top)
+      SPRITES[CHEST] = [11, 1];  // chest front
+      SPRITES[PLATE] = [6, 0];   // cobblestone (plate drawn on top)
+      SPRITES[PORTAL] = [14, 1]; // portal texture
+      SPRITES[LAVA] = [13, 14];  // lava
+      SPRITES[ZOMBIE] = [8, 6];  // zombie face (we'll use mob textures from terrain)
+      SPRITES[SKELETON] = [8, 6]; // skeleton reuse
+      SPRITES[WATER] = [13, 12]; // water
+      SPRITES[WOOD] = [4, 0];    // planks
+
+      // Item types
+      var ITEM_PICK = 'pick', ITEM_KEY = 'key', ITEM_SWORD = 'sword', ITEM_TNT = 'tnt';
+
+      // Item sprites [col, row] in items.png
+      var ITEM_SPRITES = {};
+      ITEM_SPRITES[ITEM_PICK] = [2, 2];   // iron pickaxe
+      ITEM_SPRITES[ITEM_KEY] = [4, 0];    // gold ingot (key stand-in)
+      ITEM_SPRITES[ITEM_SWORD] = [2, 1];  // iron sword
+      ITEM_SPRITES[ITEM_TNT] = [0, 0];    // we'll use terrain TNT instead
+
+      // Scores
+      var totalScore = 0;
+      var best = parseInt(localStorage.getItem('r2b_mdungeon_best') || '0', 10);
+      var siteBest = R2BScores.get('mdungeon');
+      bEl.textContent = best;
+      sbEl.textContent = siteBest;
+      R2BScores.onChange(function (s) {
+        if (s.mdungeon > siteBest) { siteBest = s.mdungeon; sbEl.textContent = siteBest; }
+      });
+
+      // Game state
+      var level = 0, state = 'playing', grid = [], items = [], player = {r: 0, c: 0},
+          inventory = [], moves = 0, levelStartTime = 0, animating = false;
+
+      // ─── LEVEL DEFINITIONS ──────────────────────────────
+      // Each level: { grid: 2D array, items: [{r,c,type}], player: {r,c}, par: moves }
+      // Grid values: 0=floor, 1=wall, 2=stone(mineable), 3=door(needs key), 4=chest(pushable),
+      //              5=pressure plate, 6=portal, 7=lava, 8=zombie, 9=skeleton, 10=water, 11=wood
+
+      var LEVELS = [
+        // Level 1: Tutorial — simple push to plate
+        {
+          par: 12,
+          player: {r: 4, c: 1},
+          items: [],
+          grid: [
+            [1,1,1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1,1,1],
+            [1,1,0,0,0,0,0,1,1,1],
+            [1,1,0,4,0,5,0,0,1,1],
+            [1,0,0,0,0,0,0,6,1,1],
+            [1,1,0,0,0,0,0,0,1,1],
+            [1,1,1,0,0,0,0,1,1,1],
+            [1,1,1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1,1,1]
+          ]
+        },
+        // Level 2: Pick up key, unlock door
+        {
+          par: 15,
+          player: {r: 4, c: 1},
+          items: [{r: 4, c: 3, type: ITEM_KEY}],
+          grid: [
+            [1,1,1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1,1,1],
+            [1,1,0,0,0,1,0,0,1,1],
+            [1,1,0,0,0,1,0,6,1,1],
+            [1,0,0,0,0,3,0,0,1,1],
+            [1,1,0,0,0,1,1,1,1,1],
+            [1,1,1,0,0,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1,1,1]
+          ]
+        },
+        // Level 3: Pick up pickaxe, mine stone
+        {
+          par: 14,
+          player: {r: 7, c: 1},
+          items: [{r: 7, c: 3, type: ITEM_PICK}],
+          grid: [
+            [1,1,1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1,1,1],
+            [1,1,1,0,0,0,6,1,1,1],
+            [1,1,1,0,0,0,0,1,1,1],
+            [1,1,1,2,2,0,0,1,1,1],
+            [1,1,0,0,0,0,0,1,1,1],
+            [1,0,0,0,0,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1,1,1]
+          ]
+        },
+        // Level 4: Sword + zombie
+        {
+          par: 16,
+          player: {r: 5, c: 1},
+          items: [{r: 5, c: 3, type: ITEM_SWORD}],
+          grid: [
+            [1,1,1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1,1,1],
+            [1,1,0,0,0,0,6,1,1,1],
+            [1,1,0,0,0,8,0,1,1,1],
+            [1,1,0,0,0,0,0,1,1,1],
+            [1,0,0,0,0,0,0,1,1,1],
+            [1,1,0,0,0,0,1,1,1,1],
+            [1,1,1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1,1,1]
+          ]
+        },
+        // Level 5: Combined — key + push chest + door
+        {
+          par: 20,
+          player: {r: 7, c: 1},
+          items: [{r: 7, c: 5, type: ITEM_KEY}],
+          grid: [
+            [1,1,1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1,1,1],
+            [1,1,0,0,0,5,0,0,1,1],
+            [1,1,0,0,0,0,0,6,1,1],
+            [1,1,1,1,3,1,1,1,1,1],
+            [1,1,0,0,0,0,0,0,1,1],
+            [1,1,0,4,0,0,0,0,1,1],
+            [1,0,0,0,0,0,0,0,1,1],
+            [1,1,0,0,0,0,0,1,1,1],
+            [1,1,1,1,1,1,1,1,1,1]
+          ]
+        },
+        // Level 6: Multi-chest Sokoban
+        {
+          par: 25,
+          player: {r: 5, c: 2},
+          items: [],
+          grid: [
+            [1,1,1,1,1,1,1,1,1,1],
+            [1,1,1,0,0,0,1,1,1,1],
+            [1,1,0,0,4,0,0,1,1,1],
+            [1,1,0,0,0,0,5,0,1,1],
+            [1,1,0,4,0,0,0,6,1,1],
+            [1,1,0,0,0,0,5,0,1,1],
+            [1,1,0,0,0,0,0,1,1,1],
+            [1,1,1,0,0,0,1,1,1,1],
+            [1,1,1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1,1,1]
+          ]
+        },
+        // Level 7: Pickaxe + stone maze + zombie
+        {
+          par: 22,
+          player: {r: 8, c: 1},
+          items: [{r: 8, c: 3, type: ITEM_PICK}, {r: 4, c: 3, type: ITEM_SWORD}],
+          grid: [
+            [1,1,1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1,1,1],
+            [1,1,0,0,0,0,0,6,1,1],
+            [1,1,0,0,8,0,0,0,1,1],
+            [1,1,0,0,0,0,0,0,1,1],
+            [1,1,2,2,2,0,0,1,1,1],
+            [1,1,0,0,0,0,1,1,1,1],
+            [1,0,0,0,0,0,1,1,1,1],
+            [1,0,0,0,0,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1,1,1]
+          ]
+        },
+        // Level 8: TNT + wood walls
+        {
+          par: 18,
+          player: {r: 7, c: 1},
+          items: [{r: 7, c: 3, type: ITEM_TNT}],
+          grid: [
+            [1,1,1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1,1,1],
+            [1,1,0,0,0,0,0,0,1,1],
+            [1,1,0,0,0,0,0,6,1,1],
+            [1,1,11,11,0,0,0,0,1,1],
+            [1,1,0,0,0,0,0,1,1,1],
+            [1,0,0,0,0,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1,1,1]
+          ]
+        },
+        // Level 9: Complex — pick + key + zombie + push
+        {
+          par: 30,
+          player: {r: 8, c: 1},
+          items: [{r: 8, c: 4, type: ITEM_PICK}, {r: 5, c: 1, type: ITEM_SWORD}, {r: 3, c: 7, type: ITEM_KEY}],
+          grid: [
+            [1,1,1,1,1,1,1,1,1,1],
+            [1,0,0,0,0,1,0,0,0,1],
+            [1,0,0,0,0,3,0,6,0,1],
+            [1,0,8,0,0,1,0,0,0,1],
+            [1,0,0,0,0,1,1,1,1,1],
+            [1,0,0,0,0,0,0,0,0,1],
+            [1,1,2,2,1,0,4,0,5,1],
+            [1,0,0,0,1,0,0,0,0,1],
+            [1,0,0,0,0,0,0,1,1,1],
+            [1,1,1,1,1,1,1,1,1,1]
+          ]
+        },
+        // Level 10: Lava maze with pushable chests as bridges
+        {
+          par: 28,
+          player: {r: 8, c: 1},
+          items: [],
+          grid: [
+            [1,1,1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1,1,1],
+            [1,1,0,0,0,0,0,0,1,1],
+            [1,1,0,0,0,7,0,6,1,1],
+            [1,1,0,4,0,7,0,0,1,1],
+            [1,1,0,0,0,7,0,0,1,1],
+            [1,1,0,0,4,0,0,1,1,1],
+            [1,0,0,0,0,0,0,1,1,1],
+            [1,0,0,0,0,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1,1,1]
+          ]
+        },
+        // Level 11: Big Sokoban — 3 chests, 3 plates
+        {
+          par: 35,
+          player: {r: 7, c: 1},
+          items: [],
+          grid: [
+            [1,1,1,1,1,1,1,1,1,1],
+            [1,0,0,0,5,0,0,0,0,1],
+            [1,0,0,4,0,0,0,0,0,1],
+            [1,0,0,0,0,1,5,0,6,1],
+            [1,0,0,0,4,1,0,0,0,1],
+            [1,0,0,0,0,0,0,0,0,1],
+            [1,1,0,0,4,0,0,5,1,1],
+            [1,0,0,0,0,0,0,0,1,1],
+            [1,1,1,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1,1,1]
+          ]
+        },
+        // Level 12: Gauntlet — sword + 2 zombies + key + door + push
+        {
+          par: 32,
+          player: {r: 8, c: 1},
+          items: [{r: 7, c: 3, type: ITEM_SWORD}, {r: 3, c: 2, type: ITEM_KEY}],
+          grid: [
+            [1,1,1,1,1,1,1,1,1,1],
+            [1,0,0,0,0,1,0,0,0,1],
+            [1,0,0,0,0,3,0,0,6,1],
+            [1,0,0,0,0,1,0,0,0,1],
+            [1,0,8,0,0,1,1,1,1,1],
+            [1,0,0,0,0,0,0,0,0,1],
+            [1,0,0,8,0,4,0,5,0,1],
+            [1,0,0,0,0,0,0,0,0,1],
+            [1,0,0,0,0,0,1,1,1,1],
+            [1,1,1,1,1,1,1,1,1,1]
+          ]
+        },
+        // Level 13: Water detour + stone mining
+        {
+          par: 26,
+          player: {r: 8, c: 1},
+          items: [{r: 6, c: 1, type: ITEM_PICK}],
+          grid: [
+            [1,1,1,1,1,1,1,1,1,1],
+            [1,0,0,0,0,0,0,0,0,1],
+            [1,0,0,0,0,2,0,6,0,1],
+            [1,0,0,10,10,2,0,0,0,1],
+            [1,0,0,10,10,0,0,0,1,1],
+            [1,0,0,0,0,0,0,1,1,1],
+            [1,0,0,0,0,0,1,1,1,1],
+            [1,0,0,0,0,0,1,1,1,1],
+            [1,0,0,0,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1,1,1]
+          ]
+        },
+        // Level 14: TNT chain + zombies
+        {
+          par: 24,
+          player: {r: 8, c: 1},
+          items: [{r: 8, c: 3, type: ITEM_TNT}, {r: 5, c: 1, type: ITEM_SWORD}],
+          grid: [
+            [1,1,1,1,1,1,1,1,1,1],
+            [1,1,1,0,0,0,0,0,1,1],
+            [1,1,0,0,0,0,0,6,1,1],
+            [1,1,0,8,0,0,0,0,1,1],
+            [1,1,11,11,11,0,0,1,1,1],
+            [1,0,0,0,0,0,1,1,1,1],
+            [1,0,0,0,0,0,1,1,1,1],
+            [1,0,0,0,0,1,1,1,1,1],
+            [1,0,0,0,0,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1,1,1]
+          ]
+        },
+        // Level 15: Grand finale — all mechanics
+        {
+          par: 40,
+          player: {r: 8, c: 0},
+          items: [{r: 7, c: 2, type: ITEM_PICK}, {r: 5, c: 0, type: ITEM_SWORD}, {r: 1, c: 5, type: ITEM_KEY}],
+          grid: [
+            [1,1,1,1,1,1,1,1,1,1],
+            [1,0,0,0,0,0,0,1,0,1],
+            [1,0,4,0,0,1,0,3,0,1],
+            [1,0,0,8,0,1,0,0,6,1],
+            [1,0,0,0,5,1,1,1,1,1],
+            [0,0,0,0,0,0,0,0,0,1],
+            [1,2,2,0,0,8,0,0,0,1],
+            [1,0,0,0,0,0,0,0,1,1],
+            [0,0,0,0,0,0,1,1,1,1],
+            [1,1,1,1,1,1,1,1,1,1]
+          ]
+        }
+      ];
+
+      // ─── DEEP COPY LEVEL ───────────────────────────────
+      function loadLevel(n) {
+        if (n >= LEVELS.length) { state = 'victory'; return; }
+        var lv = LEVELS[n];
+        grid = [];
+        for (var r = 0; r < ROWS; r++) {
+          grid[r] = [];
+          for (var cl = 0; cl < COLS; cl++) grid[r][cl] = lv.grid[r][cl];
+        }
+        items = [];
+        for (var i = 0; i < lv.items.length; i++) {
+          items.push({r: lv.items[i].r, c: lv.items[i].c, type: lv.items[i].type});
+        }
+        player = {r: lv.player.r, c: lv.player.c};
+        inventory = [];
+        moves = 0;
+        levelStartTime = Date.now();
+        state = 'playing';
+        animating = false;
+        hEl.textContent = 'Lv ' + (n + 1) + '/' + LEVELS.length + '  |  Tap/Click to move  |  Par: ' + lv.par + ' moves';
+      }
+
+      // ─── PORTAL CHECK ──────────────────────────────────
+      // Portal is accessible only when all plates have chests on them (or no plates exist)
+      function portalOpen() {
+        for (var r = 0; r < ROWS; r++)
+          for (var cl = 0; cl < COLS; cl++)
+            if (grid[r][cl] === PLATE) return false; // uncovered plate
+        return true;
+      }
+
+      // ─── MOVEMENT / INTERACTION ────────────────────────
+      function tryMove(dr, dc) {
+        if (animating) return;
+        var nr = player.r + dr, nc = player.c + dc;
+        if (nr < 0 || nr >= ROWS || nc < 0 || nc >= COLS) return;
+
+        var target = grid[nr][nc];
+
+        // Collect item on floor
+        function pickupItems() {
+          for (var i = items.length - 1; i >= 0; i--) {
+            if (items[i].r === nr && items[i].c === nc) {
+              inventory.push(items[i].type);
+              items.splice(i, 1);
+            }
+          }
+        }
+
+        // Floor / pressure plate — just walk
+        if (target === FLOOR || target === PLATE) {
+          player.r = nr; player.c = nc;
+          moves++;
+          pickupItems();
+          return;
+        }
+
+        // Portal — walk if open
+        if (target === PORTAL) {
+          if (portalOpen()) {
+            player.r = nr; player.c = nc;
+            moves++;
+            completeLevel();
+            return;
+          }
+          return; // portal locked
+        }
+
+        // Chest — Sokoban push
+        if (target === CHEST) {
+          var br = nr + dr, bc = nc + dc;
+          if (br < 0 || br >= ROWS || bc < 0 || bc >= COLS) return;
+          var behind = grid[br][bc];
+          // Can push onto floor, plate, or lava (chest fills lava)
+          if (behind === FLOOR || behind === PLATE || behind === LAVA) {
+            if (behind === PLATE) {
+              grid[br][bc] = FLOOR; // plate satisfied — becomes floor (chest is on it visually but logically the plate is "pressed")
+            } else if (behind === LAVA) {
+              grid[br][bc] = FLOOR; // chest fills lava, creating a bridge
+            } else {
+              grid[br][bc] = CHEST;
+            }
+            grid[nr][nc] = FLOOR;
+            player.r = nr; player.c = nc;
+            moves++;
+            pickupItems();
+            return;
+          }
+          return; // can't push
+        }
+
+        // Stone — mine with pickaxe
+        if (target === STONE) {
+          var pi = inventory.indexOf(ITEM_PICK);
+          if (pi !== -1) {
+            grid[nr][nc] = FLOOR;
+            // Pickaxe is NOT consumed (reusable)
+            moves++;
+            return;
+          }
+          return; // no pickaxe
+        }
+
+        // Door — unlock with key
+        if (target === DOOR) {
+          var ki = inventory.indexOf(ITEM_KEY);
+          if (ki !== -1) {
+            inventory.splice(ki, 1); // key consumed
+            grid[nr][nc] = FLOOR;
+            moves++;
+            return;
+          }
+          return; // no key
+        }
+
+        // Zombie / Skeleton — fight with sword
+        if (target === ZOMBIE || target === SKELETON) {
+          var si = inventory.indexOf(ITEM_SWORD);
+          if (si !== -1) {
+            grid[nr][nc] = FLOOR;
+            // Sword NOT consumed (reusable)
+            moves++;
+            return;
+          }
+          return; // no sword
+        }
+
+        // Wood — break with TNT (consumes TNT, destroys adjacent wood too)
+        if (target === WOOD) {
+          var ti = inventory.indexOf(ITEM_TNT);
+          if (ti !== -1) {
+            inventory.splice(ti, 1); // TNT consumed
+            // Destroy clicked wood + adjacent wood
+            grid[nr][nc] = FLOOR;
+            var dirs = [[-1,0],[1,0],[0,-1],[0,1]];
+            for (var d = 0; d < dirs.length; d++) {
+              var wr = nr + dirs[d][0], wc = nc + dirs[d][1];
+              if (wr >= 0 && wr < ROWS && wc >= 0 && wc < COLS && grid[wr][wc] === WOOD) {
+                grid[wr][wc] = FLOOR;
+              }
+            }
+            moves++;
+            return;
+          }
+          return; // no TNT
+        }
+
+        // Wall, lava, water — blocked
+        return;
+      }
+
+      // ─── CLICK → DIRECTION ────────────────────────────
+      function handleClick(r, cl) {
+        if (state === 'levelcomplete' || state === 'victory') return;
+        if (state !== 'playing') return;
+
+        var dr = r - player.r, dc = cl - player.c;
+
+        // Must click an adjacent cell (cardinal direction, distance 1)
+        if (Math.abs(dr) + Math.abs(dc) !== 1) return;
+
+        tryMove(dr, dc);
+      }
+
+      // ─── LEVEL COMPLETE ───────────────────────────────
+      function completeLevel() {
+        var par = LEVELS[level].par;
+        var timeTaken = ((Date.now() - levelStartTime) / 1000) | 0;
+        var stars = 3;
+        if (moves > par) stars = 2;
+        if (moves > par * 1.5) stars = 1;
+
+        // Score: base points for level + bonus for stars + efficiency
+        var levelScore = 100 * (level + 1);
+        var movesBonus = Math.max(0, (par - moves)) * 10;
+        var starBonus = stars * 50;
+        totalScore += levelScore + movesBonus + starBonus;
+        sEl.textContent = totalScore;
+
+        state = 'levelcomplete';
+        levelStars = stars;
+        levelMoves = moves;
+        levelPar = par;
+        levelTime = timeTaken;
+      }
+      var levelStars = 0, levelMoves = 0, levelPar = 0, levelTime = 0;
+
+      // ─── ADVANCE / RESTART ────────────────────────────
+      function nextLevel() {
+        level++;
+        loadLevel(level);
+      }
+
+      function restartLevel() {
+        loadLevel(level);
+      }
+
+      function restartGame() {
+        level = 0;
+        totalScore = 0;
+        sEl.textContent = '0';
+        loadLevel(0);
+      }
+
+      // ─── DRAW ─────────────────────────────────────────
+      var OX = BORDER, OY = BORDER;
+
+      function drawFrame() {
+        var W = cvs.width, H = cvs.height;
+        c.fillStyle = '#1a1a1a';
+        c.fillRect(0, 0, W, H);
+
+        // Draw stone border
+        for (var bx = 0; bx < W; bx += CELL) {
+          drawTile([7, 0], bx, 0, CELL, CELL);
+          drawTile([7, 0], bx, OY + ROWS * CELL, CELL, CELL);
+        }
+        for (var by = 0; by < H; by += CELL) {
+          drawTile([7, 0], 0, by, CELL, CELL);
+          drawTile([7, 0], W - CELL, by, CELL, CELL);
+        }
+
+        // Draw grid
+        for (var r = 0; r < ROWS; r++) {
+          for (var cl = 0; cl < COLS; cl++) {
+            var px = OX + cl * CELL, py = OY + r * CELL;
+            var tile = grid[r][cl];
+
+            // Always draw floor first
+            drawTile(SPRITES[FLOOR], px, py);
+
+            if (tile === WALL) {
+              drawTile(SPRITES[WALL], px, py);
+            } else if (tile === STONE) {
+              drawTile(SPRITES[STONE], px, py);
+            } else if (tile === DOOR) {
+              // Draw door as iron block
+              drawTile([6, 1], px, py); // iron block
+              // Draw key icon overlay
+              c.fillStyle = 'rgba(255,215,0,0.5)';
+              c.fillRect(px + 8, py + 6, 8, 12);
+            } else if (tile === CHEST) {
+              drawTile(SPRITES[CHEST], px, py);
+            } else if (tile === PLATE) {
+              // Pressure plate (uncovered) — draw cobble + small plate
+              c.fillStyle = '#888';
+              c.fillRect(px + 4, py + CELL - 6, CELL - 8, 3);
+            } else if (tile === PORTAL) {
+              drawTile(SPRITES[PORTAL], px, py);
+              if (!portalOpen()) {
+                c.fillStyle = 'rgba(0,0,0,0.5)';
+                c.fillRect(px, py, CELL, CELL);
+                c.fillStyle = '#f55';
+                c.font = (CELL * 0.7) + 'px sans-serif';
+                c.textAlign = 'center';
+                c.fillText('\u2716', px + CELL / 2, py + CELL * 0.75);
+              } else {
+                // Pulsing glow
+                var pulse = 0.3 + 0.2 * Math.sin(Date.now() / 300);
+                c.fillStyle = 'rgba(100,0,255,' + pulse + ')';
+                c.fillRect(px, py, CELL, CELL);
+              }
+            } else if (tile === LAVA) {
+              drawTile(SPRITES[LAVA], px, py);
+            } else if (tile === ZOMBIE) {
+              // Green face on dark bg
+              c.fillStyle = '#3a7a3a';
+              c.fillRect(px, py, CELL, CELL);
+              c.fillStyle = '#1a3a1a';
+              c.fillRect(px + 4, py + 6, 5, 5);
+              c.fillRect(px + 15, py + 6, 5, 5);
+              c.fillRect(px + 7, py + 14, 10, 4);
+            } else if (tile === SKELETON) {
+              c.fillStyle = '#ccc';
+              c.fillRect(px, py, CELL, CELL);
+              c.fillStyle = '#333';
+              c.fillRect(px + 4, py + 6, 5, 5);
+              c.fillRect(px + 15, py + 6, 5, 5);
+              c.fillRect(px + 8, py + 15, 8, 3);
+            } else if (tile === WATER) {
+              drawTile(SPRITES[WATER], px, py);
+            } else if (tile === WOOD) {
+              drawTile(SPRITES[WOOD], px, py);
+            }
+          }
+        }
+
+        // Draw items on ground
+        for (var i = 0; i < items.length; i++) {
+          var it = items[i];
+          var ix = OX + it.c * CELL, iy = OY + it.r * CELL;
+          if (it.type === ITEM_TNT) {
+            drawTile([8, 0], ix, iy); // TNT from terrain
+          } else {
+            drawItem(ITEM_SPRITES[it.type], ix, iy);
+          }
+        }
+
+        // Draw player (Steve head)
+        var ppx = OX + player.c * CELL, ppy = OY + player.r * CELL;
+        // Steve face: skin tone with eyes
+        c.fillStyle = '#c69c6d';
+        c.fillRect(ppx + 2, ppy + 2, CELL - 4, CELL - 4);
+        c.fillStyle = '#6b4226';
+        c.fillRect(ppx + 2, ppy + 2, CELL - 4, 6); // hair
+        c.fillStyle = '#fff';
+        c.fillRect(ppx + 6, ppy + 10, 4, 4); // left eye
+        c.fillRect(ppx + 14, ppy + 10, 4, 4); // right eye
+        c.fillStyle = '#2a1a0a';
+        c.fillRect(ppx + 7, ppy + 11, 2, 2); // left pupil
+        c.fillRect(ppx + 15, ppy + 11, 2, 2); // right pupil
+        c.fillStyle = '#8b5e3c';
+        c.fillRect(ppx + 8, ppy + 16, 8, 3); // mouth
+
+        // HUD — inventory bar below grid
+        var hudY = OY + ROWS * CELL + 4;
+        c.fillStyle = '#2a2a2a';
+        c.fillRect(OX, hudY, COLS * CELL, CELL + 8);
+        c.fillStyle = '#888';
+        c.font = '10px sans-serif';
+        c.textAlign = 'left';
+        c.fillText('Inventory:', OX + 4, hudY + 12);
+        c.fillText('Moves: ' + moves, OX + COLS * CELL - 70, hudY + 12);
+
+        // Draw inventory items
+        for (var j = 0; j < inventory.length; j++) {
+          var invX = OX + 60 + j * (CELL + 2);
+          c.strokeStyle = '#555';
+          c.strokeRect(invX, hudY + 2, CELL, CELL);
+          if (inventory[j] === ITEM_TNT) {
+            drawTile([8, 0], invX, hudY + 2);
+          } else {
+            drawItem(ITEM_SPRITES[inventory[j]], invX, hudY + 2);
+          }
+        }
+
+        // Restart button at bottom-right of HUD
+        var rbX = OX + COLS * CELL - 50, rbY = hudY + CELL + 2;
+        c.fillStyle = '#555';
+        c.fillRect(rbX, rbY, 50, 14);
+        c.fillStyle = '#ddd';
+        c.font = '9px sans-serif';
+        c.textAlign = 'center';
+        c.fillText('Restart', rbX + 25, rbY + 11);
+
+        // Level complete overlay
+        if (state === 'levelcomplete') {
+          c.fillStyle = 'rgba(0,0,0,0.7)';
+          c.fillRect(0, 0, W, H);
+          c.fillStyle = '#55ff55';
+          c.font = '16px Minecraft, sans-serif';
+          c.textAlign = 'center';
+          c.fillText('Level ' + (level + 1) + ' Complete!', W / 2, H / 2 - 50);
+
+          // Stars
+          c.font = '20px sans-serif';
+          c.fillStyle = '#fc0';
+          var starStr = '';
+          for (var s = 0; s < 3; s++) starStr += (s < levelStars) ? '\u2605' : '\u2606';
+          c.fillText(starStr, W / 2, H / 2 - 20);
+
+          c.font = '10px Minecraft, sans-serif';
+          c.fillStyle = '#ccc';
+          c.fillText('Moves: ' + levelMoves + '  Par: ' + levelPar + '  Time: ' + levelTime + 's', W / 2, H / 2 + 10);
+
+          // Buttons
+          c.fillStyle = '#55ff55';
+          c.fillRect(W / 2 - 60, H / 2 + 30, 50, 22);
+          c.fillRect(W / 2 + 10, H / 2 + 30, 50, 22);
+          c.fillStyle = '#000';
+          c.font = '10px Minecraft, sans-serif';
+          c.fillText('Retry', W / 2 - 35, H / 2 + 45);
+          c.fillText('Next', W / 2 + 35, H / 2 + 45);
+        }
+
+        // Victory screen
+        if (state === 'victory') {
+          c.fillStyle = 'rgba(0,0,0,0.8)';
+          c.fillRect(0, 0, W, H);
+          c.fillStyle = '#fc0';
+          c.font = '18px Minecraft, sans-serif';
+          c.textAlign = 'center';
+          c.fillText('You Escaped!', W / 2, H / 2 - 40);
+          c.fillStyle = '#55ff55';
+          c.font = '12px Minecraft, sans-serif';
+          c.fillText('Total Score: ' + totalScore, W / 2, H / 2 - 10);
+
+          c.fillStyle = '#ccc';
+          c.font = '10px Minecraft, sans-serif';
+          c.fillText('Best: ' + best + '  |  Site Best: ' + siteBest, W / 2, H / 2 + 15);
+
+          // Play again button
+          c.fillStyle = '#55ff55';
+          c.fillRect(W / 2 - 40, H / 2 + 30, 80, 22);
+          c.fillStyle = '#000';
+          c.font = '10px Minecraft, sans-serif';
+          c.fillText('Play Again', W / 2, H / 2 + 45);
+
+          // Save scores
+          if (totalScore > best) {
+            best = totalScore;
+            localStorage.setItem('r2b_mdungeon_best', best);
+            bEl.textContent = best;
+          }
+          R2BScores.submit('mdungeon', totalScore);
+        }
+      }
+
+      // ─── INPUT ────────────────────────────────────────
+      function getGridPos(e) {
+        var rect = cvs.getBoundingClientRect();
+        var sx = cvs.width / rect.width, sy = cvs.height / rect.height;
+        var cx, cy;
+        if (e.touches) {
+          cx = (e.touches[0].clientX - rect.left) * sx;
+          cy = (e.touches[0].clientY - rect.top) * sy;
+        } else {
+          cx = (e.clientX - rect.left) * sx;
+          cy = (e.clientY - rect.top) * sy;
+        }
+        return {cx: cx, cy: cy, r: ((cy - OY) / CELL) | 0, c: ((cx - OX) / CELL) | 0};
+      }
+
+      function checkRestartBtn(cx, cy) {
+        var hudY = OY + ROWS * CELL + 4;
+        var rbX = OX + COLS * CELL - 50, rbY = hudY + CELL + 2;
+        return cx >= rbX && cx <= rbX + 50 && cy >= rbY && cy <= rbY + 14;
+      }
+
+      function onClick(e) {
+        var pos = getGridPos(e);
+        var W = cvs.width, H = cvs.height;
+
+        if (state === 'levelcomplete') {
+          // Retry button
+          if (pos.cx >= W / 2 - 60 && pos.cx <= W / 2 - 10 && pos.cy >= H / 2 + 30 && pos.cy <= H / 2 + 52) {
+            restartLevel(); return;
+          }
+          // Next button
+          if (pos.cx >= W / 2 + 10 && pos.cx <= W / 2 + 60 && pos.cy >= H / 2 + 30 && pos.cy <= H / 2 + 52) {
+            nextLevel(); return;
+          }
+          return;
+        }
+
+        if (state === 'victory') {
+          if (pos.cx >= W / 2 - 40 && pos.cx <= W / 2 + 40 && pos.cy >= H / 2 + 30 && pos.cy <= H / 2 + 52) {
+            restartGame(); return;
+          }
+          return;
+        }
+
+        if (checkRestartBtn(pos.cx, pos.cy)) { restartLevel(); return; }
+
+        if (pos.r >= 0 && pos.r < ROWS && pos.c >= 0 && pos.c < COLS) {
+          handleClick(pos.r, pos.c);
+        }
+      }
+
+      var touchPos = null;
+      function onTouchStart(e) {
+        if (e.target !== cvs) return;
+        e.preventDefault();
+        touchPos = getGridPos(e);
+      }
+      function onTouchEnd(e) {
+        if (e.target !== cvs) return;
+        e.preventDefault();
+        if (!touchPos) return;
+        var pos = touchPos;
+        touchPos = null;
+        var W = cvs.width, H = cvs.height;
+
+        if (state === 'levelcomplete') {
+          if (pos.cx >= W / 2 - 60 && pos.cx <= W / 2 - 10 && pos.cy >= H / 2 + 30 && pos.cy <= H / 2 + 52) {
+            restartLevel(); return;
+          }
+          if (pos.cx >= W / 2 + 10 && pos.cx <= W / 2 + 60 && pos.cy >= H / 2 + 30 && pos.cy <= H / 2 + 52) {
+            nextLevel(); return;
+          }
+          return;
+        }
+
+        if (state === 'victory') {
+          if (pos.cx >= W / 2 - 40 && pos.cx <= W / 2 + 40 && pos.cy >= H / 2 + 30 && pos.cy <= H / 2 + 52) {
+            restartGame(); return;
+          }
+          return;
+        }
+
+        if (checkRestartBtn(pos.cx, pos.cy)) { restartLevel(); return; }
+
+        if (pos.r >= 0 && pos.r < ROWS && pos.c >= 0 && pos.c < COLS) {
+          handleClick(pos.r, pos.c);
+        }
+      }
+
+      // Keyboard support (optional)
+      function onKey(e) {
+        if (state !== 'playing') {
+          if (e.key === ' ' || e.code === 'Space') {
+            e.preventDefault();
+            if (state === 'levelcomplete') nextLevel();
+            else if (state === 'victory') restartGame();
+          }
+          if (e.key === 'r' || e.key === 'R') { restartLevel(); e.preventDefault(); }
+          return;
+        }
+        var dr = 0, dc = 0;
+        if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') dr = -1;
+        else if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') dr = 1;
+        else if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') dc = -1;
+        else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') dc = 1;
+        else if (e.key === 'r' || e.key === 'R') { restartLevel(); e.preventDefault(); return; }
+        else return;
+        e.preventDefault();
+        tryMove(dr, dc);
+      }
+
+      // Register
+      cvs.addEventListener('click', onClick);
+      cvs.addEventListener('touchstart', onTouchStart);
+      cvs.addEventListener('touchend', onTouchEnd);
+      document.addEventListener('keydown', onKey);
+
+      // Init
+      loadLevel(0);
+      function loop() { drawFrame(); setAnim(requestAnimationFrame(loop)); }
+      loop();
+
+      return {
+        cleanup: function () {
+          cvs.removeEventListener('click', onClick);
+          cvs.removeEventListener('touchstart', onTouchStart);
+          cvs.removeEventListener('touchend', onTouchEnd);
+          document.removeEventListener('keydown', onKey);
+        }
+      };
+    }
+
+
     // Start with game from URL param or default to Flappy Chicken
     var urlParams = new URLSearchParams(window.location.search);
     var gameParam = parseInt(urlParams.get('game'), 10);
-    if (gameParam === 6) {
+    if (gameParam === 7) {
       // Mine Blocks 2 → open Mine Blocks with version 2 pre-selected
       currentMineblocksVersion = 1;
-      startGame(5);
+      startGame(6);
     } else if (gameParam >= 0 && gameParam < games.length) {
       startGame(gameParam);
     } else {
