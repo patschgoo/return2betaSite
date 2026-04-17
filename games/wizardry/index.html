@@ -1,0 +1,1380 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wizardry - Cobble Catacombs</title>
+  <link rel="icon" type="image/png" href="../../images/icon.png" />
+  <style>
+    @font-face {
+      font-family: 'Minecraft';
+      src: url('/fonts/Minecraft.otf') format('opentype');
+      font-weight: normal;
+      font-style: normal;
+    }
+
+    :root {
+      --bg: #050704;
+      --panel: rgba(11, 16, 9, 0.9);
+      --panel-soft: rgba(12, 20, 12, 0.72);
+      --line: rgba(122, 172, 118, 0.45);
+      --glow: #a5ff8f;
+      --warn: #ffbe55;
+      --danger: #ff6e60;
+      --ink: #dcebd7;
+      --muted: #9fb49a;
+    }
+
+    * { box-sizing: border-box; }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+      font-family: 'Minecraft', sans-serif;
+      background: radial-gradient(circle at 20% 18%, rgba(36, 54, 30, 0.65) 0%, rgba(7, 10, 6, 0.94) 45%, #020301 100%);
+      color: var(--ink);
+    }
+
+    body {
+      min-height: 100vh;
+      padding-top: 48px;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    body::before,
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    body::before {
+      background-image:
+        linear-gradient(rgba(120, 182, 120, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(120, 182, 120, 0.04) 1px, transparent 1px);
+      background-size: 34px 34px;
+      mix-blend-mode: screen;
+      z-index: -2;
+    }
+
+    body::after {
+      background: url('../../images/minecraft/terrain.png') repeat;
+      background-size: 256px 256px;
+      opacity: 0.07;
+      z-index: -3;
+      filter: saturate(0.8) contrast(1.08);
+      animation: slow-pan 30s linear infinite;
+    }
+
+    @keyframes slow-pan {
+      from { transform: translate3d(0, 0, 0); }
+      to { transform: translate3d(-128px, -96px, 0); }
+    }
+
+    .header-band {
+      min-height: 48px;
+      width: 100%;
+      background-image: url('../../images/header.png');
+      background-repeat: repeat-x;
+      background-position: top left;
+      background-size: auto 48px;
+      flex-shrink: 0;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0 48px;
+      padding: 0 48px;
+      position: fixed;
+      top: 0;
+      z-index: 20;
+    }
+
+    .header-band::after {
+      content: '';
+      position: absolute;
+      top: 48px;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image: url('../../images/header.png');
+      background-repeat: repeat-x;
+      background-size: auto 48px;
+      transform: scaleY(-1);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .header-band > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .header-band.wrapped .howto-link {
+      flex-direction: row-reverse;
+    }
+
+    .howto-text {
+      font-size: 0.65rem;
+      font-weight: 600;
+      line-height: 1.1;
+      text-align: right;
+      max-width: 80px;
+    }
+
+    .howto-link { flex-direction: row-reverse; }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      height: 48px;
+      text-decoration: none;
+      color: #fff;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+    }
+
+    .nav-link img {
+      height: 32px;
+      width: 32px;
+      object-fit: contain;
+    }
+
+    .nav-dropdown {
+      position: relative;
+    }
+
+    .nav-dropdown-menu {
+      display: none;
+      position: absolute;
+      top: 48px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(10,16,10,0.96);
+      border: 2px solid rgba(85,255,85,0.3);
+      border-radius: 4px;
+      padding: 8px 0;
+      min-width: 190px;
+      z-index: 100;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.7);
+    }
+
+    .nav-dropdown:hover .nav-dropdown-menu,
+    .nav-dropdown.open .nav-dropdown-menu {
+      display: block;
+    }
+
+    .dropdown-link {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      color: #ccc;
+      text-decoration: none;
+      font-size: 0.75rem;
+      text-shadow: 1px 1px 0 rgba(0,0,0,0.7);
+      white-space: nowrap;
+    }
+
+    .dropdown-link img {
+      width: 18px;
+      height: 18px;
+      object-fit: contain;
+      image-rendering: pixelated;
+    }
+
+    .dropdown-link:hover {
+      background: rgba(85,255,85,0.1);
+      color: #fff;
+    }
+
+    .dropdown-link.current {
+      color: #aaff88;
+      background: rgba(85,255,85,0.12);
+    }
+
+    .dropdown-more {
+      display: block;
+      padding: 6px 16px;
+      color: #55ff55;
+      text-decoration: none;
+      font-size: 0.7rem;
+      text-shadow: 1px 1px 0 rgba(0,0,0,0.7);
+      white-space: nowrap;
+    }
+
+    .dropdown-more:hover {
+      background: rgba(85,255,85,0.1);
+      color: #aaff88;
+    }
+
+    .nav-spacer { flex: 1; }
+
+    .content {
+      width: min(1120px, 100% - 24px);
+      margin: 18px auto 40px;
+      display: grid;
+      grid-template-columns: 290px 1fr;
+      gap: 18px;
+      align-items: start;
+      opacity: 0;
+      transform: translateY(10px);
+      animation: reveal 450ms ease 90ms forwards;
+    }
+
+    @keyframes reveal {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .panel {
+      background: linear-gradient(180deg, rgba(16, 26, 15, 0.92), rgba(6, 10, 6, 0.9));
+      border: 2px solid var(--line);
+      border-radius: 6px;
+      box-shadow: 0 0 0 2px rgba(7, 11, 7, 0.85) inset, 0 10px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    .status {
+      padding: 14px;
+      position: sticky;
+      top: 68px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .title-block {
+      border: 1px solid rgba(145, 199, 138, 0.35);
+      background: var(--panel-soft);
+      padding: 10px;
+      border-radius: 4px;
+      text-align: center;
+    }
+
+    .title-block h1 {
+      margin: 0;
+      font-size: 1rem;
+      color: var(--glow);
+      text-shadow: 0 0 8px rgba(165, 255, 143, 0.28);
+      letter-spacing: 0.03em;
+    }
+
+    .title-block p {
+      margin: 6px 0 0;
+      font-size: 0.62rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .texture-face {
+      height: 124px;
+      border: 1px solid rgba(145, 199, 138, 0.28);
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+      image-rendering: pixelated;
+      background: #111 url('../../images/mobs/2d/Player_Head.png') center/contain no-repeat;
+    }
+
+    .texture-face::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.5));
+    }
+
+    .meters {
+      display: grid;
+      gap: 8px;
+    }
+
+    .meter {
+      display: grid;
+      grid-template-columns: 54px 1fr;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.58rem;
+      color: var(--muted);
+    }
+
+    .meter strong { color: var(--ink); }
+
+    .meter-track {
+      height: 10px;
+      border-radius: 999px;
+      overflow: hidden;
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(148, 180, 142, 0.35);
+    }
+
+    .meter-fill {
+      height: 100%;
+      transition: width 220ms ease;
+    }
+
+    .meter-fill.hp { background: linear-gradient(90deg, #5cb85c, #a6ff78); }
+    .meter-fill.mana { background: linear-gradient(90deg, #4782d9, #72d0ff); }
+    .meter-fill.sanity { background: linear-gradient(90deg, #b3904d, #ffdb82); }
+
+    .resources {
+      border: 1px solid rgba(145, 199, 138, 0.3);
+      border-radius: 4px;
+      padding: 9px 10px;
+      background: var(--panel-soft);
+      display: grid;
+      gap: 6px;
+      font-size: 0.62rem;
+    }
+
+    .resource-row {
+      display: flex;
+      justify-content: space-between;
+      color: var(--muted);
+    }
+
+    .resource-row span {
+      color: #efdf9e;
+    }
+
+    .records {
+      border: 1px solid rgba(145, 199, 138, 0.3);
+      border-radius: 4px;
+      padding: 9px 10px;
+      background: var(--panel-soft);
+      display: grid;
+      gap: 6px;
+      font-size: 0.56rem;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .records strong {
+      color: var(--ink);
+      font-size: 0.6rem;
+    }
+
+    .records .record-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .records .record-row span {
+      color: #efdf9e;
+    }
+
+    .records-reset {
+      margin-top: 2px;
+      width: 100%;
+      font-family: inherit;
+      font-size: 0.54rem;
+      padding: 6px 8px;
+      border-radius: 4px;
+      border: 1px solid rgba(255, 110, 96, 0.58);
+      color: #ffd3ce;
+      background: linear-gradient(180deg, rgba(40, 15, 14, 0.9), rgba(22, 9, 8, 0.92));
+      cursor: pointer;
+      transition: border-color 120ms ease, transform 100ms ease;
+    }
+
+    .records-reset:hover {
+      border-color: rgba(255, 147, 136, 0.8);
+      transform: translateY(-1px);
+    }
+
+    .records-reset:active {
+      transform: translateY(1px);
+    }
+
+    .inventory {
+      min-height: 72px;
+      border: 1px solid rgba(145, 199, 138, 0.3);
+      border-radius: 4px;
+      padding: 9px;
+      background: var(--panel-soft);
+      font-size: 0.56rem;
+      line-height: 1.45;
+      color: var(--muted);
+    }
+
+    .inventory strong { color: var(--ink); font-size: 0.6rem; }
+
+    .game {
+      padding: 16px;
+      display: grid;
+      gap: 14px;
+      min-height: 680px;
+    }
+
+    .scene-card {
+      border: 1px solid rgba(145, 199, 138, 0.35);
+      border-radius: 4px;
+      overflow: hidden;
+      background: #091007;
+      position: relative;
+      min-height: 196px;
+    }
+
+    .scene-layer {
+      position: absolute;
+      inset: 0;
+      image-rendering: pixelated;
+      transition: opacity 280ms ease;
+    }
+
+    .scene-layer.base {
+      background-image: url('../../images/minecraft/terrain.png');
+      background-repeat: repeat;
+      background-size: 256px 256px;
+      filter: saturate(1.05) brightness(0.88);
+      animation: drift 10s linear infinite alternate;
+    }
+
+    .scene-layer.overlay {
+      background-image: linear-gradient(130deg, rgba(13, 26, 16, 0.1), rgba(0, 0, 0, 0.55));
+      mix-blend-mode: screen;
+      opacity: 0.7;
+    }
+
+    .scene-layer.icon {
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: 156px 156px;
+      opacity: 0.85;
+      filter: drop-shadow(0 8px 15px rgba(0, 0, 0, 0.5));
+    }
+
+    .scene-layer.grain {
+      background-image: repeating-linear-gradient(
+        0deg,
+        rgba(220, 255, 220, 0.03) 0,
+        rgba(220, 255, 220, 0.03) 1px,
+        transparent 1px,
+        transparent 2px
+      );
+      mix-blend-mode: soft-light;
+      opacity: 0.55;
+      pointer-events: none;
+    }
+
+    @keyframes drift {
+      from { transform: translateY(0); }
+      to { transform: translateY(-18px); }
+    }
+
+    .scene-caption {
+      position: absolute;
+      left: 10px;
+      bottom: 10px;
+      right: 10px;
+      font-size: 0.56rem;
+      color: #e9ffe3;
+      background: rgba(3, 5, 2, 0.76);
+      border: 1px solid rgba(124, 168, 121, 0.3);
+      border-radius: 4px;
+      padding: 7px 8px;
+      line-height: 1.5;
+      text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.7);
+    }
+
+    .log {
+      border: 1px solid rgba(145, 199, 138, 0.35);
+      border-radius: 4px;
+      background: rgba(5, 8, 4, 0.85);
+      padding: 10px 12px;
+      min-height: 220px;
+      max-height: 280px;
+      overflow: auto;
+      font-size: 0.61rem;
+      line-height: 1.6;
+      color: var(--ink);
+    }
+
+    .log p {
+      margin: 0 0 8px;
+      opacity: 0;
+      transform: translateY(6px);
+      animation: log-in 210ms ease forwards;
+    }
+
+    @keyframes log-in {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .log p.note { color: #d4f4cb; }
+    .log p.good { color: #bcff9d; }
+    .log p.bad { color: #ff9d93; }
+    .log p.warn { color: #ffd78f; }
+
+    .choices {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .choices button,
+    .actions button {
+      font-family: inherit;
+      font-size: 0.62rem;
+      border: 1px solid rgba(150, 198, 144, 0.5);
+      color: #e6f6e1;
+      background: linear-gradient(180deg, rgba(18, 34, 16, 0.96), rgba(9, 18, 8, 0.96));
+      border-radius: 4px;
+      padding: 11px 10px;
+      cursor: pointer;
+      text-align: left;
+      line-height: 1.45;
+      transition: transform 100ms ease, border-color 140ms ease, box-shadow 140ms ease;
+    }
+
+    .choices button:hover,
+    .actions button:hover {
+      border-color: #a4ff88;
+      box-shadow: 0 0 0 1px rgba(164, 255, 136, 0.3) inset;
+      transform: translateY(-1px);
+    }
+
+    .choices button:active,
+    .actions button:active {
+      transform: translateY(1px);
+    }
+
+    .choices button:disabled {
+      opacity: 0.45;
+      cursor: default;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .actions button {
+      text-align: center;
+      padding: 8px 16px;
+      font-size: 0.58rem;
+      min-width: 132px;
+    }
+
+    .actions button.warn {
+      color: #ffe7a8;
+      border-color: rgba(249, 204, 106, 0.55);
+    }
+
+    .actions button.danger {
+      color: #ffd0cb;
+      border-color: rgba(255, 110, 96, 0.65);
+    }
+
+    .actions button.audio {
+      color: #c6e8ff;
+      border-color: rgba(114, 208, 255, 0.62);
+    }
+
+    .meta-note {
+      margin-top: 2px;
+      font-size: 0.54rem;
+      color: #8fa88b;
+      letter-spacing: 0.01em;
+      text-align: right;
+    }
+
+    @media (max-width: 900px) {
+      .content {
+        grid-template-columns: 1fr;
+        width: min(860px, 100% - 16px);
+      }
+
+      .status {
+        position: static;
+      }
+
+      .game {
+        min-height: auto;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .header-band {
+        min-height: 48px;
+        gap: 0 24px;
+        padding: 0 12px;
+      }
+
+      .nav-link {
+        font-size: 0.78rem;
+      }
+
+      .nav-link img {
+        width: 28px;
+        height: 28px;
+      }
+
+      .nav-spacer,
+      .header-band > .nav-link:nth-child(2),
+      .header-band > .nav-link:nth-child(3),
+      .header-band > .nav-link:nth-child(4),
+      .header-band > .nav-link:nth-child(5),
+      .header-band > .nav-link:nth-child(6),
+      .header-band > .nav-link:nth-child(7),
+      .header-band > .howto-link {
+        display: none;
+      }
+
+      .content {
+        width: calc(100% - 12px);
+        gap: 12px;
+        margin-top: 10px;
+      }
+
+      .game {
+        padding: 12px;
+      }
+
+      .choices {
+        grid-template-columns: 1fr;
+      }
+
+      .actions {
+        justify-content: stretch;
+      }
+
+      .actions button {
+        width: 100%;
+        min-width: 0;
+      }
+
+      .scene-card {
+        min-height: 172px;
+      }
+
+      .scene-layer.icon {
+        background-size: 122px 122px;
+      }
+
+      .howto-text {
+        font-size: 0.5rem;
+        max-width: 60px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="header-band" aria-label="Header">
+    <a class="nav-link" href="/"><img src="../../images/home_icon.png" alt="Home icon" />Home</a>
+    <a class="nav-link" href="/map/"><img src="../../images/map_icon.webp" alt="Map icon" />Map</a>
+    <a class="nav-link" href="/plugins/"><img src="../../images/plugins_icon.png" alt="Plugins icon" />Plugins</a>
+    <a class="nav-link" href="/wiki/"><img src="../../images/wiki_icon.png" alt="Wiki icon" />Wiki</a>
+    <a class="nav-link" href="/chat/"><img src="../../images/chat_icon.png" alt="Chat icon" />Chat</a>
+    <a class="nav-link" href="https://discord.gg/vVvs7tN5p7" target="_blank" rel="noopener noreferrer"><img src="../../images/discord_icon.png" alt="Discord icon" />Discord</a>
+    <div class="nav-spacer"></div>
+    <a class="nav-link" href="https://eaglercraft.com/play/?version=b1.7.3" target="_blank" rel="noopener noreferrer" title="Eaglercraft"><img src="../../images/eaglercraft_icon.png" alt="Eaglercraft" /></a>
+    <div class="nav-dropdown" id="gamesDropdown">
+      <a class="nav-link" href="/games/"><img src="../../images/game_icon.png" alt="Games icon" />Games</a>
+      <div class="nav-dropdown-menu">
+        <a class="dropdown-link" href="/games/?game=0"><img src="../../images/Game%20Links/flappy-chicken.png" alt="" />Flappy Chicken</a>
+        <a class="dropdown-link" href="/games/?game=1"><img src="../../images/Game%20Links/blocktris.png" alt="" />Blocktris</a>
+        <a class="dropdown-link" href="/games/?game=2"><img src="../../images/Game%20Links/hatch-snake.webp" alt="" />Hatch (Snake)</a>
+        <a class="dropdown-link" href="/games/?game=3"><img src="../../images/Game%20Links/minecreeper.png" alt="" />Minecreeper</a>
+        <a class="dropdown-link" href="/games/?game=4"><img src="../../images/Game%20Links/block-crush.png" alt="" />Block Crush</a>
+        <a class="dropdown-link" href="/games/?game=5"><img src="../../images/Game%20Links/mine-dungeon.png" alt="" />Mine Dungeon</a>
+        <a class="dropdown-link" href="/games/?game=6"><img src="../../images/Game%20Links/mine-blocks.png" alt="" />Mine Blocks</a>
+        <a class="dropdown-link" href="/games/?game=7"><img src="../../images/Game%20Links/mine-blocks-2.png" alt="" />Mine Blocks 2</a>
+        <a class="dropdown-link current" href="/games/wizardry/"><img src="../../images/mobs/2d/Player_Head.png" alt="" />Wizardry Adventure</a>
+        <hr />
+        <a class="dropdown-more" href="/games/more-links/">More Links &#8250;</a>
+      </div>
+    </div>
+    <a class="nav-link howto-link" href="/how-to/"><span class="howto-text">How to Join &amp; more</span><img src="../../images/how-to_icon.gif" alt="How to icon" /></a>
+  </header>
+
+  <main class="content">
+    <aside class="panel status">
+      <div class="title-block">
+        <h1>Wizardry</h1>
+        <p>Cobble Catacombs - click through cursed chambers, gather relics, and survive the Warden below.</p>
+      </div>
+      <div class="texture-face" aria-hidden="true"></div>
+      <div class="meters">
+        <div class="meter">
+          <strong>HP</strong>
+          <div class="meter-track"><div class="meter-fill hp" id="hpBar"></div></div>
+        </div>
+        <div class="meter">
+          <strong>Mana</strong>
+          <div class="meter-track"><div class="meter-fill mana" id="manaBar"></div></div>
+        </div>
+        <div class="meter">
+          <strong>Nerve</strong>
+          <div class="meter-track"><div class="meter-fill sanity" id="sanityBar"></div></div>
+        </div>
+      </div>
+      <div class="resources">
+        <div class="resource-row">Gold <span id="goldCount">0</span></div>
+        <div class="resource-row">Keys <span id="keyCount">0</span></div>
+        <div class="resource-row">Relics <span id="relicCount">0</span></div>
+        <div class="resource-row">Depth <span id="depthCount">0</span></div>
+      </div>
+      <div class="records" id="recordBox">
+        <strong>Local Records</strong>
+        <div class="record-row">Fastest Win <span id="fastestWin">--:--</span></div>
+        <div class="record-row">Deepest Success <span id="deepestRun">0</span></div>
+        <div class="record-row">Total Wins <span id="totalWins">0</span></div>
+        <button id="resetRecordsBtn" class="records-reset">Reset Records</button>
+      </div>
+      <div class="inventory" id="inventoryBox"><strong>Satchel</strong><br />Empty</div>
+    </aside>
+
+    <section class="panel game">
+      <div class="scene-card" id="sceneCard" role="img" aria-label="Current adventure scene">
+        <div class="scene-layer base" id="sceneBase"></div>
+        <div class="scene-layer overlay"></div>
+        <div class="scene-layer icon" id="sceneIcon"></div>
+        <div class="scene-layer grain"></div>
+        <div class="scene-caption" id="sceneCaption"></div>
+      </div>
+
+      <div class="log" id="logBox" aria-live="polite"></div>
+
+      <div class="choices" id="choices"></div>
+
+      <div class="actions">
+        <button id="soundBtn" class="audio">Sound: Off</button>
+        <button id="castBtn" class="warn">Cast Arcane Ward (4 mana)</button>
+        <button id="restBtn">Steady Breath (+mana, +nerve)</button>
+        <button id="restartBtn" class="danger">Restart Delve</button>
+      </div>
+      <div class="meta-note">Tip: the dungeon changes with each click, but relics only count when you survive.</div>
+    </section>
+  </main>
+
+  <script>
+    (function () {
+      var header = document.querySelector('.header-band');
+      if (!header) return;
+      function checkHeader() {
+        header.classList.toggle('wrapped', header.scrollHeight > 48);
+      }
+      function updatePadding() {
+        document.body.style.paddingTop = header.offsetHeight + 'px';
+      }
+      var obs = new ResizeObserver(function () {
+        checkHeader();
+        updatePadding();
+      });
+      obs.observe(header);
+      checkHeader();
+      updatePadding();
+    }());
+  </script>
+
+  <script>
+    (function () {
+      var state = {
+        hp: 20,
+        maxHp: 20,
+        mana: 10,
+        maxMana: 10,
+        sanity: 12,
+        maxSanity: 12,
+        gold: 0,
+        keys: 0,
+        relics: 0,
+        depth: 0,
+        ward: 0,
+        inventory: [],
+        node: 'entrance',
+        lastNodeLogged: null,
+        startedAt: Date.now(),
+        gameOver: false,
+        won: false
+      };
+
+      var STORAGE_KEY = 'r2b_wizardry_records_v1';
+      var records = loadRecords();
+      var audio = {
+        enabled: false,
+        initialized: false,
+        ctx: null,
+        master: null,
+        ambienceGain: null,
+        droneA: null,
+        droneB: null,
+        wobble: null,
+        hiss: null,
+        hissFilter: null
+      };
+
+      var icons = {
+        entrance: '../../images/mobs/2d/Player_Head.png',
+        library: '../../images/minecraft/crafting_bench.png',
+        pit: '../../images/mobs/2d/Zombie_Head.png',
+        shrine: '../../images/minecraft/furnace.png',
+        echo: '../../images/mobs/2d/Skeleton_Skull.png',
+        vault: '../../images/mobs/2d/Creeper_Head.png',
+        boss: '../../images/mobs/3d/Head.png',
+        win: '../../images/mobs/3d/Zombie_Head.png',
+        loss: '../../images/mobs/3d/Skeleton_Skull.png'
+      };
+
+      var ambience = {
+        entrance: { pos: '0 0', tone: 'A torch crackles beside cracked stone stairs.' },
+        library: { pos: '-48px -16px', tone: 'Books hum quietly as if they remember your name.' },
+        pit: { pos: '-32px -80px', tone: 'Rotten air rises from a broken shaft in the floor.' },
+        shrine: { pos: '-96px -16px', tone: 'An old furnace altar glows with ember runes.' },
+        echo: { pos: '-144px -64px', tone: 'Armor clinks in the dark, then suddenly stops.' },
+        vault: { pos: '-16px -128px', tone: 'Gold glitters across pressure plates and wires.' },
+        boss: { pos: '-112px -112px', tone: 'The Warden stirs behind a deepslate gate.' },
+        win: { pos: '-176px -16px', tone: 'The relic sings while daylight floods the exit.' },
+        loss: { pos: '-176px -96px', tone: 'Your footsteps fade into the stone forever.' }
+      };
+
+      var nodes = {
+        entrance: {
+          text: 'You descend into the Cobble Catacombs with only a chipped wand and a stubborn will.',
+          options: [
+            { label: 'Take the lantern-lit stair', to: 'library', effect: function () { adjust('mana', 1); adjust('sanity', 1); state.depth += 1; log('Lantern soot coats your sleeves. You feel steady.', 'note'); } },
+            { label: 'Drop through the cracked shaft', to: 'pit', effect: function () { adjust('hp', -2); state.depth += 2; log('You land hard among broken stone.', 'warn'); } }
+          ]
+        },
+        library: {
+          text: 'Dusty shelves hide spell fragments, maps, and traps made of string and bones.',
+          options: [
+            { label: 'Decode a spell tablet', to: 'shrine', effect: function () { adjust('mana', 2); maybeFind('Arcane Tablet', 0.6); state.depth += 1; } },
+            { label: 'Search for hidden cache', to: 'vault', effect: function () { gainGold(rand(2, 6)); if (chance(0.35)) gainKeys(1); adjust('sanity', -1); state.depth += 1; } },
+            { label: 'Retreat to stairwell', to: 'entrance', effect: function () { adjust('sanity', 1); } }
+          ]
+        },
+        pit: {
+          text: 'Bones and old helmets crunch under your boots. Something watches from the dark lip above.',
+          options: [
+            { label: 'Fight through cave spiders', to: 'echo', effect: function () { combat(3, 7, 0.55, 'You blast the spiders with sparks.', 'Spiders sink fangs into your arm.'); state.depth += 1; } },
+            { label: 'Scavenge abandoned packs', to: 'library', effect: function () { if (chance(0.55)) { gainGold(rand(3, 8)); maybeFind('Torn Spell Pouch', 0.4); } else { adjust('hp', -3); log('A tripwire snaps and darts hit your side.', 'bad'); } state.depth += 1; } }
+          ]
+        },
+        shrine: {
+          text: 'A furnace idol asks for tribute. The walls are etched with eyes and warning sigils.',
+          options: [
+            { label: 'Offer 3 gold for blessing', to: 'echo', requirement: function () { return state.gold >= 3; }, effect: function () { state.gold -= 3; adjust('hp', 4); adjust('mana', 2); log('Warm light seals your wounds.', 'good'); state.depth += 1; } },
+            { label: 'Steal the ember gem', to: 'vault', effect: function () { maybeFind('Ember Gem', 0.9); adjust('hp', -4); adjust('sanity', -2); log('A curse lashes your chest as you run.', 'bad'); state.depth += 2; } },
+            { label: 'Read warning runes', to: 'boss', effect: function () { adjust('mana', 1); adjust('sanity', 2); log('The runes reveal the Warden gate nearby.', 'note'); state.depth += 1; } }
+          ]
+        },
+        echo: {
+          text: 'A hall of armor echoes every breath. One helm turns toward you with blue fire in its eyes.',
+          options: [
+            { label: 'Duel the echo knight', to: 'vault', effect: function () { combat(4, 8, 0.5, 'Your ward cracks the echo knight.', 'The knight cleaves through your shoulder.'); if (chance(0.45)) gainKeys(1); state.depth += 1; } },
+            { label: 'Sneak through side vents', to: 'boss', effect: function () { var ok = chance(0.62); if (ok) { adjust('sanity', -1); log('You slip by unseen and hear deep vibrations ahead.', 'note'); } else { adjust('hp', -4); log('A hidden blade catches your cloak and skin.', 'bad'); } state.depth += 1; } },
+            { label: 'Fall back to shrine', to: 'shrine', effect: function () { adjust('sanity', 1); } }
+          ]
+        },
+        vault: {
+          text: 'An iron vault door sits behind redstone locks. A hum shakes dust from the ceiling.',
+          options: [
+            { label: 'Use key to open relic chest', to: 'boss', requirement: function () { return state.keys >= 1; }, effect: function () { state.keys -= 1; state.relics += 1; gainGold(rand(5, 12)); maybeFind('Relic Shard', 1); log('You claim a relic shard from obsidian silk.', 'good'); state.depth += 1; } },
+            { label: 'Force the lock with wand', to: 'boss', effect: function () { adjust('mana', -2); if (chance(0.5)) { state.relics += 1; maybeFind('Cracked Relic', 1); log('The lock pops and sparks shower the room.', 'good'); } else { adjust('hp', -5); log('The lock explodes and throws you back.', 'bad'); } state.depth += 1; } },
+            { label: 'Leave before alarms trigger', to: 'echo', effect: function () { adjust('sanity', 1); state.depth += 1; } }
+          ]
+        },
+        boss: {
+          text: 'The Warden of Cobble awakens. Deepslate plates shift as it rises from the altar pit.',
+          options: [
+            { label: 'Unleash all remaining mana', to: 'win', effect: function () { var power = state.mana + (state.relics * 2) + (state.ward ? 3 : 0); if (power >= 10) { adjust('mana', -state.mana); adjust('sanity', -1); log('A storm of blue fire cracks the Warden shell.', 'good'); } else { adjust('hp', -8); adjust('mana', -4); log('Your spell sputters against deepslate armor.', 'bad'); if (state.hp > 0) { return { stay: true }; } } state.depth += 1; } },
+            { label: 'Use relic to seal the gate', to: 'win', requirement: function () { return state.relics >= 1; }, effect: function () { state.relics -= 1; adjust('sanity', -2); log('The relic fractures and binds the Warden in stone.', 'good'); state.depth += 1; } },
+            { label: 'Try to flee upward', to: 'loss', effect: function () { var escaped = chance(0.35 + (state.keys * 0.08)); if (escaped) { log('You escape, but the catacombs remain cursed.', 'warn'); state.won = false; state.gameOver = true; state.node = 'loss'; render(); return; } adjust('hp', -9); log('The Warden slams the tunnel shut behind you.', 'bad'); if (state.hp <= 0) defeat('The tunnel collapses under deepslate fists.'); } }
+          ]
+        },
+        win: {
+          text: 'You stagger into moonlight with the catacombs silent behind you. The village bells ring at dawn.',
+          options: [
+            { label: 'Begin another delve', to: 'entrance', effect: function () { hardReset(); } }
+          ],
+          enter: function () {
+            if (!state.gameOver) {
+              state.gameOver = true;
+              state.won = true;
+              gainGold(8 + state.relics * 4 + Math.max(0, state.depth - 4));
+              adjust('sanity', 2);
+              commitWinRecord();
+              log('Victory! The villagers reward your survival with coin and songs.', 'good');
+            }
+          }
+        },
+        loss: {
+          text: 'You are carried out by strangers at sunrise. The dungeon keeps what it took.',
+          options: [
+            { label: 'Return to the stairs', to: 'entrance', effect: function () { hardReset(); } }
+          ],
+          enter: function () {
+            if (!state.gameOver) {
+              state.gameOver = true;
+              state.won = false;
+              log('Defeat. Your satchel is lighter and your hands still shaking.', 'bad');
+            }
+          }
+        }
+      };
+
+      var refs = {
+        hpBar: document.getElementById('hpBar'),
+        manaBar: document.getElementById('manaBar'),
+        sanityBar: document.getElementById('sanityBar'),
+        gold: document.getElementById('goldCount'),
+        keys: document.getElementById('keyCount'),
+        relics: document.getElementById('relicCount'),
+        depth: document.getElementById('depthCount'),
+        fastestWin: document.getElementById('fastestWin'),
+        deepestRun: document.getElementById('deepestRun'),
+        totalWins: document.getElementById('totalWins'),
+        resetRecords: document.getElementById('resetRecordsBtn'),
+        inventory: document.getElementById('inventoryBox'),
+        caption: document.getElementById('sceneCaption'),
+        icon: document.getElementById('sceneIcon'),
+        base: document.getElementById('sceneBase'),
+        choices: document.getElementById('choices'),
+        log: document.getElementById('logBox'),
+        sound: document.getElementById('soundBtn'),
+        cast: document.getElementById('castBtn'),
+        rest: document.getElementById('restBtn'),
+        restart: document.getElementById('restartBtn')
+      };
+
+      function rand(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+      }
+
+      function chance(probability) {
+        return Math.random() < probability;
+      }
+
+      function clamp(value, min, max) {
+        return Math.max(min, Math.min(max, value));
+      }
+
+      function loadRecords() {
+        try {
+          var raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) {
+            return { fastestWinMs: null, deepestSuccess: 0, wins: 0 };
+          }
+          var parsed = JSON.parse(raw);
+          return {
+            fastestWinMs: typeof parsed.fastestWinMs === 'number' ? parsed.fastestWinMs : null,
+            deepestSuccess: typeof parsed.deepestSuccess === 'number' ? parsed.deepestSuccess : 0,
+            wins: typeof parsed.wins === 'number' ? parsed.wins : 0
+          };
+        } catch (_) {
+          return { fastestWinMs: null, deepestSuccess: 0, wins: 0 };
+        }
+      }
+
+      function saveRecords() {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+        } catch (_) {
+          // Ignore storage failures in private mode or strict browser settings.
+        }
+      }
+
+      function formatDuration(ms) {
+        if (typeof ms !== 'number' || !isFinite(ms) || ms < 0) {
+          return '--:--';
+        }
+        var totalSeconds = Math.round(ms / 1000);
+        var minutes = Math.floor(totalSeconds / 60);
+        var seconds = totalSeconds % 60;
+        return String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0');
+      }
+
+      function renderRecords() {
+        refs.fastestWin.textContent = formatDuration(records.fastestWinMs);
+        refs.deepestRun.textContent = String(records.deepestSuccess);
+        refs.totalWins.textContent = String(records.wins);
+      }
+
+      function commitWinRecord() {
+        var elapsed = Date.now() - state.startedAt;
+        if (records.fastestWinMs === null || elapsed < records.fastestWinMs) {
+          records.fastestWinMs = elapsed;
+          log('New fastest win: ' + formatDuration(elapsed) + '.', 'good');
+        }
+        if (state.depth > records.deepestSuccess) {
+          records.deepestSuccess = state.depth;
+          log('New deepest successful run: ' + state.depth + '.', 'good');
+        }
+        records.wins += 1;
+        saveRecords();
+        renderRecords();
+      }
+
+      function buildNoiseBuffer(ctx) {
+        var length = Math.floor(ctx.sampleRate * 1.8);
+        var buffer = ctx.createBuffer(1, length, ctx.sampleRate);
+        var data = buffer.getChannelData(0);
+        for (var i = 0; i < length; i += 1) {
+          data[i] = (Math.random() * 2 - 1) * 0.35;
+        }
+        return buffer;
+      }
+
+      function initAudio() {
+        if (audio.initialized) return;
+        var Ctx = window.AudioContext || window.webkitAudioContext;
+        if (!Ctx) return;
+        audio.ctx = new Ctx();
+        audio.master = audio.ctx.createGain();
+        audio.master.gain.value = 0.0001;
+        audio.master.connect(audio.ctx.destination);
+
+        audio.ambienceGain = audio.ctx.createGain();
+        audio.ambienceGain.gain.value = 0.08;
+        audio.ambienceGain.connect(audio.master);
+
+        audio.droneA = audio.ctx.createOscillator();
+        audio.droneA.type = 'triangle';
+        audio.droneA.frequency.value = 58;
+        var droneAGain = audio.ctx.createGain();
+        droneAGain.gain.value = 0.07;
+        audio.droneA.connect(droneAGain).connect(audio.ambienceGain);
+
+        audio.droneB = audio.ctx.createOscillator();
+        audio.droneB.type = 'sine';
+        audio.droneB.frequency.value = 87;
+        var droneBGain = audio.ctx.createGain();
+        droneBGain.gain.value = 0.04;
+        audio.droneB.connect(droneBGain).connect(audio.ambienceGain);
+
+        audio.wobble = audio.ctx.createOscillator();
+        audio.wobble.type = 'sine';
+        audio.wobble.frequency.value = 0.11;
+        var wobbleGain = audio.ctx.createGain();
+        wobbleGain.gain.value = 6;
+        audio.wobble.connect(wobbleGain);
+        wobbleGain.connect(audio.droneA.frequency);
+
+        audio.hiss = audio.ctx.createBufferSource();
+        audio.hiss.buffer = buildNoiseBuffer(audio.ctx);
+        audio.hiss.loop = true;
+        audio.hissFilter = audio.ctx.createBiquadFilter();
+        audio.hissFilter.type = 'highpass';
+        audio.hissFilter.frequency.value = 900;
+        var hissGain = audio.ctx.createGain();
+        hissGain.gain.value = 0.02;
+        audio.hiss.connect(audio.hissFilter).connect(hissGain).connect(audio.ambienceGain);
+
+        audio.droneA.start();
+        audio.droneB.start();
+        audio.wobble.start();
+        audio.hiss.start();
+        audio.initialized = true;
+      }
+
+      function updateSoundButton() {
+        refs.sound.textContent = audio.enabled ? 'Sound: On' : 'Sound: Off';
+      }
+
+      function setSoundEnabled(enabled) {
+        audio.enabled = enabled;
+        if (enabled) {
+          initAudio();
+          if (audio.ctx && audio.ctx.state === 'suspended') {
+            audio.ctx.resume();
+          }
+        }
+        if (audio.master) {
+          var now = audio.ctx.currentTime;
+          audio.master.gain.cancelScheduledValues(now);
+          audio.master.gain.setValueAtTime(audio.master.gain.value, now);
+          audio.master.gain.linearRampToValueAtTime(enabled ? 0.28 : 0.0001, now + 0.25);
+        }
+        updateSoundButton();
+      }
+
+      function playSfx(kind) {
+        if (!audio.enabled || !audio.initialized || !audio.ctx || !audio.master) return;
+        var now = audio.ctx.currentTime;
+        var osc = audio.ctx.createOscillator();
+        var gain = audio.ctx.createGain();
+        osc.connect(gain).connect(audio.master);
+        if (kind === 'good') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(420, now);
+          osc.frequency.exponentialRampToValueAtTime(620, now + 0.13);
+          gain.gain.setValueAtTime(0.0001, now);
+          gain.gain.exponentialRampToValueAtTime(0.075, now + 0.02);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.26);
+          osc.start(now);
+          osc.stop(now + 0.28);
+          return;
+        }
+        if (kind === 'bad') {
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(170, now);
+          osc.frequency.exponentialRampToValueAtTime(95, now + 0.22);
+          gain.gain.setValueAtTime(0.0001, now);
+          gain.gain.exponentialRampToValueAtTime(0.06, now + 0.02);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.24);
+          osc.start(now);
+          osc.stop(now + 0.26);
+          return;
+        }
+        if (kind === 'warn') {
+          osc.type = 'square';
+          osc.frequency.setValueAtTime(280, now);
+          gain.gain.setValueAtTime(0.0001, now);
+          gain.gain.exponentialRampToValueAtTime(0.045, now + 0.015);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.14);
+          osc.start(now);
+          osc.stop(now + 0.16);
+          return;
+        }
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(300, now);
+        gain.gain.setValueAtTime(0.0001, now);
+        gain.gain.exponentialRampToValueAtTime(0.03, now + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.08);
+        osc.start(now);
+        osc.stop(now + 0.1);
+      }
+
+      function adjust(key, amount) {
+        var maxKey = 'max' + key.charAt(0).toUpperCase() + key.slice(1);
+        var max = state[maxKey] || 999;
+        state[key] = clamp(state[key] + amount, 0, max);
+        if (key === 'hp' && state.hp <= 0) {
+          defeat('Your body gives out in the dark.');
+        }
+      }
+
+      function gainGold(amount) {
+        state.gold += amount;
+        log('You gain ' + amount + ' gold.', 'good');
+      }
+
+      function gainKeys(amount) {
+        state.keys += amount;
+        log('You find a rusted key.', 'note');
+      }
+
+      function maybeFind(item, probability) {
+        if (chance(probability)) {
+          if (state.inventory.indexOf(item) === -1) {
+            state.inventory.push(item);
+          }
+          log('Loot found: ' + item + '.', 'note');
+        }
+      }
+
+      function combat(minDmg, maxDmg, winChance, winText, loseText) {
+        if (state.ward > 0) {
+          log('Your arcane ward absorbs the first strike.', 'good');
+          state.ward = 0;
+          if (chance(0.78)) {
+            log(winText, 'good');
+            return;
+          }
+        }
+
+        if (chance(winChance + (state.mana * 0.02))) {
+          log(winText, 'good');
+          adjust('mana', -1);
+        } else {
+          var dmg = rand(minDmg, maxDmg);
+          adjust('hp', -dmg);
+          adjust('sanity', -1);
+          log(loseText + ' (-' + dmg + ' HP)', 'bad');
+        }
+      }
+
+      function defeat(message) {
+        state.node = 'loss';
+        state.gameOver = true;
+        state.won = false;
+        log(message, 'bad');
+      }
+
+      function log(text, type) {
+        var line = document.createElement('p');
+        line.textContent = text;
+        line.className = type || 'note';
+        refs.log.appendChild(line);
+        refs.log.scrollTop = refs.log.scrollHeight;
+        if (type === 'good' || type === 'bad' || type === 'warn') {
+          playSfx(type);
+        }
+      }
+
+      function renderMeters() {
+        refs.hpBar.style.width = Math.round((state.hp / state.maxHp) * 100) + '%';
+        refs.manaBar.style.width = Math.round((state.mana / state.maxMana) * 100) + '%';
+        refs.sanityBar.style.width = Math.round((state.sanity / state.maxSanity) * 100) + '%';
+      }
+
+      function renderInventory() {
+        var lines = ['<strong>Satchel</strong>'];
+        if (!state.inventory.length) {
+          lines.push('Empty');
+        } else {
+          lines.push(state.inventory.join('<br />'));
+        }
+        if (state.ward > 0) {
+          lines.push('<br />Arcane Ward: ready');
+        }
+        refs.inventory.innerHTML = lines.join('<br />');
+      }
+
+      function optionEnabled(option) {
+        if (typeof option.requirement !== 'function') return true;
+        return option.requirement();
+      }
+
+      function renderChoices(node) {
+        refs.choices.innerHTML = '';
+        node.options.forEach(function (option) {
+          var btn = document.createElement('button');
+          btn.textContent = option.label;
+          var enabled = optionEnabled(option) && !state.gameOver;
+          btn.disabled = !enabled;
+          if (!enabled && option.requirement) {
+            btn.textContent += ' (requirements not met)';
+          }
+          btn.addEventListener('click', function () {
+            if (!enabled) return;
+            playSfx('note');
+            var effectResult;
+            if (typeof option.effect === 'function') {
+              effectResult = option.effect();
+            }
+            if (state.hp <= 0) {
+              render();
+              return;
+            }
+            if (effectResult && effectResult.stay) {
+              render();
+              return;
+            }
+            state.node = option.to;
+            var next = nodes[state.node];
+            if (next && typeof next.enter === 'function') {
+              next.enter();
+            }
+            render();
+          });
+          refs.choices.appendChild(btn);
+        });
+      }
+
+      function renderScene(nodeKey) {
+        var mood = ambience[nodeKey] || ambience.entrance;
+        refs.base.style.backgroundPosition = mood.pos;
+        refs.caption.textContent = mood.tone;
+        refs.icon.style.backgroundImage = 'url(' + (icons[nodeKey] || icons.entrance) + ')';
+      }
+
+      function render() {
+        renderMeters();
+        refs.gold.textContent = String(state.gold);
+        refs.keys.textContent = String(state.keys);
+        refs.relics.textContent = String(state.relics);
+        refs.depth.textContent = String(state.depth);
+        renderRecords();
+        renderInventory();
+
+        var node = nodes[state.node] || nodes.entrance;
+        renderScene(state.node);
+        if (state.lastNodeLogged !== state.node) {
+          log(node.text, state.gameOver ? (state.won ? 'good' : 'warn') : 'note');
+          state.lastNodeLogged = state.node;
+        }
+        renderChoices(node);
+        refs.cast.disabled = state.gameOver;
+        refs.rest.disabled = state.gameOver;
+        updateSoundButton();
+      }
+
+      function hardReset() {
+        state.hp = 20;
+        state.maxHp = 20;
+        state.mana = 10;
+        state.maxMana = 10;
+        state.sanity = 12;
+        state.maxSanity = 12;
+        state.gold = 0;
+        state.keys = 0;
+        state.relics = 0;
+        state.depth = 0;
+        state.ward = 0;
+        state.inventory = [];
+        state.node = 'entrance';
+        state.lastNodeLogged = null;
+        state.startedAt = Date.now();
+        state.gameOver = false;
+        state.won = false;
+        refs.log.innerHTML = '';
+        log('A new torch is lit. You return to the catacombs.', 'note');
+        render();
+      }
+
+      refs.sound.addEventListener('click', function () {
+        setSoundEnabled(!audio.enabled);
+        playSfx('note');
+      });
+
+      refs.resetRecords.addEventListener('click', function () {
+        records = { fastestWinMs: null, deepestSuccess: 0, wins: 0 };
+        saveRecords();
+        renderRecords();
+        playSfx('warn');
+        log('Local records reset.', 'warn');
+      });
+
+      refs.cast.addEventListener('click', function () {
+        if (state.gameOver) return;
+        if (state.mana < 4) {
+          log('Not enough mana for Arcane Ward.', 'warn');
+          return;
+        }
+        adjust('mana', -4);
+        state.ward = 1;
+        adjust('sanity', 1);
+        playSfx('note');
+        log('A thin blue shield wraps around you.', 'good');
+        renderMeters();
+        renderInventory();
+      });
+
+      refs.rest.addEventListener('click', function () {
+        if (state.gameOver) return;
+        playSfx('note');
+        adjust('mana', 2);
+        adjust('sanity', 1);
+        if (chance(0.28)) {
+          adjust('hp', -1);
+          log('Rest is cut short by skittering footsteps. (-1 HP)', 'warn');
+        } else {
+          log('You slow your breath and steady your hands.', 'note');
+        }
+        renderMeters();
+      });
+
+      refs.restart.addEventListener('click', hardReset);
+
+      log('Wizardry module initialized. Choose your first path.', 'note');
+      render();
+    }());
+  </script>
+</body>
+</html>
