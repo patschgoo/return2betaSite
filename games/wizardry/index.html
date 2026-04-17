@@ -592,6 +592,18 @@
       text-align: right;
     }
 
+    /* Nav carousel */
+    .nav-carousel { display: none; width: 100%; align-items: center; justify-content: center; height: 48px; }
+    .nav-caret { background: none; border: none; color: rgba(255,255,255,0.8); font-size: 1.1rem; cursor: pointer; padding: 0 14px; height: 48px; display: flex; align-items: center; flex-shrink: 0; transition: color 0.15s; }
+    .nav-caret:hover { color: #fff; }
+    .nav-caret:disabled { opacity: 0.2; cursor: default; }
+    .nav-carousel-items { display: flex; align-items: center; justify-content: center; gap: 20px; flex: 1; overflow: hidden; }
+    .nav-carousel .nav-link { white-space: nowrap; }
+    .nav-carousel .nav-link.nav-current { color: #c8e8c8; text-shadow: 0 0 6px rgba(255,255,255,0.2); }
+    .header-band > .nav-link.nav-current,
+    .header-band > .nav-dropdown > .nav-link.nav-current { color: #c8e8c8; text-shadow: 0 0 6px rgba(255,255,255,0.2); }
+    .nav-carousel .howto-link { white-space: normal; }
+
     @media (max-width: 900px) {
       .content {
         grid-template-columns: 1fr;
@@ -611,27 +623,25 @@
       .header-band {
         min-height: 48px;
         gap: 0 24px;
-        padding: 0 12px;
+        padding: 0 16px;
       }
 
-      .nav-link {
-        font-size: 0.78rem;
-      }
+      .nav-link { font-size: 0.8rem; }
+      .nav-link img { height: 28px; width: 28px; }
 
-      .nav-link img {
-        width: 28px;
-        height: 28px;
-      }
+      .header-band > .nav-link,
+      .header-band > .nav-dropdown,
+      .header-band > .nav-spacer { display: none; }
 
-      .nav-spacer,
-      .header-band > .nav-link:nth-child(2),
-      .header-band > .nav-link:nth-child(3),
-      .header-band > .nav-link:nth-child(4),
-      .header-band > .nav-link:nth-child(5),
-      .header-band > .nav-link:nth-child(6),
-      .header-band > .nav-link:nth-child(7),
-      .header-band > .howto-link {
-        display: none;
+      .nav-carousel { display: flex; }
+      .nav-caret { padding: 0 10px; }
+      .nav-carousel-items { gap: 8px; }
+
+      .howto-text {
+        font-size: 0.5rem;
+        max-width: 60px;
+        line-height: 1.15;
+        text-align: right;
       }
 
       .content {
@@ -669,6 +679,10 @@
         font-size: 0.5rem;
         max-width: 60px;
       }
+
+      .nav-dropdown.open { display: block !important; position: fixed; top: 48px; left: 0; right: 0; z-index: 100; }
+      .nav-dropdown.open > .nav-link { display: none !important; }
+      .nav-dropdown.open .nav-dropdown-menu { position: static; transform: none; width: 100%; border-radius: 0; border-left: none; border-right: none; }
     }
   </style>
 </head>
@@ -699,6 +713,11 @@
       </div>
     </div>
     <a class="nav-link howto-link" href="/how-to/"><span class="howto-text">How to Join &amp; more</span><img src="../../images/how-to_icon.gif" alt="How to icon" /></a>
+    <div class="nav-carousel" id="navCarousel">
+      <button class="nav-caret" id="navPrev" aria-label="Previous pages">&#9664;</button>
+      <div class="nav-carousel-items" id="navCarouselItems"></div>
+      <button class="nav-caret" id="navNext" aria-label="Next pages">&#9654;</button>
+    </div>
   </header>
 
   <main class="content">
@@ -778,6 +797,76 @@
       obs.observe(header);
       checkHeader();
       updatePadding();
+    }());
+  </script>
+
+  <script>
+    (function () {
+      var header = document.querySelector('.header-band');
+      if (!header) return;
+      var allLinks = Array.from(header.querySelectorAll(':scope > .nav-link, :scope > .nav-dropdown > .nav-link'));
+      var spacer = header.querySelector(':scope > .nav-spacer');
+      var carousel = document.getElementById('navCarousel');
+      var prevBtn = document.getElementById('navPrev');
+      var nextBtn = document.getElementById('navNext');
+      var itemsEl = document.getElementById('navCarouselItems');
+      if (!carousel || !prevBtn || !nextBtn || !itemsEl || !allLinks.length) return;
+      var N = 3, page = 0;
+      var total = Math.ceil(allLinks.length / N);
+      var cp = location.pathname.replace(/\/$/, '') || '/';
+      for (var i = 0; i < allLinks.length; i++) {
+        var lh = (allLinks[i].getAttribute('href') || '').replace(/\/$/, '') || '/';
+        if (lh === cp) { allLinks[i].classList.add('nav-current'); page = Math.floor(i / N); break; }
+      }
+      function render() {
+        itemsEl.innerHTML = '';
+        allLinks.slice(page * N, (page + 1) * N).forEach(function (a) {
+          var cl = a.cloneNode(true);
+          var lh = (a.getAttribute('href') || '').replace(/\/$/, '') || '/';
+          if (lh === cp) cl.classList.add('nav-current');
+          itemsEl.appendChild(cl);
+        });
+        prevBtn.disabled = page === 0;
+        nextBtn.disabled = page >= total - 1;
+      }
+      prevBtn.addEventListener('click', function () { if (page > 0) { page--; render(); } });
+      nextBtn.addEventListener('click', function () { if (page < total - 1) { page++; render(); } });
+      render();
+      itemsEl.addEventListener('click', function(e) {
+        var link = e.target.closest('a[href$="/games/"]');
+        if (link) { e.preventDefault(); var dd = document.getElementById('gamesDropdown'); if (dd) dd.classList.toggle('open'); }
+      });
+      document.addEventListener('click', function(e) {
+        if (!e.target.closest('.nav-dropdown') && !e.target.closest('#navCarouselItems')) {
+          var dd = document.getElementById('gamesDropdown'); if (dd) dd.classList.remove('open');
+        }
+      });
+      var forced = false;
+      var dropdown = header.querySelector(':scope > .nav-dropdown');
+      function forceOn() {
+        if (forced) return; forced = true;
+        allLinks.forEach(function (a) { a.style.display = 'none'; });
+        if (dropdown) dropdown.style.display = 'none';
+        if (spacer) spacer.style.display = 'none';
+        carousel.style.display = 'flex';
+      }
+      function forceOff() {
+        if (!forced) return; forced = false;
+        allLinks.forEach(function (a) { a.style.display = ''; });
+        if (dropdown) dropdown.style.display = '';
+        if (spacer) spacer.style.display = '';
+        if (window.innerWidth > 720) carousel.style.display = 'none';
+      }
+      if (window.innerWidth > 720 && header.scrollHeight > 100) forceOn();
+      var rt;
+      window.addEventListener('resize', function () {
+        clearTimeout(rt);
+        rt = setTimeout(function () {
+          if (window.innerWidth <= 720) { forceOff(); return; }
+          forceOff();
+          requestAnimationFrame(function () { if (header.scrollHeight > 100) forceOn(); });
+        }, 150);
+      });
     }());
   </script>
 
@@ -892,9 +981,9 @@
         boss: {
           text: 'The Warden of Cobble awakens. Deepslate plates shift as it rises from the altar pit.',
           options: [
-            { label: 'Unleash all remaining mana', to: 'win', effect: function () { var power = state.mana + (state.relics * 2) + (state.ward ? 3 : 0); if (power >= 10) { adjust('mana', -state.mana); adjust('sanity', -1); log('A storm of blue fire cracks the Warden shell.', 'good'); } else { adjust('hp', -8); adjust('mana', -4); log('Your spell sputters against deepslate armor.', 'bad'); if (state.hp > 0) { return { stay: true }; } } state.depth += 1; } },
+            { label: 'Unleash all remaining mana', to: 'win', effect: function () { var power = state.mana + (state.relics * 2) + (state.ward ? 3 : 0); if (power >= 10) { adjust('mana', -state.mana); adjust('sanity', -1); log('A storm of blue fire cracks the Warden shell.', 'good'); } else { log('Your spell sputters against deepslate armor.', 'bad'); adjust('hp', -8); adjust('mana', -4); if (state.hp > 0) { return { stay: true }; } } state.depth += 1; } },
             { label: 'Use relic to seal the gate', to: 'win', requirement: function () { return state.relics >= 1; }, effect: function () { state.relics -= 1; adjust('sanity', -2); log('The relic fractures and binds the Warden in stone.', 'good'); state.depth += 1; } },
-            { label: 'Try to flee upward', to: 'loss', effect: function () { var escaped = chance(0.35 + (state.keys * 0.08)); if (escaped) { log('You escape, but the catacombs remain cursed.', 'warn'); state.won = false; state.gameOver = true; state.node = 'loss'; render(); return; } adjust('hp', -9); log('The Warden slams the tunnel shut behind you.', 'bad'); if (state.hp <= 0) defeat('The tunnel collapses under deepslate fists.'); } }
+            { label: 'Try to flee upward', to: 'loss', effect: function () { var escaped = chance(0.35 + (state.keys * 0.08)); if (escaped) { log('You escape, but the catacombs remain cursed.', 'warn'); state.won = false; state.gameOver = true; return; } log('The Warden slams the tunnel shut behind you.', 'bad'); adjust('hp', -9); if (state.hp <= 0) defeat('The tunnel collapses under deepslate fists.'); } }
           ]
         },
         win: {
