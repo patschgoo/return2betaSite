@@ -1420,11 +1420,12 @@
       }
 
       /* ── Background music ─────────────────────────── */
-      var musicState = { enabled: false, gain: null, pad: null, timer: null, idx: 0, beat: 0 };
-      /* Dm pentatonic melody — two phrases that loop, darker dungeon feel */
-      var melodyA = [294, 349, 392, 349, 294, 262, 220, 262, 294, 349, 440, 392, 349, 294, 262, 220];
-      var melodyB = [196, 220, 262, 294, 262, 220, 196, 175, 196, 220, 262, 294, 349, 294, 262, 220];
-      var bassLine = [73, 73, 87, 87, 98, 98, 87, 87];
+      var musicState = { enabled: false, gain: null, pad: null, pad2: null, timer: null, idx: 0, beat: 0 };
+      /* Low Dm phrases — all notes in the 55–175 Hz range for a deep dungeon rumble */
+      var melodyA = [147, 131, 110, 98, 110, 131, 98, 87, 110, 98, 131, 110, 87, 98, 110, 87];
+      var melodyB = [98, 87, 73, 82, 98, 87, 73, 65, 73, 82, 98, 110, 98, 87, 73, 65];
+      var melodyC = [65, 73, 87, 98, 87, 73, 65, 55, 65, 73, 82, 87, 98, 87, 73, 65];
+      var bassLine = [55, 55, 44, 44, 49, 49, 44, 44, 37, 37, 44, 44, 49, 49, 55, 55];
 
       function initMusic() {
         if (musicState.gain) return;
@@ -1433,85 +1434,123 @@
         musicState.gain = audio.ctx.createGain();
         musicState.gain.gain.value = 0.0001;
         musicState.gain.connect(audio.ctx.destination);
-        /* low pad drone for atmosphere */
+        /* low pad drone */
         musicState.pad = audio.ctx.createOscillator();
         musicState.pad.type = 'sine';
-        musicState.pad.frequency.value = 147;
+        musicState.pad.frequency.value = 55;
         var padGain = audio.ctx.createGain();
-        padGain.gain.value = 0.025;
+        padGain.gain.value = 0.03;
         musicState.pad.connect(padGain).connect(musicState.gain);
         var padLfo = audio.ctx.createOscillator();
         padLfo.type = 'sine';
-        padLfo.frequency.value = 0.08;
+        padLfo.frequency.value = 0.06;
         var lfoGain = audio.ctx.createGain();
-        lfoGain.gain.value = 4;
+        lfoGain.gain.value = 3;
         padLfo.connect(lfoGain).connect(musicState.pad.frequency);
         musicState.pad.start();
         padLfo.start();
+        /* second pad a fifth above, triangle for texture */
+        musicState.pad2 = audio.ctx.createOscillator();
+        musicState.pad2.type = 'triangle';
+        musicState.pad2.frequency.value = 82;
+        var pad2Gain = audio.ctx.createGain();
+        pad2Gain.gain.value = 0.012;
+        musicState.pad2.connect(pad2Gain).connect(musicState.gain);
+        var pad2Lfo = audio.ctx.createOscillator();
+        pad2Lfo.type = 'sine';
+        pad2Lfo.frequency.value = 0.04;
+        var lfo2Gain = audio.ctx.createGain();
+        lfo2Gain.gain.value = 2;
+        pad2Lfo.connect(lfo2Gain).connect(musicState.pad2.frequency);
+        musicState.pad2.start();
+        pad2Lfo.start();
       }
 
       function playMusicNote() {
         if (!musicState.enabled || !musicState.gain || !audio.ctx) return;
         var now = audio.ctx.currentTime;
-        var phrases = musicState.beat < 32 ? melodyA : melodyB;
+        var phaseIdx = Math.floor(musicState.beat / 16) % 3;
+        var phrases = phaseIdx === 0 ? melodyA : phaseIdx === 1 ? melodyB : melodyC;
         var noteIdx = musicState.idx % phrases.length;
         var freq = phrases[noteIdx];
         musicState.idx++;
-        musicState.beat = (musicState.beat + 1) % 64;
+        musicState.beat = (musicState.beat + 1) % 48;
 
-        /* Main melody — sine with slow attack/release */
+        /* Main melody — low sine, gentle swell */
         var osc = audio.ctx.createOscillator();
         var g = audio.ctx.createGain();
         osc.type = 'sine';
         osc.frequency.value = freq;
         g.gain.setValueAtTime(0.0001, now);
-        g.gain.linearRampToValueAtTime(0.055, now + 0.5);
-        g.gain.linearRampToValueAtTime(0.035, now + 1.8);
-        g.gain.linearRampToValueAtTime(0.0001, now + 3.0);
+        g.gain.linearRampToValueAtTime(0.04, now + 0.8);
+        g.gain.linearRampToValueAtTime(0.025, now + 2.5);
+        g.gain.linearRampToValueAtTime(0.0001, now + 4.0);
         osc.connect(g).connect(musicState.gain);
         osc.start(now);
-        osc.stop(now + 3.2);
+        osc.stop(now + 4.2);
 
-        /* Octave-up shimmer — triangle, quieter and delayed */
-        var osc2 = audio.ctx.createOscillator();
-        var g2 = audio.ctx.createGain();
-        osc2.type = 'triangle';
-        osc2.frequency.value = freq * 2;
-        g2.gain.setValueAtTime(0.0001, now + 0.3);
-        g2.gain.linearRampToValueAtTime(0.018, now + 0.8);
-        g2.gain.linearRampToValueAtTime(0.0001, now + 2.4);
-        osc2.connect(g2).connect(musicState.gain);
-        osc2.start(now);
-        osc2.stop(now + 2.6);
-
-        /* Fifth harmony — adds depth every other note */
+        /* Soft triangle an octave below for rumble, every other note */
         if (noteIdx % 2 === 0) {
-          var osc3 = audio.ctx.createOscillator();
-          var g3 = audio.ctx.createGain();
-          osc3.type = 'sine';
-          osc3.frequency.value = freq * 1.5;
-          g3.gain.setValueAtTime(0.0001, now + 0.1);
-          g3.gain.linearRampToValueAtTime(0.015, now + 0.6);
-          g3.gain.linearRampToValueAtTime(0.0001, now + 2.0);
-          osc3.connect(g3).connect(musicState.gain);
-          osc3.start(now);
-          osc3.stop(now + 2.2);
+          var oscLow = audio.ctx.createOscillator();
+          var gLow = audio.ctx.createGain();
+          oscLow.type = 'triangle';
+          oscLow.frequency.value = freq * 0.5;
+          gLow.gain.setValueAtTime(0.0001, now + 0.2);
+          gLow.gain.linearRampToValueAtTime(0.02, now + 1.0);
+          gLow.gain.linearRampToValueAtTime(0.0001, now + 3.5);
+          oscLow.connect(gLow).connect(musicState.gain);
+          oscLow.start(now);
+          oscLow.stop(now + 3.7);
         }
 
-        /* Bass note — deep triangle tone every 4th beat */
+        /* Fifth harmony — quiet sine, every 3rd note */
+        if (noteIdx % 3 === 0) {
+          var osc5 = audio.ctx.createOscillator();
+          var g5 = audio.ctx.createGain();
+          osc5.type = 'sine';
+          osc5.frequency.value = freq * 1.5;
+          g5.gain.setValueAtTime(0.0001, now + 0.4);
+          g5.gain.linearRampToValueAtTime(0.012, now + 1.2);
+          g5.gain.linearRampToValueAtTime(0.0001, now + 3.0);
+          osc5.connect(g5).connect(musicState.gain);
+          osc5.start(now);
+          osc5.stop(now + 3.2);
+        }
+
+        /* Deep bass — every 4th beat */
         if (noteIdx % 4 === 0) {
-          var bassFreq = bassLine[Math.floor(musicState.beat / 8) % bassLine.length];
+          var bassFreq = bassLine[Math.floor(musicState.beat / 3) % bassLine.length];
           var oscB = audio.ctx.createOscillator();
           var gB = audio.ctx.createGain();
           oscB.type = 'triangle';
           oscB.frequency.value = bassFreq;
           gB.gain.setValueAtTime(0.0001, now);
-          gB.gain.linearRampToValueAtTime(0.04, now + 0.3);
-          gB.gain.linearRampToValueAtTime(0.025, now + 2.5);
-          gB.gain.linearRampToValueAtTime(0.0001, now + 4.0);
+          gB.gain.linearRampToValueAtTime(0.035, now + 0.5);
+          gB.gain.linearRampToValueAtTime(0.02, now + 3.5);
+          gB.gain.linearRampToValueAtTime(0.0001, now + 5.0);
           oscB.connect(gB).connect(musicState.gain);
           oscB.start(now);
-          oscB.stop(now + 4.2);
+          oscB.stop(now + 5.2);
+        }
+
+        /* Filtered noise wisp — subtle cave wind texture every 6th note */
+        if (noteIdx % 6 === 0) {
+          var nBuf = audio.ctx.createBuffer(1, Math.floor(audio.ctx.sampleRate * 2), audio.ctx.sampleRate);
+          var nData = nBuf.getChannelData(0);
+          for (var i = 0; i < nData.length; i++) nData[i] = (Math.random() * 2 - 1) * 0.15;
+          var nSrc = audio.ctx.createBufferSource();
+          nSrc.buffer = nBuf;
+          var nFilt = audio.ctx.createBiquadFilter();
+          nFilt.type = 'bandpass';
+          nFilt.frequency.value = 200;
+          nFilt.Q.value = 2;
+          var nGain = audio.ctx.createGain();
+          nGain.gain.setValueAtTime(0.0001, now);
+          nGain.gain.linearRampToValueAtTime(0.015, now + 0.8);
+          nGain.gain.linearRampToValueAtTime(0.0001, now + 2.5);
+          nSrc.connect(nFilt).connect(nGain).connect(musicState.gain);
+          nSrc.start(now);
+          nSrc.stop(now + 2.7);
         }
       }
 
@@ -1524,12 +1563,12 @@
             var t = audio.ctx.currentTime;
             musicState.gain.gain.cancelScheduledValues(t);
             musicState.gain.gain.setValueAtTime(musicState.gain.gain.value, t);
-            musicState.gain.gain.linearRampToValueAtTime(0.5, t + 0.5);
+            musicState.gain.gain.linearRampToValueAtTime(0.4, t + 0.8);
           }
           musicState.idx = 0;
           musicState.beat = 0;
           playMusicNote();
-          musicState.timer = setInterval(playMusicNote, 3200);
+          musicState.timer = setInterval(playMusicNote, 3800);
         } else {
           if (musicState.gain && audio.ctx) {
             var t2 = audio.ctx.currentTime;
