@@ -292,14 +292,23 @@
     .texture-face::after {
       content: '';
       position: absolute;
-      top: -14px;
-      left: calc(50% + 12px);
-      transform: translateX(-50%);
+      top: 4px;
+      left: calc(50% + 20px);
+      transform: translateX(-50%) rotate(10deg);
       width: 90px;
-      height: 90px;
+      height: 50px;
       background: url('../../images/wizardry/wizard_hat.png') center/contain no-repeat;
       image-rendering: pixelated;
       pointer-events: none;
+    }
+
+    .texture-face.hat-spin::after {
+      animation: hatSpin 2s linear infinite;
+    }
+
+    @keyframes hatSpin {
+      from { transform: translateX(-50%) rotate(10deg); }
+      to   { transform: translateX(-50%) rotate(370deg); }
     }
 
     .meters {
@@ -1411,8 +1420,11 @@
       }
 
       /* ── Background music ─────────────────────────── */
-      var musicState = { enabled: false, gain: null, timer: null, idx: 0 };
-      var musicNotes = [131, 165, 147, 196, 165, 175, 131, 110, 131, 147, 165, 131];
+      var musicState = { enabled: false, gain: null, pad: null, timer: null, idx: 0, beat: 0 };
+      /* Dm pentatonic melody — two phrases that loop, darker dungeon feel */
+      var melodyA = [294, 349, 392, 349, 294, 262, 220, 262, 294, 349, 440, 392, 349, 294, 262, 220];
+      var melodyB = [196, 220, 262, 294, 262, 220, 196, 175, 196, 220, 262, 294, 349, 294, 262, 220];
+      var bassLine = [73, 73, 87, 87, 98, 98, 87, 87];
 
       function initMusic() {
         if (musicState.gain) return;
@@ -1421,33 +1433,86 @@
         musicState.gain = audio.ctx.createGain();
         musicState.gain.gain.value = 0.0001;
         musicState.gain.connect(audio.ctx.destination);
+        /* low pad drone for atmosphere */
+        musicState.pad = audio.ctx.createOscillator();
+        musicState.pad.type = 'sine';
+        musicState.pad.frequency.value = 147;
+        var padGain = audio.ctx.createGain();
+        padGain.gain.value = 0.025;
+        musicState.pad.connect(padGain).connect(musicState.gain);
+        var padLfo = audio.ctx.createOscillator();
+        padLfo.type = 'sine';
+        padLfo.frequency.value = 0.08;
+        var lfoGain = audio.ctx.createGain();
+        lfoGain.gain.value = 4;
+        padLfo.connect(lfoGain).connect(musicState.pad.frequency);
+        musicState.pad.start();
+        padLfo.start();
       }
 
       function playMusicNote() {
         if (!musicState.enabled || !musicState.gain || !audio.ctx) return;
         var now = audio.ctx.currentTime;
-        var freq = musicNotes[musicState.idx % musicNotes.length];
+        var phrases = musicState.beat < 32 ? melodyA : melodyB;
+        var noteIdx = musicState.idx % phrases.length;
+        var freq = phrases[noteIdx];
         musicState.idx++;
+        musicState.beat = (musicState.beat + 1) % 64;
+
+        /* Main melody — sine with slow attack/release */
         var osc = audio.ctx.createOscillator();
         var g = audio.ctx.createGain();
         osc.type = 'sine';
         osc.frequency.value = freq;
         g.gain.setValueAtTime(0.0001, now);
-        g.gain.linearRampToValueAtTime(0.07, now + 0.4);
-        g.gain.linearRampToValueAtTime(0.0001, now + 2.2);
+        g.gain.linearRampToValueAtTime(0.055, now + 0.5);
+        g.gain.linearRampToValueAtTime(0.035, now + 1.8);
+        g.gain.linearRampToValueAtTime(0.0001, now + 3.0);
         osc.connect(g).connect(musicState.gain);
         osc.start(now);
-        osc.stop(now + 2.4);
+        osc.stop(now + 3.2);
+
+        /* Octave-up shimmer — triangle, quieter and delayed */
         var osc2 = audio.ctx.createOscillator();
         var g2 = audio.ctx.createGain();
         osc2.type = 'triangle';
         osc2.frequency.value = freq * 2;
-        g2.gain.setValueAtTime(0.0001, now + 0.15);
-        g2.gain.linearRampToValueAtTime(0.025, now + 0.5);
-        g2.gain.linearRampToValueAtTime(0.0001, now + 1.8);
+        g2.gain.setValueAtTime(0.0001, now + 0.3);
+        g2.gain.linearRampToValueAtTime(0.018, now + 0.8);
+        g2.gain.linearRampToValueAtTime(0.0001, now + 2.4);
         osc2.connect(g2).connect(musicState.gain);
         osc2.start(now);
-        osc2.stop(now + 2);
+        osc2.stop(now + 2.6);
+
+        /* Fifth harmony — adds depth every other note */
+        if (noteIdx % 2 === 0) {
+          var osc3 = audio.ctx.createOscillator();
+          var g3 = audio.ctx.createGain();
+          osc3.type = 'sine';
+          osc3.frequency.value = freq * 1.5;
+          g3.gain.setValueAtTime(0.0001, now + 0.1);
+          g3.gain.linearRampToValueAtTime(0.015, now + 0.6);
+          g3.gain.linearRampToValueAtTime(0.0001, now + 2.0);
+          osc3.connect(g3).connect(musicState.gain);
+          osc3.start(now);
+          osc3.stop(now + 2.2);
+        }
+
+        /* Bass note — deep triangle tone every 4th beat */
+        if (noteIdx % 4 === 0) {
+          var bassFreq = bassLine[Math.floor(musicState.beat / 8) % bassLine.length];
+          var oscB = audio.ctx.createOscillator();
+          var gB = audio.ctx.createGain();
+          oscB.type = 'triangle';
+          oscB.frequency.value = bassFreq;
+          gB.gain.setValueAtTime(0.0001, now);
+          gB.gain.linearRampToValueAtTime(0.04, now + 0.3);
+          gB.gain.linearRampToValueAtTime(0.025, now + 2.5);
+          gB.gain.linearRampToValueAtTime(0.0001, now + 4.0);
+          oscB.connect(gB).connect(musicState.gain);
+          oscB.start(now);
+          oscB.stop(now + 4.2);
+        }
       }
 
       function setMusicEnabled(on) {
@@ -1459,17 +1524,18 @@
             var t = audio.ctx.currentTime;
             musicState.gain.gain.cancelScheduledValues(t);
             musicState.gain.gain.setValueAtTime(musicState.gain.gain.value, t);
-            musicState.gain.gain.linearRampToValueAtTime(0.45, t + 0.3);
+            musicState.gain.gain.linearRampToValueAtTime(0.5, t + 0.5);
           }
           musicState.idx = 0;
+          musicState.beat = 0;
           playMusicNote();
-          musicState.timer = setInterval(playMusicNote, 2600);
+          musicState.timer = setInterval(playMusicNote, 3200);
         } else {
           if (musicState.gain && audio.ctx) {
             var t2 = audio.ctx.currentTime;
             musicState.gain.gain.cancelScheduledValues(t2);
             musicState.gain.gain.setValueAtTime(musicState.gain.gain.value, t2);
-            musicState.gain.gain.linearRampToValueAtTime(0.0001, t2 + 0.3);
+            musicState.gain.gain.linearRampToValueAtTime(0.0001, t2 + 0.5);
           }
           if (musicState.timer) { clearInterval(musicState.timer); musicState.timer = null; }
         }
