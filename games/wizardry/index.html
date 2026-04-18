@@ -429,9 +429,9 @@
     }
 
     .scene-layer.base {
-      background-image: url('../../images/minecraft/terrain.png');
-      background-repeat: repeat;
-      background-size: 256px 256px;
+      background-repeat: no-repeat;
+      background-size: cover;
+      background-position: center;
       filter: saturate(1.05) brightness(0.88);
       animation: drift 10s linear infinite alternate;
     }
@@ -482,6 +482,19 @@
       line-height: 1.5;
       text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.7);
     }
+
+    .scene-torch {
+      position: absolute;
+      bottom: 4px;
+      height: 56px;
+      width: auto;
+      image-rendering: pixelated;
+      z-index: 4;
+      filter: drop-shadow(0 0 8px rgba(255, 180, 60, 0.6));
+      pointer-events: none;
+    }
+    .scene-torch.left { left: 6px; }
+    .scene-torch.right { right: 6px; }
 
     .log {
       border: 1px solid rgba(145, 199, 138, 0.35);
@@ -763,6 +776,8 @@
         <div class="scene-layer overlay"></div>
         <div class="scene-layer icon" id="sceneIcon"></div>
         <div class="scene-layer grain"></div>
+        <img class="scene-torch left" src="../../images/wizardry/torches/Torch.gif" alt="" aria-hidden="true" />
+        <img class="scene-torch right" src="../../images/wizardry/torches/Torch.gif" alt="" aria-hidden="true" />
         <div class="scene-caption" id="sceneCaption"></div>
       </div>
 
@@ -908,27 +923,27 @@
       };
 
       var icons = {
-        entrance: '../../images/mobs%20full/Pig.png',
-        library: '../../images/mobs%20full/Chicken.png',
-        pit: '../../images/mobs%20full/Zombie.png',
-        shrine: '../../images/mobs%20full/Creeper.png',
-        echo: '../../images/mobs%20full/Skeleton.png',
-        vault: '../../images/mobs%20full/Spider.png',
-        boss: '../../images/mobs%20full/Zombie_Pigman.png',
-        win: '../../images/mobs%20full/White_Sheep.png',
-        loss: '../../images/mobs%20full/Ghast.gif'
+        entrance: '../../images/wizardry/mobs%20full/Pig.png',
+        library: '../../images/wizardry/mobs%20full/Chicken.png',
+        pit: '../../images/wizardry/mobs%20full/Zombie.png',
+        shrine: '../../images/wizardry/mobs%20full/Creeper.png',
+        echo: '../../images/wizardry/mobs%20full/Skeleton.png',
+        vault: '../../images/wizardry/mobs%20full/Spider.png',
+        boss: '../../images/wizardry/mobs%20full/Zombie_Pigman.png',
+        win: '../../images/wizardry/mobs%20full/White_Sheep.png',
+        loss: '../../images/wizardry/mobs%20full/Ghast.gif'
       };
 
       var ambience = {
-        entrance: { pos: '0 0', tone: 'A torch crackles beside cracked stone stairs.' },
-        library: { pos: '-48px -16px', tone: 'Books hum quietly as if they remember your name.' },
-        pit: { pos: '-32px -80px', tone: 'Rotten air rises from a broken shaft in the floor.' },
-        shrine: { pos: '-96px -16px', tone: 'An old furnace altar glows with ember runes.' },
-        echo: { pos: '-144px -64px', tone: 'Armor clinks in the dark, then suddenly stops.' },
-        vault: { pos: '-16px -128px', tone: 'Gold glitters across pressure plates and wires.' },
-        boss: { pos: '-112px -112px', tone: 'The Warden stirs behind a deepslate gate.' },
-        win: { pos: '-176px -16px', tone: 'The relic sings while daylight floods the exit.' },
-        loss: { pos: '-176px -96px', tone: 'Your footsteps fade into the stone forever.' }
+        entrance: { bg: '../../images/wizardry/screenshots/night/2026-04-18_04.50.39.png', tone: 'A torch crackles beside cracked stone stairs.' },
+        library: { bg: '../../images/wizardry/screenshots/buildings/2011-12-28_14.42.02.png', tone: 'Books hum quietly as if they remember your name.' },
+        pit: { bg: '../../images/wizardry/screenshots/underground/2026-04-18_05.20.38.png', tone: 'Rotten air rises from a broken shaft in the floor.' },
+        shrine: { bg: '../../images/wizardry/screenshots/nether/2026-04-18_06.25.00.png', tone: 'An old furnace altar glows with ember runes.' },
+        echo: { bg: '../../images/wizardry/screenshots/structures/dungeon/2026-04-18_04.48.42.png', tone: 'Armor clinks in the dark, then suddenly stops.' },
+        vault: { bg: '../../images/wizardry/screenshots/underground/2026-04-18_05.20.19.png', tone: 'Gold glitters across pressure plates and wires.' },
+        boss: { bg: '../../images/wizardry/screenshots/structures/dungeon/2026-04-18_05.19.43.png', tone: 'The Warden stirs behind a deepslate gate.' },
+        win: { bg: '../../images/wizardry/screenshots/day/2026-04-18_04.54.22.png', tone: 'The relic sings while daylight floods the exit.' },
+        loss: { bg: '../../images/wizardry/screenshots/underground/2026-04-18_05.22.15.png', tone: 'Your footsteps fade into the stone forever.' }
       };
 
       var nodes = {
@@ -1368,7 +1383,7 @@
 
       function renderScene(nodeKey) {
         var mood = ambience[nodeKey] || ambience.entrance;
-        refs.base.style.backgroundPosition = mood.pos;
+        refs.base.style.backgroundImage = 'url(' + mood.bg + ')';
         refs.caption.textContent = mood.tone;
         refs.icon.style.backgroundImage = 'url(' + (icons[nodeKey] || icons.entrance) + ')';
       }
