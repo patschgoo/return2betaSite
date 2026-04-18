@@ -443,9 +443,9 @@
     }
 
     .scene-layer.icon {
-      background-position: center;
+      background-position: center 35%;
       background-repeat: no-repeat;
-      background-size: contain;
+      background-size: auto 50%;
       opacity: 0.85;
       filter: drop-shadow(0 8px 15px rgba(0, 0, 0, 0.5));
     }
@@ -485,8 +485,8 @@
 
     .scene-torch {
       position: absolute;
-      bottom: 4px;
-      height: 56px;
+      top: 6px;
+      height: 48px;
       width: auto;
       image-rendering: pixelated;
       z-index: 4;
@@ -685,7 +685,7 @@
       }
 
       .scene-layer.icon {
-        background-size: contain;
+        background-size: auto 45%;
       }
 
       .howto-text {
@@ -776,8 +776,8 @@
         <div class="scene-layer overlay"></div>
         <div class="scene-layer icon" id="sceneIcon"></div>
         <div class="scene-layer grain"></div>
-        <img class="scene-torch left" src="../../images/wizardry/torches/Torch.gif" alt="" aria-hidden="true" />
-        <img class="scene-torch right" src="../../images/wizardry/torches/Torch.gif" alt="" aria-hidden="true" />
+        <img class="scene-torch left" src="../../images/wizardry/torches/torches%20sideways.gif" alt="" aria-hidden="true" />
+        <img class="scene-torch right" src="../../images/wizardry/torches/torches%20sideways.gif" alt="" aria-hidden="true" />
         <div class="scene-caption" id="sceneCaption"></div>
       </div>
 
@@ -787,11 +787,11 @@
 
       <div class="actions">
         <button id="soundBtn" class="audio">Sound: Off</button>
-        <button id="castBtn" class="warn">Cast Arcane Ward (4 mana)</button>
-        <button id="restBtn">Steady Breath (+mana, +nerve)</button>
+        <button id="castBtn" class="warn" title="Spends 4 mana to conjure a shield that absorbs the first hit in your next combat and adds power to the boss fight.">Cast Arcane Ward (4 mana)</button>
+        <button id="restBtn" title="Recover 2 mana and 1 nerve, but there is a small chance something finds you in the dark.">Steady Breath (+mana, +nerve)</button>
         <button id="restartBtn" class="danger">Restart Delve</button>
       </div>
-      <div class="meta-note">Tip: the dungeon changes with each click, but relics only count when you survive.</div>
+      <div class="meta-note">Arcane Ward absorbs the first hit in combat and boosts your power against the boss. Steady Breath restores mana and nerve but risks a small ambush. Relics only count when you escape alive.</div>
     </section>
   </main>
 
@@ -923,24 +923,24 @@
       };
 
       var icons = {
-        entrance: '../../images/wizardry/mobs%20full/Pig.png',
-        library: '../../images/wizardry/mobs%20full/Chicken.png',
-        pit: '../../images/wizardry/mobs%20full/Zombie.png',
-        shrine: '../../images/wizardry/mobs%20full/Creeper.png',
+        entrance: null,
+        library: null,
+        pit: '../../images/wizardry/mobs%20full/Spider.png',
+        shrine: null,
         echo: '../../images/wizardry/mobs%20full/Skeleton.png',
-        vault: '../../images/wizardry/mobs%20full/Spider.png',
+        vault: null,
         boss: '../../images/wizardry/mobs%20full/Zombie_Pigman.png',
         win: '../../images/wizardry/mobs%20full/White_Sheep.png',
         loss: '../../images/wizardry/mobs%20full/Ghast.gif'
       };
 
       var ambience = {
-        entrance: { bg: '../../images/wizardry/screenshots/night/2026-04-18_04.50.39.png', tone: 'A torch crackles beside cracked stone stairs.' },
+        entrance: { bg: '../../images/wizardry/screenshots/structures/night/2026-04-18_04.33.28.png', tone: 'A torch crackles beside cracked stone stairs.' },
         library: { bg: '../../images/wizardry/screenshots/buildings/2011-12-28_14.42.02.png', tone: 'Books hum quietly as if they remember your name.' },
         pit: { bg: '../../images/wizardry/screenshots/underground/2026-04-18_05.20.38.png', tone: 'Rotten air rises from a broken shaft in the floor.' },
         shrine: { bg: '../../images/wizardry/screenshots/nether/2026-04-18_06.25.00.png', tone: 'An old furnace altar glows with ember runes.' },
-        echo: { bg: '../../images/wizardry/screenshots/structures/dungeon/2026-04-18_04.48.42.png', tone: 'Armor clinks in the dark, then suddenly stops.' },
-        vault: { bg: '../../images/wizardry/screenshots/underground/2026-04-18_05.20.19.png', tone: 'Gold glitters across pressure plates and wires.' },
+        echo: { bg: '../../images/wizardry/screenshots/structures/dungeon/2026-04-18_04.48.33.png', tone: 'Armor clinks in the dark, then suddenly stops.' },
+        vault: { bg: '../../images/wizardry/screenshots/structures/dungeon/2012-12-27_22.45.09.png', tone: 'Gold glitters across pressure plates and wires.' },
         boss: { bg: '../../images/wizardry/screenshots/structures/dungeon/2026-04-18_05.19.43.png', tone: 'The Warden stirs behind a deepslate gate.' },
         win: { bg: '../../images/wizardry/screenshots/day/2026-04-18_04.54.22.png', tone: 'The relic sings while daylight floods the exit.' },
         loss: { bg: '../../images/wizardry/screenshots/underground/2026-04-18_05.22.15.png', tone: 'Your footsteps fade into the stone forever.' }
@@ -1385,7 +1385,8 @@
         var mood = ambience[nodeKey] || ambience.entrance;
         refs.base.style.backgroundImage = 'url(' + mood.bg + ')';
         refs.caption.textContent = mood.tone;
-        refs.icon.style.backgroundImage = 'url(' + (icons[nodeKey] || icons.entrance) + ')';
+        var iconUrl = icons[nodeKey];
+        refs.icon.style.backgroundImage = iconUrl ? 'url(' + iconUrl + ')' : 'none';
       }
 
       function render() {
