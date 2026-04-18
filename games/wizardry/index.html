@@ -1420,20 +1420,33 @@
       }
 
       /* ── Background music ─────────────────────────── */
-      var musicState = { enabled: false, gain: null, pad: null, pad2: null, timer: null, idx: 0, beat: 0 };
-      /* Low Dm phrases — all notes in the 55–175 Hz range for a deep dungeon rumble */
+      var musicState = { enabled: false, gain: null, lpf: null, pad: null, pad2: null, timer: null, idx: 0, beat: 0 };
+      /* Low Dm phrases — all in 55–147 Hz for a deep dungeon feel */
       var melodyA = [147, 131, 110, 98, 110, 131, 98, 87, 110, 98, 131, 110, 87, 98, 110, 87];
       var melodyB = [98, 87, 73, 82, 98, 87, 73, 65, 73, 82, 98, 110, 98, 87, 73, 65];
       var melodyC = [65, 73, 87, 98, 87, 73, 65, 55, 65, 73, 82, 87, 98, 87, 73, 65];
       var bassLine = [55, 55, 44, 44, 49, 49, 44, 44, 37, 37, 44, 44, 49, 49, 55, 55];
+
+      /* Smooth envelope helper — avoids clicks by using exponential curves */
+      function smoothEnv(g, now, peak, attack, sustain, release) {
+        g.gain.setValueAtTime(0.001, now);
+        g.gain.exponentialRampToValueAtTime(Math.max(peak, 0.001), now + attack);
+        g.gain.exponentialRampToValueAtTime(Math.max(peak * 0.6, 0.001), now + attack + sustain);
+        g.gain.exponentialRampToValueAtTime(0.001, now + attack + sustain + release);
+      }
 
       function initMusic() {
         if (musicState.gain) return;
         initAudio();
         if (!audio.ctx) return;
         musicState.gain = audio.ctx.createGain();
-        musicState.gain.gain.value = 0.0001;
-        musicState.gain.connect(audio.ctx.destination);
+        musicState.gain.gain.value = 0.001;
+        /* Low-pass filter softens all music output */
+        musicState.lpf = audio.ctx.createBiquadFilter();
+        musicState.lpf.type = 'lowpass';
+        musicState.lpf.frequency.value = 280;
+        musicState.lpf.Q.value = 0.7;
+        musicState.gain.connect(musicState.lpf).connect(audio.ctx.destination);
         /* low pad drone */
         musicState.pad = audio.ctx.createOscillator();
         musicState.pad.type = 'sine';
@@ -1449,7 +1462,7 @@
         padLfo.connect(lfoGain).connect(musicState.pad.frequency);
         musicState.pad.start();
         padLfo.start();
-        /* second pad a fifth above, triangle for texture */
+        /* second pad a fifth above */
         musicState.pad2 = audio.ctx.createOscillator();
         musicState.pad2.type = 'triangle';
         musicState.pad2.frequency.value = 82;
@@ -1476,81 +1489,51 @@
         musicState.idx++;
         musicState.beat = (musicState.beat + 1) % 48;
 
-        /* Main melody — low sine, gentle swell */
+        /* Main melody — smooth exponential envelope */
         var osc = audio.ctx.createOscillator();
         var g = audio.ctx.createGain();
         osc.type = 'sine';
         osc.frequency.value = freq;
-        g.gain.setValueAtTime(0.0001, now);
-        g.gain.linearRampToValueAtTime(0.04, now + 0.8);
-        g.gain.linearRampToValueAtTime(0.025, now + 2.5);
-        g.gain.linearRampToValueAtTime(0.0001, now + 4.0);
+        smoothEnv(g, now, 0.04, 1.2, 1.8, 1.5);
         osc.connect(g).connect(musicState.gain);
         osc.start(now);
-        osc.stop(now + 4.2);
+        osc.stop(now + 4.7);
 
-        /* Soft triangle an octave below for rumble, every other note */
+        /* Sub-octave rumble every other note */
         if (noteIdx % 2 === 0) {
           var oscLow = audio.ctx.createOscillator();
           var gLow = audio.ctx.createGain();
           oscLow.type = 'triangle';
           oscLow.frequency.value = freq * 0.5;
-          gLow.gain.setValueAtTime(0.0001, now + 0.2);
-          gLow.gain.linearRampToValueAtTime(0.02, now + 1.0);
-          gLow.gain.linearRampToValueAtTime(0.0001, now + 3.5);
+          smoothEnv(gLow, now + 0.3, 0.02, 1.0, 1.5, 1.2);
           oscLow.connect(gLow).connect(musicState.gain);
-          oscLow.start(now);
-          oscLow.stop(now + 3.7);
+          oscLow.start(now + 0.3);
+          oscLow.stop(now + 4.2);
         }
 
-        /* Fifth harmony — quiet sine, every 3rd note */
+        /* Fifth harmony every 3rd note */
         if (noteIdx % 3 === 0) {
           var osc5 = audio.ctx.createOscillator();
           var g5 = audio.ctx.createGain();
           osc5.type = 'sine';
           osc5.frequency.value = freq * 1.5;
-          g5.gain.setValueAtTime(0.0001, now + 0.4);
-          g5.gain.linearRampToValueAtTime(0.012, now + 1.2);
-          g5.gain.linearRampToValueAtTime(0.0001, now + 3.0);
+          smoothEnv(g5, now + 0.5, 0.012, 1.0, 1.0, 1.0);
           osc5.connect(g5).connect(musicState.gain);
-          osc5.start(now);
-          osc5.stop(now + 3.2);
+          osc5.start(now + 0.5);
+          osc5.stop(now + 3.7);
         }
 
-        /* Deep bass — every 4th beat */
+        /* Deep bass every 4th beat */
         if (noteIdx % 4 === 0) {
           var bassFreq = bassLine[Math.floor(musicState.beat / 3) % bassLine.length];
           var oscB = audio.ctx.createOscillator();
           var gB = audio.ctx.createGain();
-          oscB.type = 'triangle';
+          oscB.type = 'sine';
           oscB.frequency.value = bassFreq;
-          gB.gain.setValueAtTime(0.0001, now);
-          gB.gain.linearRampToValueAtTime(0.035, now + 0.5);
-          gB.gain.linearRampToValueAtTime(0.02, now + 3.5);
-          gB.gain.linearRampToValueAtTime(0.0001, now + 5.0);
+          smoothEnv(gB, now, 0.035, 0.8, 2.5, 2.0);
           oscB.connect(gB).connect(musicState.gain);
           oscB.start(now);
-          oscB.stop(now + 5.2);
-        }
-
-        /* Filtered noise wisp — subtle cave wind texture every 6th note */
-        if (noteIdx % 6 === 0) {
-          var nBuf = audio.ctx.createBuffer(1, Math.floor(audio.ctx.sampleRate * 2), audio.ctx.sampleRate);
-          var nData = nBuf.getChannelData(0);
-          for (var i = 0; i < nData.length; i++) nData[i] = (Math.random() * 2 - 1) * 0.15;
-          var nSrc = audio.ctx.createBufferSource();
-          nSrc.buffer = nBuf;
-          var nFilt = audio.ctx.createBiquadFilter();
-          nFilt.type = 'bandpass';
-          nFilt.frequency.value = 200;
-          nFilt.Q.value = 2;
-          var nGain = audio.ctx.createGain();
-          nGain.gain.setValueAtTime(0.0001, now);
-          nGain.gain.linearRampToValueAtTime(0.015, now + 0.8);
-          nGain.gain.linearRampToValueAtTime(0.0001, now + 2.5);
-          nSrc.connect(nFilt).connect(nGain).connect(musicState.gain);
-          nSrc.start(now);
-          nSrc.stop(now + 2.7);
+          oscB.stop(now + 5.5);
         }
       }
 
@@ -1562,8 +1545,8 @@
           if (musicState.gain) {
             var t = audio.ctx.currentTime;
             musicState.gain.gain.cancelScheduledValues(t);
-            musicState.gain.gain.setValueAtTime(musicState.gain.gain.value, t);
-            musicState.gain.gain.linearRampToValueAtTime(0.4, t + 0.8);
+            musicState.gain.gain.setValueAtTime(Math.max(musicState.gain.gain.value, 0.001), t);
+            musicState.gain.gain.exponentialRampToValueAtTime(0.4, t + 1.0);
           }
           musicState.idx = 0;
           musicState.beat = 0;
@@ -1573,8 +1556,8 @@
           if (musicState.gain && audio.ctx) {
             var t2 = audio.ctx.currentTime;
             musicState.gain.gain.cancelScheduledValues(t2);
-            musicState.gain.gain.setValueAtTime(musicState.gain.gain.value, t2);
-            musicState.gain.gain.linearRampToValueAtTime(0.0001, t2 + 0.5);
+            musicState.gain.gain.setValueAtTime(Math.max(musicState.gain.gain.value, 0.001), t2);
+            musicState.gain.gain.exponentialRampToValueAtTime(0.001, t2 + 0.8);
           }
           if (musicState.timer) { clearInterval(musicState.timer); musicState.timer = null; }
         }
@@ -1703,8 +1686,7 @@
         if (/unleash|seal the/.test(l)) return 'dsword';
         if (/offer|blessing/.test(l)) return 'gold';
         if (/key|chest|lock|force/.test(l)) return 'lever';
-        if (/tablet|decode|spell/.test(l)) return 'book';
-        if (/rune|read|warning/.test(l)) return 'lapis';
+        if (/tablet|decode|spell|rune|read|warning/.test(l)) return 'book';
         if (/ember|steal/.test(l)) return 'diamond';
         if (/search|scavenge|cache|sneak|vent/.test(l)) return 'bow';
         if (/flee|stair|retreat|return|begin|drop|shaft|leave|fall back/.test(l)) return 'coal';
