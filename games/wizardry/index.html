@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Wizardry - Cobble Catacombs</title>
+  <title>Mizardry - Cobble Catacombs</title>
   <link rel="icon" type="image/png" href="../../images/icon.png" />
   <style>
     @font-face {
@@ -494,7 +494,7 @@
       pointer-events: none;
     }
     .scene-torch.left { left: 6px; }
-    .scene-torch.right { right: 6px; }
+    .scene-torch.right { right: 6px; transform: scaleX(-1); }
 
     .log {
       border: 1px solid rgba(145, 199, 138, 0.35);
@@ -718,7 +718,7 @@
         <a class="dropdown-link" href="/games/?game=3"><img src="../../images/Game%20Links/minecreeper.png" alt="" />Minecreeper</a>
         <a class="dropdown-link" href="/games/?game=4"><img src="../../images/Game%20Links/block-crush.png" alt="" />Block Crush</a>
         <a class="dropdown-link" href="/games/?game=5"><img src="../../images/Game%20Links/mine-dungeon.png" alt="" />Mine Dungeon</a>
-        <a class="dropdown-link current" href="/games/wizardry/"><img src="../../images/mobs/2d/Player_Head.png" alt="" />Wizardry Adventure</a>
+        <a class="dropdown-link current" href="/games/wizardry/"><img src="../../images/mobs/2d/Player_Head.png" alt="" />Mizardry Adventure</a>
         <a class="dropdown-link" href="/games/?game=6"><img src="../../images/Game%20Links/mine-blocks.png" alt="" />Mine Blocks</a>
         <a class="dropdown-link" href="/games/?game=7"><img src="../../images/Game%20Links/mine-blocks-2.png" alt="" />Mine Blocks 2</a>
         <hr />
@@ -736,7 +736,7 @@
   <main class="content">
     <aside class="panel status">
       <div class="title-block">
-        <h1>Wizardry</h1>
+        <h1>Mizardry</h1>
         <p>Cobble Catacombs - click through cursed chambers, gather relics, and survive the Warden below.</p>
       </div>
       <div class="texture-face" aria-hidden="true"></div>
@@ -776,8 +776,8 @@
         <div class="scene-layer overlay"></div>
         <div class="scene-layer icon" id="sceneIcon"></div>
         <div class="scene-layer grain"></div>
-        <img class="scene-torch left" src="../../images/wizardry/torches/torches%20sideways.gif" alt="" aria-hidden="true" />
-        <img class="scene-torch right" src="../../images/wizardry/torches/torches%20sideways.gif" alt="" aria-hidden="true" />
+        <img class="scene-torch left" src="../../images/wizardry/torches/Torch%20sideways.png" alt="" aria-hidden="true" />
+        <img class="scene-torch right" src="../../images/wizardry/torches/Torch%20sideways.png" alt="" aria-hidden="true" />
         <div class="scene-caption" id="sceneCaption"></div>
       </div>
 
@@ -907,7 +907,7 @@
         won: false
       };
 
-      var STORAGE_KEY = 'r2b_wizardry_records_v1';
+      var STORAGE_KEY = 'r2b_mizardry_records_v1';
       var records = loadRecords();
       var audio = {
         enabled: false,
@@ -1477,7 +1477,7 @@
 
       refs.restart.addEventListener('click', hardReset);
 
-      log('Wizardry module initialized. Choose your first path.', 'note');
+      log('Mizardry module initialized. Choose your first path.', 'note');
       render();
     }());
   </script>
