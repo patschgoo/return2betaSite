@@ -1661,12 +1661,14 @@
       function choiceIcon(label) {
         var l = label.toLowerCase();
         if (/fight|duel|spider|combat/.test(l)) return 'sword';
-        if (/unleash|seal|relic/.test(l)) return 'dsword';
-        if (/gold|offer|blessing/.test(l)) return 'gold';
-        if (/spell|decode|tablet|rune|read|mana/.test(l)) return 'pearl';
-        if (/search|scavenge|steal|cache|sneak|vent/.test(l)) return 'bow';
+        if (/unleash|seal the/.test(l)) return 'dsword';
+        if (/offer|blessing/.test(l)) return 'gold';
         if (/key|chest|lock|force/.test(l)) return 'lever';
-        if (/flee|stair|retreat|return|begin|drop|shaft|leave/.test(l)) return 'coal';
+        if (/tablet|decode|spell/.test(l)) return 'book';
+        if (/rune|read|warning/.test(l)) return 'lapis';
+        if (/ember|steal/.test(l)) return 'redstone';
+        if (/search|scavenge|cache|sneak|vent/.test(l)) return 'bow';
+        if (/flee|stair|retreat|return|begin|drop|shaft|leave|fall back/.test(l)) return 'coal';
         return '';
       }
 
