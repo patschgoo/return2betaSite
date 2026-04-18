@@ -1098,16 +1098,69 @@
         loss: '../../images/wizardry/mobs%20full/Ghast.gif'
       };
 
+      var S = '../../images/wizardry/screenshots/';
       var ambience = {
-        entrance: { bg: '../../images/wizardry/screenshots/night/bigger%20cave%20entrance.png', tone: 'A torch crackles beside cracked stone stairs.' },
-        library: { bg: '../../images/wizardry/screenshots/buildings/basic%20house%20in%20mountainwall.png', tone: 'Books hum quietly as if they remember your name.' },
-        pit: { bg: '../../images/wizardry/screenshots/underground/dark%20entrance%20underground.png', tone: 'Rotten air rises from a broken shaft in the floor.' },
-        shrine: { bg: '../../images/wizardry/screenshots/nether/glowstone%20near%20soulsand%20area%20grat%20view.png', tone: 'An old furnace altar glows with ember runes.' },
-        echo: { bg: '../../images/wizardry/screenshots/structures/dungeon/monster%20dungeon%20zombie%20spawner%20near%20ravaine%20mointain%20entrance%20underground.png', tone: 'Armor clinks in the dark, then suddenly stops.' },
-        vault: { bg: '../../images/wizardry/screenshots/structures/dungeon/big%20mine%20with%20rails%20and%20spider%20dungen%20no%20monsteres%20spawned.png', tone: 'Gold glitters across pressure plates and wires.' },
-        boss: { bg: '../../images/wizardry/screenshots/structures/dungeon/spider%20dungeon%20with%20spawner%20room.png', tone: 'The Warden stirs behind a deepslate gate.' },
-        win: { bg: '../../images/wizardry/screenshots/day/sky%20with%20sun.png', tone: 'The relic sings while daylight floods the exit.' },
-        loss: { bg: '../../images/wizardry/screenshots/underground/lava%20pools%20underground.webp', tone: 'Your footsteps fade into the stone forever.' }
+        entrance: { bg: [
+          S + 'night/bigger%20cave%20entrance.png',
+          S + 'night/crawl%20hole%20outside%20entrance.png',
+          S + 'day/mountain%20underground%20gateway%20entrance.png',
+          S + 'day/forrest%20side%20underground%20entrance.png'
+        ], tone: 'A torch crackles beside cracked stone stairs.' },
+        library: { bg: [
+          S + 'buildings/basic%20house%20in%20mountainwall.png',
+          S + 'buildings/farmhouse%20wheatfield%20night.png',
+          S + 'buildings/windmill%20night.png',
+          S + 'buildings/farmhouse%20by%20river.png'
+        ], tone: 'Books hum quietly as if they remember your name.' },
+        pit: { bg: [
+          S + 'underground/dark%20entrance%20underground.png',
+          S + 'underground/two%20way%20split.png',
+          S + 'underground/small%20hole%20walkway.png',
+          S + 'day/underwater.png',
+          S + 'day/swimming%20in%20ater%20near%20shore.png',
+          S + 'day/underwater%20diving%20up%20to%20shore.png'
+        ], tone: 'Rotten air rises from a broken shaft in the floor.' },
+        shrine: { bg: [
+          S + 'nether/glowstone%20near%20soulsand%20area%20grat%20view.png',
+          S + 'nether/walls%20overhang%20with%20glowstone%20and%20a%20bit%20of%20lava.png',
+          S + 'nether/nether%20portal%20in%20nether%20with%20lava%20pools%20behind%20it.png',
+          S + 'nether/nether%20portal%20in%20open%20area.png',
+          S + 'nether/nether%20portal%20fire%20spread%20around%20it.png',
+          S + 'nether/nether%20portal%20with%20ghast%20in%20background.png'
+        ], tone: 'An old furnace altar glows with ember runes.' },
+        echo: { bg: [
+          S + 'structures/dungeon/monster%20dungeon%20zombie%20spawner%20near%20ravaine%20mointain%20entrance%20underground.png',
+          S + 'structures/dungeon/big%20mine%20with%20rails%20and%20spider%20dungen%20monsteres%20spawned%20already.png',
+          S + 'underground/mining%20near%20lava.png',
+          S + 'underground/lava%20between%20ores%20and%20stone.png'
+        ], tone: 'Armor clinks in the dark, then suddenly stops.' },
+        vault: { bg: [
+          S + 'structures/dungeon/big%20mine%20with%20rails%20and%20spider%20dungen%20no%20monsteres%20spawned.png',
+          S + 'structures/dungeon/big%20mine%20with%20rails%20and%20spider%20dungen%20monsteres%20spawner%20in%20background.png',
+          S + 'structures/night/mine%20under%20sand.png',
+          S + 'structures/night/skeleton%20near%20mine%20entrance%20in%20snowy%20pine%20area.png'
+        ], tone: 'Gold glitters across pressure plates and wires.' },
+        boss: { bg: [
+          S + 'structures/dungeon/spider%20dungeon%20with%20spawner%20room.png',
+          S + 'nether/aggressive%20ghast.png',
+          S + 'nether/burning%20near%20lava%20pool%20with%20ghast%20in%20background.png',
+          S + 'nether/blown%20up%20out%20nether%20portal.png'
+        ], tone: 'The Warden stirs behind a deepslate gate.' },
+        win: { bg: [
+          S + 'day/sky%20with%20sun.png',
+          S + 'day/cloudy%20sunny%20sky.png',
+          S + 'day/roses%20on%20grassland.png',
+          S + 'day/snow/snowy%20wonderland.png',
+          S + 'day/snow/snow%20birch%20and%20oak%20grass%20land.png',
+          S + 'day/snow/snowy%20area%20open%20with%20sheep.png',
+          S + 'day/on%20nether%20portal%20in%20snowy%20area.png'
+        ], tone: 'The relic sings while daylight floods the exit.' },
+        loss: { bg: [
+          S + 'underground/lava%20pools%20underground.webp',
+          S + 'underground/skeleton%20trapped%20underground%20but%20viewscreen%20removed.png',
+          S + 'nether/burning%20in%20lava%20flows%20with%20a%20lot%20ov%20flows%20near%20it.png',
+          S + 'nether/burning%20on%20soulsand%20land%20with%20lava%20flow%20from%20wall.png'
+        ], tone: 'Your footsteps fade into the stone forever.' }
       };
 
       var nodes = {
@@ -1739,7 +1792,8 @@
 
       function renderScene(nodeKey) {
         var mood = ambience[nodeKey] || ambience.entrance;
-        refs.base.style.backgroundImage = 'url(' + mood.bg + ')';
+        var bg = Array.isArray(mood.bg) ? mood.bg[Math.floor(Math.random() * mood.bg.length)] : mood.bg;
+        refs.base.style.backgroundImage = 'url(' + bg + ')';
         refs.caption.textContent = mood.tone;
         var iconUrl = icons[nodeKey];
         refs.icon.style.backgroundImage = iconUrl ? 'url(' + iconUrl + ')' : 'none';
