@@ -292,8 +292,8 @@
     .texture-face::after {
       content: '';
       position: absolute;
-      top: -8px;
-      left: calc(50% + 10px);
+      top: -14px;
+      left: calc(50% + 18px);
       transform: translateX(-50%);
       width: 80px;
       height: 80px;
@@ -496,9 +496,29 @@
       text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.7);
     }
 
+    .torch-mount {
+      position: absolute;
+      top: 0;
+      width: 32px;
+      height: 64px;
+      z-index: 3;
+      image-rendering: pixelated;
+      pointer-events: none;
+    }
+    .torch-mount.left { left: 0; }
+    .torch-mount.right { right: 0; }
+    .torch-mount-block {
+      width: 32px;
+      height: 32px;
+      background: url('../../images/minecraft/terrain.png') no-repeat;
+      background-size: 512px 512px;
+    }
+    .torch-mount-block.cobble  { background-position: -32px -32px; }
+    .torch-mount-block.mossy   { background-position: -128px -64px; }
+
     .scene-torch {
       position: absolute;
-      top: 6px;
+      top: 4px;
       height: 48px;
       width: auto;
       image-rendering: pixelated;
@@ -506,8 +526,8 @@
       filter: drop-shadow(0 0 8px rgba(255, 180, 60, 0.6));
       pointer-events: none;
     }
-    .scene-torch.left { left: 6px; }
-    .scene-torch.right { right: 6px; transform: scaleX(-1); }
+    .scene-torch.left  { left: 8px; transform: rotate(15deg);  transform-origin: bottom center; }
+    .scene-torch.right { right: 8px; transform: rotate(-15deg) scaleX(-1); transform-origin: bottom center; }
 
     /* Hover tooltips */
     [data-tip] {
@@ -658,12 +678,18 @@
     .mc-icon.bone   { background-position: -128px 0; }
     .mc-icon.coal   { background-position: -112px 0; }
     .mc-icon.bow    { background-position: -80px -16px; }
-    .mc-icon.lever  { background-position: -80px 0; }
-    .mc-icon.disc   { background-position: 0 -240px; }
-    .mc-icon.cart   { background-position: -112px -128px; }
-    .mc-icon.book   { background-position: -176px -48px; }
-    .mc-icon.ember  { background-position: -144px -64px; }
-    .mc-icon.leather { background-position: -112px -96px; }
+    .mc-icon.lever {
+      background: url('../../images/minecraft/terrain.png') no-repeat;
+      background-size: 256px 256px;
+      background-position: 0 -96px;
+    }
+    .mc-icon.disc     { background-position: 0 -240px; }
+    .mc-icon.cart     { background-position: -112px -128px; }
+    .mc-icon.book     { background-position: -176px -48px; }
+    .mc-icon.redstone { background-position: -128px -48px; }
+    .mc-icon.diamond  { background-position: -112px -48px; }
+    .mc-icon.lapis    { background-position: -144px -48px; }
+    .mc-icon.leather  { background-position: -112px -96px; }
 
     .title-torch {
       height: 18px;
@@ -678,6 +704,28 @@
       color: var(--muted);
       opacity: 0.7;
     }
+
+    .records-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .records-header strong { flex: 1; text-align: center; }
+    .rec-nav {
+      background: none;
+      border: 1px solid rgba(145, 199, 138, 0.3);
+      border-radius: 3px;
+      color: var(--muted);
+      font-family: inherit;
+      font-size: 0.52rem;
+      padding: 2px 6px;
+      cursor: pointer;
+      line-height: 1;
+      transition: border-color 120ms ease;
+    }
+    .rec-nav:hover { border-color: var(--glow); color: var(--ink); }
+    .rec-tab { display: none; }
+    .rec-tab.active { display: block; }
 
     /* Nav carousel */
     .nav-carousel { display: none; width: 100%; align-items: center; justify-content: center; height: 48px; }
@@ -762,6 +810,15 @@
         height: 36px;
       }
 
+      .torch-mount-block {
+        width: 24px;
+        height: 24px;
+        background-size: 384px 384px;
+      }
+      .torch-mount-block.cobble  { background-position: -24px -24px; }
+      .torch-mount-block.mossy   { background-position: -96px -48px; }
+      .torch-mount { width: 24px; height: 48px; }
+
       .scene-layer.icon {
         background-size: auto 45%;
       }
@@ -844,12 +901,23 @@
         <div class="resource-row" data-tip="How deep you've gone. Affects difficulty and the gold rewarded on victory."><span class="mc-icon cart"></span>Depth <span id="depthCount">0</span></div>
       </div>
       <div class="records" id="recordBox">
-        <strong>Local Records</strong>
-        <div class="record-row">Fastest Win <span id="fastestWin">--:--</span></div>
-        <div class="record-row">Deepest Success <span id="deepestRun">0</span></div>
-        <div class="record-row">Total Wins <span id="totalWins">0</span></div>
-        <div class="record-row run-timer">Run Timer <span id="runTimer">00:00</span></div>
-        <button id="resetRecordsBtn" class="records-reset">Reset Local Records</button>
+        <div class="records-header">
+          <button class="rec-nav" id="recPrev" aria-label="Previous">&#9664;</button>
+          <strong id="recTitle">Local Records</strong>
+          <button class="rec-nav" id="recNext" aria-label="Next">&#9654;</button>
+        </div>
+        <div class="rec-tab active" id="recLocal">
+          <div class="record-row">Fastest Win <span id="fastestWin">--:--</span></div>
+          <div class="record-row">Deepest Success <span id="deepestRun">0</span></div>
+          <div class="record-row">Total Wins <span id="totalWins">0</span></div>
+          <div class="record-row run-timer">Run Timer <span id="runTimer">00:00</span></div>
+          <button id="resetRecordsBtn" class="records-reset">Reset Local Records</button>
+        </div>
+        <div class="rec-tab" id="recSite">
+          <div class="record-row">Fastest Win <span id="siteFastest">--:--</span></div>
+          <div class="record-row">Deepest Success <span id="siteDeepest">0</span></div>
+          <div class="record-row run-timer" style="opacity:0.5">Shared across all players</div>
+        </div>
       </div>
       <div class="inventory" id="inventoryBox"><strong>Satchel</strong><br />Empty</div>
     </aside>
@@ -860,6 +928,8 @@
         <div class="scene-layer overlay"></div>
         <div class="scene-layer icon" id="sceneIcon"></div>
         <div class="scene-layer grain"></div>
+        <div class="torch-mount left" aria-hidden="true"><div class="torch-mount-block cobble"></div><div class="torch-mount-block mossy"></div></div>
+        <div class="torch-mount right" aria-hidden="true"><div class="torch-mount-block cobble"></div><div class="torch-mount-block mossy"></div></div>
         <img class="scene-torch left" src="../../images/wizardry/torches/Torch.gif" alt="" aria-hidden="true" />
         <img class="scene-torch right" src="../../images/wizardry/torches/Torch.gif" alt="" aria-hidden="true" />
         <div class="scene-caption" id="sceneCaption"></div>
@@ -1422,9 +1492,9 @@
       var itemIcons = {
         'Arcane Tablet': 'book',
         'Torn Spell Pouch': 'leather',
-        'Ember Gem': 'ember',
-        'Relic Shard': 'dsword',
-        'Cracked Relic': 'sword'
+        'Ember Gem': 'redstone',
+        'Relic Shard': 'diamond',
+        'Cracked Relic': 'lapis'
       };
 
       function renderInventory() {
@@ -1457,7 +1527,7 @@
         if (/gold|offer|blessing/.test(l)) return 'gold';
         if (/spell|decode|tablet|rune|read|mana/.test(l)) return 'pearl';
         if (/search|scavenge|steal|cache|sneak|vent/.test(l)) return 'bow';
-        if (/key|chest|lock|force/.test(l)) return 'bone';
+        if (/key|chest|lock|force/.test(l)) return 'lever';
         if (/flee|stair|retreat|return|begin|drop|shaft|leave/.test(l)) return 'coal';
         return '';
       }
@@ -1612,6 +1682,107 @@
 
       log('Mizardry module initialized. Choose your first path.', 'note');
       render();
+
+      /* ── Records tab switching ─────────────────────── */
+      var recTabs = ['recLocal', 'recSite'];
+      var recTitles = ['Local Records', 'Site Records'];
+      var recIdx = 0;
+      var recTitle = document.getElementById('recTitle');
+      var recPrev = document.getElementById('recPrev');
+      var recNext = document.getElementById('recNext');
+      function showRecTab() {
+        recTabs.forEach(function (id, i) {
+          var el = document.getElementById(id);
+          if (el) el.classList.toggle('active', i === recIdx);
+        });
+        if (recTitle) recTitle.textContent = recTitles[recIdx];
+      }
+      if (recPrev) recPrev.addEventListener('click', function () { recIdx = (recIdx + recTabs.length - 1) % recTabs.length; showRecTab(); });
+      if (recNext) recNext.addEventListener('click', function () { recIdx = (recIdx + 1) % recTabs.length; showRecTab(); });
+
+      /* ── Site-wide records via WebSocket ────────────── */
+      var SPEED_CAP = 999999;
+      var siteRecords = {
+        fastMs: null,
+        depth: 0
+      };
+      var siteWs = null;
+      var siteReady = false;
+      var siteDelay = 2000;
+
+      // Load cached site records from localStorage
+      (function () {
+        var cf = parseInt(localStorage.getItem('r2b_mizardry_fast_site') || '0', 10);
+        var cd = parseInt(localStorage.getItem('r2b_mizardry_depth_site') || '0', 10);
+        if (cf > 0) siteRecords.fastMs = (SPEED_CAP - cf) * 1000;
+        if (cd > 0) siteRecords.depth = cd;
+        renderSiteRecords();
+      })();
+
+      function renderSiteRecords() {
+        var sf = document.getElementById('siteFastest');
+        var sd = document.getElementById('siteDeepest');
+        if (sf) sf.textContent = siteRecords.fastMs !== null ? formatDuration(siteRecords.fastMs) : '--:--';
+        if (sd) sd.textContent = String(siteRecords.depth);
+      }
+
+      function applySiteScores(scores) {
+        if (typeof scores.mizardry_fast === 'number' && scores.mizardry_fast > 0) {
+          var ms = (SPEED_CAP - scores.mizardry_fast) * 1000;
+          if (siteRecords.fastMs === null || ms < siteRecords.fastMs) {
+            siteRecords.fastMs = ms;
+            localStorage.setItem('r2b_mizardry_fast_site', String(scores.mizardry_fast));
+          }
+        }
+        if (typeof scores.mizardry_depth === 'number' && scores.mizardry_depth > siteRecords.depth) {
+          siteRecords.depth = scores.mizardry_depth;
+          localStorage.setItem('r2b_mizardry_depth_site', String(scores.mizardry_depth));
+        }
+        renderSiteRecords();
+      }
+
+      function connectSite() {
+        try { siteWs = new WebSocket('wss://chat.return2beta.com'); } catch (e) { return; }
+        siteWs.onopen = function () {
+          siteReady = true;
+          siteDelay = 2000;
+          siteWs.send(JSON.stringify({ type: 'get_scores' }));
+        };
+        siteWs.onmessage = function (e) {
+          var d; try { d = JSON.parse(e.data); } catch (x) { return; }
+          if (d.type === 'scores' && d.scores) applySiteScores(d.scores);
+          if (d.type === 'score_updated') {
+            var obj = {};
+            obj[d.game] = d.score;
+            applySiteScores(obj);
+          }
+        };
+        siteWs.onclose = function () {
+          siteReady = false;
+          setTimeout(connectSite, siteDelay);
+          siteDelay = Math.min(siteDelay * 2, 30000);
+        };
+        siteWs.onerror = function () { siteWs.close(); };
+      }
+      connectSite();
+
+      function submitSiteRecord(game, score) {
+        if (siteWs && siteReady) {
+          siteWs.send(JSON.stringify({ type: 'submit_score', game: game, score: score }));
+        }
+      }
+
+      // Hook into commitWinRecord to also submit site records
+      var _origCommitWin = commitWinRecord;
+      commitWinRecord = function () {
+        _origCommitWin();
+        // Submit speed (inverted: higher = faster)
+        var elapsed = Date.now() - state.startedAt;
+        var speedScore = SPEED_CAP - Math.round(elapsed / 1000);
+        if (speedScore > 0) submitSiteRecord('mizardry_fast', speedScore);
+        // Submit depth
+        if (state.depth > 0) submitSiteRecord('mizardry_depth', state.depth);
+      };
     }());
   </script>
 </body>

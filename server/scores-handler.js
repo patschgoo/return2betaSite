@@ -15,7 +15,7 @@ const fs = require('fs');
 const path = require('path');
 
 const SCORES_FILE = path.join(__dirname, 'scores.json');
-const VALID_GAMES = ['flappy', 'tetris', 'hatch', 'mine', 'bcrush', 'mdungeon'];
+const VALID_GAMES = ['flappy', 'tetris', 'hatch', 'mine', 'bcrush', 'mdungeon', 'mizardry_fast', 'mizardry_depth'];
 const MAX_SCORE = 999999; // sanity cap to prevent abuse
 
 // ── Chat rate limiting ──────────────────────────────────
