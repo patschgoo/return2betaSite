@@ -293,10 +293,10 @@
       content: '';
       position: absolute;
       top: -14px;
-      left: calc(50% + 18px);
+      left: calc(50% + 12px);
       transform: translateX(-50%);
-      width: 80px;
-      height: 80px;
+      width: 90px;
+      height: 90px;
       background: url('../../images/wizardry/wizard_hat.png') center/contain no-repeat;
       image-rendering: pixelated;
       pointer-events: none;
@@ -940,6 +940,7 @@
       <div class="choices" id="choices"></div>
 
       <div class="actions">
+        <button id="musicBtn" class="audio">Music: Off</button>
         <button id="soundBtn" class="audio">Sound: Off</button>
         <button id="castBtn" class="warn" data-tip="Costs 4 mana. Creates a one-use shield that blocks the first hit in your next combat encounter. Also adds +3 power to the final boss spell check (need 10+ total to win)." title="">Cast Arcane Ward (4 mana)</button>
         <button id="restBtn" title="Recover 2 mana and 1 nerve, but there is a small chance something finds you in the dark.">Steady Breath (+mana, +nerve)</button>
@@ -1056,7 +1057,7 @@
         inventory: [],
         node: 'entrance',
         lastNodeLogged: null,
-        startedAt: Date.now(),
+        startedAt: null,
         gameOver: false,
         won: false
       };
@@ -1089,15 +1090,15 @@
       };
 
       var ambience = {
-        entrance: { bg: '../../images/wizardry/screenshots/structures/night/2026-04-18_04.33.28.png', tone: 'A torch crackles beside cracked stone stairs.' },
-        library: { bg: '../../images/wizardry/screenshots/buildings/2011-12-28_14.42.02.png', tone: 'Books hum quietly as if they remember your name.' },
-        pit: { bg: '../../images/wizardry/screenshots/underground/2026-04-18_05.20.38.png', tone: 'Rotten air rises from a broken shaft in the floor.' },
-        shrine: { bg: '../../images/wizardry/screenshots/nether/2026-04-18_06.25.00.png', tone: 'An old furnace altar glows with ember runes.' },
-        echo: { bg: '../../images/wizardry/screenshots/structures/dungeon/2026-04-18_04.48.33.png', tone: 'Armor clinks in the dark, then suddenly stops.' },
-        vault: { bg: '../../images/wizardry/screenshots/structures/dungeon/2012-12-27_22.45.09.png', tone: 'Gold glitters across pressure plates and wires.' },
-        boss: { bg: '../../images/wizardry/screenshots/structures/dungeon/2026-04-18_05.19.43.png', tone: 'The Warden stirs behind a deepslate gate.' },
-        win: { bg: '../../images/wizardry/screenshots/day/2026-04-18_04.54.22.png', tone: 'The relic sings while daylight floods the exit.' },
-        loss: { bg: '../../images/wizardry/screenshots/underground/2026-04-18_05.22.15.png', tone: 'Your footsteps fade into the stone forever.' }
+        entrance: { bg: '../../images/wizardry/screenshots/night/bigger%20cave%20entrance.png', tone: 'A torch crackles beside cracked stone stairs.' },
+        library: { bg: '../../images/wizardry/screenshots/buildings/basic%20house%20in%20mountainwall.png', tone: 'Books hum quietly as if they remember your name.' },
+        pit: { bg: '../../images/wizardry/screenshots/underground/dark%20entrance%20underground.png', tone: 'Rotten air rises from a broken shaft in the floor.' },
+        shrine: { bg: '../../images/wizardry/screenshots/nether/glowstone%20near%20soulsand%20area%20grat%20view.png', tone: 'An old furnace altar glows with ember runes.' },
+        echo: { bg: '../../images/wizardry/screenshots/structures/dungeon/monster%20dungeon%20zombie%20spawner%20near%20ravaine%20mointain%20entrance%20underground.png', tone: 'Armor clinks in the dark, then suddenly stops.' },
+        vault: { bg: '../../images/wizardry/screenshots/structures/dungeon/big%20mine%20with%20rails%20and%20spider%20dungen%20no%20monsteres%20spawned.png', tone: 'Gold glitters across pressure plates and wires.' },
+        boss: { bg: '../../images/wizardry/screenshots/structures/dungeon/spider%20dungeon%20with%20spawner%20room.png', tone: 'The Warden stirs behind a deepslate gate.' },
+        win: { bg: '../../images/wizardry/screenshots/day/sky%20with%20sun.png', tone: 'The relic sings while daylight floods the exit.' },
+        loss: { bg: '../../images/wizardry/screenshots/underground/lava%20pools%20underground.webp', tone: 'Your footsteps fade into the stone forever.' }
       };
 
       var nodes = {
@@ -1205,6 +1206,7 @@
         choices: document.getElementById('choices'),
         log: document.getElementById('logBox'),
         sound: document.getElementById('soundBtn'),
+        music: document.getElementById('musicBtn'),
         cast: document.getElementById('castBtn'),
         rest: document.getElementById('restBtn'),
         restart: document.getElementById('restartBtn')
@@ -1408,6 +1410,76 @@
         osc.stop(now + 0.1);
       }
 
+      /* ── Background music ─────────────────────────── */
+      var musicState = { enabled: false, gain: null, timer: null, idx: 0 };
+      var musicNotes = [131, 165, 147, 196, 165, 175, 131, 110, 131, 147, 165, 131];
+
+      function initMusic() {
+        if (musicState.gain) return;
+        initAudio();
+        if (!audio.ctx) return;
+        musicState.gain = audio.ctx.createGain();
+        musicState.gain.gain.value = 0.0001;
+        musicState.gain.connect(audio.ctx.destination);
+      }
+
+      function playMusicNote() {
+        if (!musicState.enabled || !musicState.gain || !audio.ctx) return;
+        var now = audio.ctx.currentTime;
+        var freq = musicNotes[musicState.idx % musicNotes.length];
+        musicState.idx++;
+        var osc = audio.ctx.createOscillator();
+        var g = audio.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        g.gain.setValueAtTime(0.0001, now);
+        g.gain.linearRampToValueAtTime(0.07, now + 0.4);
+        g.gain.linearRampToValueAtTime(0.0001, now + 2.2);
+        osc.connect(g).connect(musicState.gain);
+        osc.start(now);
+        osc.stop(now + 2.4);
+        var osc2 = audio.ctx.createOscillator();
+        var g2 = audio.ctx.createGain();
+        osc2.type = 'triangle';
+        osc2.frequency.value = freq * 2;
+        g2.gain.setValueAtTime(0.0001, now + 0.15);
+        g2.gain.linearRampToValueAtTime(0.025, now + 0.5);
+        g2.gain.linearRampToValueAtTime(0.0001, now + 1.8);
+        osc2.connect(g2).connect(musicState.gain);
+        osc2.start(now);
+        osc2.stop(now + 2);
+      }
+
+      function setMusicEnabled(on) {
+        musicState.enabled = on;
+        if (on) {
+          initMusic();
+          if (audio.ctx && audio.ctx.state === 'suspended') audio.ctx.resume();
+          if (musicState.gain) {
+            var t = audio.ctx.currentTime;
+            musicState.gain.gain.cancelScheduledValues(t);
+            musicState.gain.gain.setValueAtTime(musicState.gain.gain.value, t);
+            musicState.gain.gain.linearRampToValueAtTime(0.45, t + 0.3);
+          }
+          musicState.idx = 0;
+          playMusicNote();
+          musicState.timer = setInterval(playMusicNote, 2600);
+        } else {
+          if (musicState.gain && audio.ctx) {
+            var t2 = audio.ctx.currentTime;
+            musicState.gain.gain.cancelScheduledValues(t2);
+            musicState.gain.gain.setValueAtTime(musicState.gain.gain.value, t2);
+            musicState.gain.gain.linearRampToValueAtTime(0.0001, t2 + 0.3);
+          }
+          if (musicState.timer) { clearInterval(musicState.timer); musicState.timer = null; }
+        }
+        updateMusicButton();
+      }
+
+      function updateMusicButton() {
+        refs.music.textContent = musicState.enabled ? 'Music: On' : 'Music: Off';
+      }
+
       function adjust(key, amount) {
         var maxKey = 'max' + key.charAt(0).toUpperCase() + key.slice(1);
         var max = state[maxKey] || 999;
@@ -1551,6 +1623,7 @@
           btn.appendChild(document.createTextNode(text));
           btn.addEventListener('click', function () {
             if (!enabled) return;
+            if (!state.startedAt) state.startedAt = Date.now();
             playSfx('note');
             var effectResult;
             if (typeof option.effect === 'function') {
@@ -1619,7 +1692,7 @@
         state.inventory = [];
         state.node = 'entrance';
         state.lastNodeLogged = null;
-        state.startedAt = Date.now();
+        state.startedAt = null;
         state.gameOver = false;
         state.won = false;
         refs.log.innerHTML = '';
@@ -1632,6 +1705,10 @@
       refs.sound.addEventListener('click', function () {
         setSoundEnabled(!audio.enabled);
         playSfx('note');
+      });
+
+      refs.music.addEventListener('click', function () {
+        setMusicEnabled(!musicState.enabled);
       });
 
       refs.resetRecords.addEventListener('click', function () {
@@ -1674,7 +1751,7 @@
       refs.restart.addEventListener('click', hardReset);
 
       setInterval(function () {
-        if (!state.gameOver) {
+        if (!state.gameOver && state.startedAt) {
           var el = document.getElementById('runTimer');
           if (el) el.textContent = formatDuration(Date.now() - state.startedAt);
         }
