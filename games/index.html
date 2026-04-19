@@ -2879,14 +2879,17 @@
         shuffleArr(openCells);
         var placeIdx = 0;
         function placeItem(tile) {
-          if (placeIdx >= openCells.length) return;
+          if (placeIdx >= openCells.length || placeIdx >= maxItems) return;
           g[openCells[placeIdx].r][openCells[placeIdx].c] = tile;
           placeIdx++;
         }
 
+        // Item budget: cap total placed items to keep levels navigable
+        var maxItems = Math.floor(openCells.length * 0.45);
+
         // Mobs
-        var mobCount = diff === 0 ? Math.floor(lvNum / 4) : diff === 1 ? Math.floor(lvNum / 2.5) + 1 : Math.floor(lvNum / 2) + 2;
-        mobCount = Math.min(mobCount, 5);
+        var mobCount = diff === 0 ? Math.floor(lvNum / 4) : diff === 1 ? Math.floor(lvNum / 3) + 1 : Math.floor(lvNum / 2.5) + 1;
+        mobCount = Math.min(mobCount, 4);
         if (mobCount > 0) placeItem(SWORD_T); // give sword if mobs present
         for (i = 0; i < mobCount; i++) {
           var mobType = Math.random() < 0.5 ? ZOMBIE : (Math.random() < 0.6 ? SKELETON : CREEPER);
@@ -2899,18 +2902,18 @@
 
         // Hazards by difficulty
         if (diff >= 1 || lvNum >= 3) {
-          var crackCount = 1 + Math.floor(lvNum / 3);
-          crackCount = Math.min(crackCount, 4);
+          var crackCount = 1 + Math.floor(lvNum / 4);
+          crackCount = Math.min(crackCount, 3);
           for (i = 0; i < crackCount; i++) placeItem(CRACK);
         }
         if (diff >= 1 || lvNum >= 5) {
-          var lavaCount = Math.floor(lvNum / 4) + (diff === 2 ? 2 : 0);
-          lavaCount = Math.min(lavaCount, 4);
+          var lavaCount = Math.floor(lvNum / 5) + (diff === 2 ? 1 : 0);
+          lavaCount = Math.min(lavaCount, 3);
           for (i = 0; i < lavaCount; i++) placeItem(LAVA);
         }
-        if (diff >= 1 && lvNum >= 4) {
+        if (diff >= 1 && lvNum >= 5) {
           placeItem(SPIKE);
-          if (diff === 2 && lvNum >= 7) placeItem(SPIKE);
+          if (diff === 2 && lvNum >= 9) placeItem(SPIKE);
         }
 
         // Key + door puzzle (normal+ after level 3, easy after level 6)
@@ -2942,11 +2945,11 @@
           placeItem(PLATE);
         }
 
-        // Dark tiles (hard after level 4, normal after level 8)
-        if ((diff === 2 && lvNum >= 4) || (diff === 1 && lvNum >= 8)) {
+        // Dark tiles (hard after level 6, normal after level 10)
+        if ((diff === 2 && lvNum >= 6) || (diff === 1 && lvNum >= 10)) {
           placeItem(TORCH_T);
-          var darkCount = 3 + Math.floor(lvNum / 2);
-          darkCount = Math.min(darkCount, 10);
+          var darkCount = 2 + Math.floor(lvNum / 3);
+          darkCount = Math.min(darkCount, 6);
           // Convert some cells to DARK
           for (i = placeIdx; i < Math.min(placeIdx + darkCount, openCells.length); i++) {
             var dc2 = openCells[i];
@@ -3032,7 +3035,13 @@
           if (nr < 0 || nr >= ROWS || nc < 0 || nc >= COLS) { hitSolid = true; break; }
           var tile = grid[nr][nc];
 
-          if (tile === WALL || tile === DARK) { hitSolid = true; break; }
+          if (tile === WALL) { hitSolid = true; break; }
+          if (tile === DARK) {
+            if (!isLit(nr, nc)) { hitSolid = true; break; }
+            grid[nr][nc] = EMPTY; // reveal lit dark tile
+            r = nr; cl = nc; slid = true;
+            slideTrail.push({r: r, c: cl}); continue;
+          }
           if (tile === DOOR) {
             if (inventory.key) { delete inventory.key; grid[nr][nc] = EMPTY; showMsg('Unlocked!'); }
             else { hitSolid = true; break; }
