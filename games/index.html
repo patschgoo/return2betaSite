@@ -2993,6 +2993,7 @@
         state = 'difficulty';
         player = null;
         grid = [];
+        inventory = {};
         runLevels = [];
         level = 0;
         totalScore = 0;
@@ -3325,12 +3326,13 @@
           c.font = '12px sans-serif'; c.textAlign = 'left';
           c.fillText('\u2764', OX + h * 14, hudY + 13);
         }
+        var inv = inventory || {};
         var invX = OX + 50;
         c.font = '10px sans-serif'; c.fillStyle = '#aaa';
-        if (inventory.key) { c.fillText('Key', invX, hudY + 13); invX += 28; }
-        if (inventory.sword) { c.fillText('Swd', invX, hudY + 13); invX += 28; }
-        if (inventory.pick) { c.fillText('Pick', invX, hudY + 13); invX += 28; }
-        if (inventory.torch) { c.fillText('Trch', invX, hudY + 13); invX += 28; }
+        if (inv.key) { c.fillText('Key', invX, hudY + 13); invX += 28; }
+        if (inv.sword) { c.fillText('Swd', invX, hudY + 13); invX += 28; }
+        if (inv.pick) { c.fillText('Pick', invX, hudY + 13); invX += 28; }
+        if (inv.torch) { c.fillText('Trch', invX, hudY + 13); invX += 28; }
         c.fillStyle = movesLeft <= 1 ? '#f44' : '#aaa';
         c.textAlign = 'right'; c.font = '10px sans-serif';
         c.fillText('Moves: ' + movesLeft + '/' + maxMoves, W - OX, hudY + 13);
