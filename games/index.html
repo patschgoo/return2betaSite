@@ -2969,10 +2969,11 @@
         loadLevel(0);
       }
 
-      function finalizeRun() {
+      function finalizeRun(includeCurrentRoomScore) {
         if (runFinalized) return;
         runFinalized = true;
-        var finalScore = totalScore + (state === 'playing' || state === 'outofmoves' ? (score || 0) : 0);
+        var includeCurrent = !!includeCurrentRoomScore || state === 'playing' || state === 'outofmoves';
+        var finalScore = totalScore + (includeCurrent ? (score || 0) : 0);
         if (finalScore > best) {
           best = finalScore;
           localStorage.setItem('r2b_mdungeon_best', best);
@@ -2984,6 +2985,7 @@
         }
         R2BScores.submit('mdungeon', finalScore);
         lastSavedScore = finalScore;
+        sEl.textContent = finalScore;
       }
 
       function toDifficultyMenu(fromPause) {
@@ -3351,7 +3353,7 @@
           c.fillStyle = '#f44'; c.font = '18px Minecraft, sans-serif'; c.textAlign = 'center';
           c.fillText('You Died!', W / 2, H / 2 - 20);
           c.fillStyle = '#ccc'; c.font = '11px Minecraft, sans-serif';
-          c.fillText('Final Score: ' + totalScore, W / 2, H / 2 + 5);
+          c.fillText('Final Score: ' + (lastSavedScore !== null ? lastSavedScore : totalScore), W / 2, H / 2 + 5);
           drawBtn(W / 2 - 50, H / 2 + 20, 100, 24, 'Restart Game');
         }
         if (state === 'difficulty') {
@@ -3437,7 +3439,7 @@
           if (inBtn(pos.x, pos.y, W / 2 - 28, H / 2 - 2, 56, 24)) { menuMode = 'start'; startRun('normal'); return true; }
           if (inBtn(pos.x, pos.y, W / 2 + 32, H / 2 - 2, 56, 24)) { menuMode = 'start'; startRun('hard'); return true; }
           if (inBtn(pos.x, pos.y, W / 2 - 50, H / 2 + 30, 100, 24)) {
-            if (menuMode === 'pause') finalizeRun();
+            if (menuMode === 'pause') finalizeRun(true);
             toDifficultyMenu(false);
             return true;
           }
@@ -3512,7 +3514,7 @@
           if (e.key === '1') { startRun('easy'); e.preventDefault(); }
           else if (e.key === '2') { startRun('normal'); e.preventDefault(); }
           else if (e.key === '3') { startRun('hard'); e.preventDefault(); }
-          else if (e.key === 'g' || e.key === 'G') { if (menuMode === 'pause') finalizeRun(); toDifficultyMenu(false); e.preventDefault(); }
+          else if (e.key === 'g' || e.key === 'G') { if (menuMode === 'pause') finalizeRun(true); toDifficultyMenu(false); e.preventDefault(); }
           return;
         }
         if (state === 'playing' && (e.key === 'Escape' || e.code === 'Escape')) {
