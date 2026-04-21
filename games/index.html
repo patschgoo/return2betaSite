@@ -380,9 +380,9 @@
         <a class="dropdown-link" href="/games/?game=3"><img src="../images/Game%20Links/minecreeper.png" alt="" />Minecreeper</a>
         <a class="dropdown-link" href="/games/?game=4"><img src="../images/Game%20Links/block-crush.png" alt="" />Block Crush</a>
         <a class="dropdown-link" href="/games/?game=5"><img src="../images/Game%20Links/mine-dungeon.png" alt="" />Mine Dungeon</a>
-        <a class="dropdown-link" href="/games/wizardry/"><img src="../images/wizardry/wizard_hat.png" alt="" />Mizardry Adventure</a>
         <a class="dropdown-link" href="/games/?game=6"><img src="../images/Game%20Links/mine-blocks.png" alt="" />Mine Blocks</a>
         <a class="dropdown-link" href="/games/?game=7"><img src="../images/Game%20Links/mine-blocks-2.png" alt="" />Mine Blocks 2</a>
+        <a class="dropdown-link" href="/games/wizardry/"><img src="../images/mobs/2d/Player_Head.png" alt="" />Wizardry Adventure</a>
         <hr />
         <a class="dropdown-more" href="/games/more-links/">More Links &#8250;</a>
       </div>
@@ -677,7 +677,7 @@
       }
       scale = Math.round(scale * 100) / 100;
       gameContainer.style.transform = 'scale(' + scale + ')';
-      gameContainer.style.marginBottom = Math.max(0, (canvas.height * scale - canvas.height) + 8) + 'px';
+      gameContainer.style.marginBottom = ((canvas.height * scale - canvas.height) + 8) + 'px';
     }
     window.addEventListener('resize', scaleGame);
 
@@ -2648,16 +2648,16 @@
     // ── Mine Dungeon ──────────────────────────────────────
     // Dungeon slider with lives, max moves, mob/item textures
     function mineDungeon(cvs, c, sEl, bEl, sbEl, hEl, setAnim) {
-      var CELL = 32;
+      var CELL = 24;
       var COLS = 12, ROWS = 12;
       var BORDER = 2;
-      var HUD_H = CELL + 20;
+      var HUD_H = CELL + 14;
       cvs.width = COLS * CELL + BORDER * 2;
       cvs.height = ROWS * CELL + BORDER * 2 + HUD_H;
       var OX = BORDER, OY = BORDER;
       var T = 16;
 
-      // ── Images ────────────────────────────────────
+      // ── Load mob/player head images ───────────────
       var imgPlayer = new Image(); imgPlayer.src = '../images/mobs/2d/Player_Head.png';
       var imgZombie = new Image(); imgZombie.src = '../images/mobs/2d/Zombie_Head.png';
       var imgSkeleton = new Image(); imgSkeleton.src = '../images/mobs/2d/Skeleton_Skull.png';
@@ -2665,22 +2665,20 @@
       var imgItems = new Image(); imgItems.src = '../images/minecraft/items.png';
       var itemsReady = false; imgItems.onload = function () { itemsReady = true; };
 
-      // terrain.png sprite
+      // terrain.png sprite draw
       function dt(col, row, dx, dy) {
         if (!terrainReady) { c.fillStyle = '#444'; c.fillRect(dx, dy, CELL, CELL); return; }
         c.drawImage(terrainImg, col * T, row * T, T, T, dx, dy, CELL, CELL);
       }
-      // items.png sprite
+      // items.png sprite draw
       function di(col, row, dx, dy, sz) {
         sz = sz || CELL;
         if (!itemsReady) return;
         c.drawImage(imgItems, col * T, row * T, T, T, dx, dy, sz, sz);
       }
-      // mob head — centered and slightly smaller than cell
+      // mob head draw
       function dm(img, dx, dy) {
-        if (!img.complete || !img.naturalWidth) return;
-        var pad = Math.round(CELL * 0.1);
-        c.drawImage(img, dx + pad, dy + pad, CELL - pad * 2, CELL - pad * 2);
+        if (img.complete && img.naturalWidth) c.drawImage(img, dx, dy, CELL, CELL);
       }
 
       // ── Tile types ───────────────────────────────
@@ -2690,79 +2688,13 @@
           HEART_T = 16, SWORD_T = 17, PICK_T = 18, TORCH_T = 19, STONE_W = 20,
           DARK = 21, GRAVEL_T = 22;
 
-      // ── Difficulty ───────────────────────────────
-      var difficulty = -1; // -1 = not selected, 0=easy, 1=normal, 2=hard
-      var diffNames = ['Easy', 'Normal', 'Hard'];
-      var diffColors = ['#5f5', '#fc0', '#f55'];
-      var diffDescs = [
-        'Fewer hazards, more moves',
-        'Balanced challenge',
-        'Dense hazards, tight moves'
-      ];
-      var LEVELS_PER_RUN = 15;
-
       // ── Game state ───────────────────────────────
-      var level = 0, grid = [], player, lives, maxMoves, movesLeft, inventory,
-          score, totalScore = 0, state = 'diffselect', msg = '', msgTimer = 0,
-          litCells = {}, slideTrail = [], slideAnim = 0, heartsTaken = 0;
-      var levelCache = {}; // cache generated levels so retry replays the same layout
+        var level = 0, grid = [], player, lives, maxMoves, movesLeft, inventory,
+          score, totalScore = 0, state = 'difficulty', msg = '', msgTimer = 0,
+          litCells = {}, slideTrail = [], slideAnim = 0, heartsTaken = 0,
+          runLevels = [], difficulty = null, runFinalized = false,
+          menuMode = 'start', lastSavedScore = null;
 
-      // ── Smooth‑slide animation ───────────────────
-      var sliding = false, slideAnimPath = [], slideAnimIdx = 0, slideAnimT = 0;
-      var SLIDE_SPEED = 0.28;
-      var playerDrawR = 0, playerDrawC = 0;
-
-      // ── Particles ────────────────────────────────
-      var particles = [];
-      function spawnBurst(x, y, n, col, spread, life) {
-        for (var i = 0; i < n; i++) particles.push({
-          x: x + (Math.random() - 0.5) * spread, y: y + (Math.random() - 0.5) * spread,
-          vx: (Math.random() - 0.5) * 3, vy: (Math.random() - 0.5) * 3 - 0.5,
-          color: col, life: life + Math.random() * life * 0.5,
-          maxLife: life * 1.5, size: 1.5 + Math.random() * 2.5
-        });
-      }
-      function spawnIceTrail(px, py) {
-        var cols = ['#adf','#cef','#8cf','#fff','#bef'];
-        for (var i = 0; i < 4; i++) particles.push({
-          x: px + Math.random() * CELL, y: py + Math.random() * CELL,
-          vx: (Math.random() - 0.5) * 1.2, vy: -Math.random() * 1.5 - 0.5,
-          color: cols[Math.floor(Math.random() * cols.length)],
-          life: 18 + Math.random() * 14, maxLife: 32, size: 1 + Math.random() * 2.5
-        });
-      }
-      function updateParticles() {
-        for (var i = particles.length - 1; i >= 0; i--) {
-          var p = particles[i]; p.x += p.vx; p.y += p.vy; p.vy += 0.04; p.life--;
-          if (p.life <= 0) particles.splice(i, 1);
-        }
-      }
-      function drawParticles() {
-        for (var i = 0; i < particles.length; i++) {
-          var p = particles[i];
-          c.globalAlpha = Math.max(0, p.life / p.maxLife);
-          c.fillStyle = p.color;
-          c.fillRect(Math.round(p.x - p.size / 2), Math.round(p.y - p.size / 2), p.size, p.size);
-        }
-        c.globalAlpha = 1;
-      }
-
-      // ── Screen shake ─────────────────────────────
-      var shakeX = 0, shakeY = 0, shakeDur = 0, shakeStr = 0;
-      function triggerShake(s, d) { shakeStr = s; shakeDur = d; }
-      function updateShake() {
-        if (shakeDur > 0) { shakeDur--; shakeX = (Math.random() - 0.5) * shakeStr * 2; shakeY = (Math.random() - 0.5) * shakeStr * 2; shakeStr *= 0.88; }
-        else { shakeX = 0; shakeY = 0; }
-      }
-
-      // ── Floor variation ──────────────────────────
-      var floorVar = [];
-      function genFloorVar() {
-        floorVar = [];
-        for (var r = 0; r < ROWS; r++) { floorVar[r] = []; for (var cl = 0; cl < COLS; cl++) floorVar[r][cl] = Math.random(); }
-      }
-
-      // ── Score tracking ───────────────────────────
       var best = parseInt(localStorage.getItem('r2b_mdungeon_best') || '0', 10);
       var siteBest = R2BScores.get('mdungeon');
       bEl.textContent = best;
@@ -2771,223 +2703,309 @@
         if (s.mdungeon !== undefined && s.mdungeon > siteBest) { siteBest = s.mdungeon; sbEl.textContent = siteBest; }
       });
 
-      // ══════════════════════════════════════════════
-      // ── RANDOM LEVEL GENERATOR ────────────────────
-      // ══════════════════════════════════════════════
+      // ── LEVELS ─────────────────────────────────────
+      var LEVELS = [
+        // Lv1: Ice zigzag (par=5, max=7)
+        { par: 5, grid: [
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,5,2,0,2,2,0,1,1,1,1],
+          [1,1,0,1,1,1,1,2,1,1,1,1],
+          [1,0,2,2,0,1,0,2,1,1,1,1],
+          [1,1,1,1,1,1,1,0,1,1,1,1],
+          [1,1,1,1,1,1,1,2,1,1,1,1],
+          [1,1,1,'P',2,2,2,0,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1]
+        ]},
+        // Lv2: Ice slide intro (par=6, max=8)
+        { par: 6, grid: [
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,'P',2,2,2,0,1,1,1,1,1],
+          [1,1,1,1,1,1,0,1,1,1,1,1],
+          [1,1,1,0,2,2,2,1,1,1,1,1],
+          [1,1,1,0,1,1,1,1,1,1,1,1],
+          [1,1,1,5,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1]
+        ]},
+        // Lv3: Ice corridor (par=6, max=8)
+        { par: 6, grid: [
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,0,2,2,0,0,5,1,1,1,1,1],
+          [1,1,1,1,1,2,1,1,1,1,1,1],
+          [1,0,2,2,2,2,1,1,1,1,1,1],
+          [1,1,1,0,1,1,1,1,1,1,1,1],
+          [1,'P',2,0,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1]
+        ]},
+        // Lv4: Cracked floor (par=6, max=8)
+        { par: 6, grid: [
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,0,0,0,0,0,5,1,1,1,1],
+          [1,1,0,0,11,0,0,1,1,1,1,1],
+          [1,1,'P',11,1,11,0,1,1,1,1,1],
+          [1,1,0,0,11,0,1,1,1,1,1,1],
+          [1,1,0,0,0,0,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1]
+        ]},
+        // Lv5: Pickaxe + stone (par=7, max=9)
+        { par: 7, grid: [
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,0,0,0,0,0,5,1,1,1,1],
+          [1,1,0,1,20,1,1,1,1,1,1,1],
+          [1,1,'P',0,0,0,0,1,1,1,1,1],
+          [1,1,0,1,18,1,1,1,1,1,1,1],
+          [1,1,0,0,0,0,6,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1]
+        ]},
+        // Lv6: Ice maze (par=7, max=9)
+        { par: 7, grid: [
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,5,2,0,1,0,2,0,1,1,1,1],
+          [1,2,1,2,1,2,1,2,1,1,1,1],
+          [1,0,2,2,0,0,2,2,1,1,1,1],
+          [1,1,1,1,1,1,1,2,1,1,1,1],
+          [1,1,1,1,'P',2,2,0,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1]
+        ]},
+        // Lv7: Sword + mobs gauntlet (par=7, max=9)
+        { par: 7, grid: [
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,0,0,0,0,0,0,0,1,1,1,1],
+          [1,0,1,1,1,0,1,0,1,1,1,1],
+          [1,0,0,17,0,10,0,0,5,1,1,1],
+          [1,'P',0,0,1,0,9,1,1,1,1,1],
+          [1,0,1,0,0,0,0,1,1,1,1,1],
+          [1,0,0,8,1,0,0,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1]
+        ]},
+        // Lv8: Key + door detour (par=8, max=10)
+        { par: 8, grid: [
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,0,0,15,0,1,1,1,1,1,1],
+          [1,1,0,1,1,0,1,1,1,1,1,1],
+          [1,1,'P',0,0,0,4,0,5,1,1,1],
+          [1,1,0,1,0,0,0,0,0,1,1,1],
+          [1,1,0,0,0,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1]
+        ]},
+        // Lv9: Dark maze + torch (par=8, max=10)
+        { par: 8, grid: [
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,21,21,21,21,21,21,21,21,1,1,1],
+          [1,21,5,0,21,0,0,0,21,1,1,1],
+          [1,21,0,21,21,21,0,21,21,1,1,1],
+          [1,21,0,0,0,0,0,0,21,1,1,1],
+          [1,21,21,21,0,21,21,0,21,1,1,1],
+          [1,21,'P',0,0,21,19,0,21,1,1,1],
+          [1,21,21,21,21,21,21,21,21,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1]
+        ]},
+        // Lv10: Grand mix — pick + stone + sword + mob + key + door + ice (par=8, max=10)
+        { par: 8, grid: [
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,0,0,20,0,17,1,0,15,0,0,1],
+          [1,0,1,1,0,0,1,0,1,4,5,1],
+          [1,'P',0,18,0,0,0,2,2,0,0,1],
+          [1,0,1,1,0,1,8,1,0,1,0,1],
+          [1,0,0,0,0,1,0,0,0,0,0,1],
+          [1,1,0,16,1,0,0,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1]
+        ]},
+        // Lv11: Sword + zombie detour (par=9, max=11)
+        { par: 9, grid: [
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,0,0,17,0,1,1,1,1,1,1],
+          [1,1,0,1,1,0,1,1,1,1,1,1],
+          [1,1,'P',0,0,0,8,0,5,1,1,1],
+          [1,1,0,0,0,6,6,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1]
+        ]},
+        // Lv12: Crate + plate + door (par=11, max=13)
+        { par: 11, grid: [
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,0,0,0,0,0,4,0,5,1,1,1],
+          [1,0,1,1,0,1,1,1,1,1,1,1],
+          [1,'P',0,0,13,0,14,1,1,1,1,1],
+          [1,0,1,0,0,0,1,1,1,1,1,1],
+          [1,0,0,0,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1]
+        ]},
+        // Lv13: Dark dungeon — torch + combat + key + door + ice (par=11, max=13)
+        { par: 11, grid: [
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,21,21,21,21,21,21,21,21,21,1,1],
+          [1,21,0,0,0,15,21,4,0,5,1,1],
+          [1,21,0,21,2,2,2,21,0,21,1,1],
+          [1,21,0,0,0,21,17,0,0,21,1,1],
+          [1,21,0,21,21,21,0,21,0,21,1,1],
+          [1,21,'P',0,19,0,0,0,8,21,1,1],
+          [1,21,21,21,21,21,21,21,21,21,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1]
+        ]},
+        // Lv14: Key + door + ice + sword + zombie (par=12, max=14)
+        { par: 12, grid: [
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,0,0,0,0,1,0,0,0,0,1,1],
+          [1,0,1,1,2,2,2,1,15,0,1,1],
+          [1,0,0,17,0,1,0,0,4,5,1,1],
+          [1,'P',1,0,0,0,0,1,0,0,1,1],
+          [1,0,0,0,1,0,8,0,0,1,1,1],
+          [1,0,0,0,0,0,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1]
+        ]},
+        // Lv15: Lava bridge — push crates (par=15, max=17)
+        { par: 15, grid: [
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,0,0,0,1,0,0,0,0,1,1,1],
+          [1,0,1,0,1,0,1,1,5,1,1,1],
+          [1,0,0,0,6,0,0,0,0,1,1,1],
+          [1,'P',0,13,1,0,1,1,1,1,1,1],
+          [1,0,1,0,6,13,0,0,1,1,1,1],
+          [1,0,0,0,1,0,0,0,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1]
+        ]}
+      ];
 
-      function generateLevel(lvNum) {
-        // diff 0=easy, 1=normal, 2=hard
-        var diff = difficulty;
-        var g = [];
-        var r, cl;
-        for (r = 0; r < 12; r++) { g[r] = []; for (cl = 0; cl < 12; cl++) g[r][cl] = WALL; }
+      function cloneLevel(lv) {
+        return {
+          par: lv.par,
+          grid: lv.grid.map(function (row) { return row.slice(); })
+        };
+      }
 
-        // Playable area size scales with difficulty and level progress
-        var baseSize = diff === 0 ? 6 : diff === 1 ? 7 : 8;
-        var growth = Math.min(lvNum, 8);
-        var areaW = Math.min(10, baseSize + Math.floor(growth * 0.4));
-        var areaH = Math.min(10, baseSize + Math.floor(growth * 0.3));
-        var ox = 1, oy = 1; // top-left of playable area
-
-        // Step 1: Carve a connected area using random walk from center
-        var cx = ox + Math.floor(areaW / 2), cy = oy + Math.floor(areaH / 2);
-        var carved = {};
-        var carveList = [];
-        function carveCell(cr, cc) {
-          if (cr < oy || cr >= oy + areaH || cc < ox || cc >= ox + areaW) return false;
-          var k = cr + ',' + cc;
-          if (carved[k]) return false;
-          carved[k] = true;
-          g[cr][cc] = EMPTY;
-          carveList.push({r: cr, c: cc});
-          return true;
+      function pickN(pool, n) {
+        var src = pool.slice();
+        var out = [];
+        while (src.length && out.length < n) {
+          var i = Math.floor(Math.random() * src.length);
+          out.push(src.splice(i, 1)[0]);
         }
-        carveCell(cy, cx);
+        return out;
+      }
 
-        // Random walk to carve cells
-        var targetCells = diff === 0 ? 20 + lvNum * 2 : diff === 1 ? 25 + lvNum * 2 : 30 + lvNum * 2;
-        targetCells = Math.min(targetCells, areaW * areaH - 4);
-        var wr = cy, wc = cx;
-        var dirs = [[-1,0],[1,0],[0,-1],[0,1]];
-        var safety = 0;
-        while (carveList.length < targetCells && safety < 2000) {
-          safety++;
-          var d = dirs[Math.floor(Math.random() * 4)];
-          var nr = wr + d[0], nc = wc + d[1];
-          if (nr >= oy && nr < oy + areaH && nc >= ox && nc < ox + areaW) {
-            carveCell(nr, nc);
-            wr = nr; wc = nc;
-          }
-          // Occasionally jump to a random carved cell to avoid getting stuck
-          if (safety % 30 === 0 && carveList.length > 0) {
-            var jump = carveList[Math.floor(Math.random() * carveList.length)];
-            wr = jump.r; wc = jump.c;
-          }
+      function buildRun(diff) {
+        var idxPool;
+        if (diff === 'easy') idxPool = [0, 1, 2, 3, 4, 5, 6, 7];
+        else if (diff === 'normal') idxPool = [3, 4, 5, 6, 7, 8, 9, 10, 11];
+        else idxPool = [7, 8, 9, 10, 11, 12, 13, 14];
+        return pickN(idxPool, 3).map(function (idx) { return cloneLevel(LEVELS[idx]); });
+      }
+
+      function startRun(diff) {
+        difficulty = diff;
+        runLevels = buildRun(diff);
+        level = 0;
+        totalScore = 0;
+        score = 0;
+        lives = 3;
+        runFinalized = false;
+        sEl.textContent = '0';
+        loadLevel(0);
+      }
+
+      function finalizeRun() {
+        if (runFinalized) return;
+        runFinalized = true;
+        var finalScore = totalScore + (state === 'playing' || state === 'outofmoves' ? (score || 0) : 0);
+        if (finalScore > best) {
+          best = finalScore;
+          localStorage.setItem('r2b_mdungeon_best', best);
+          bEl.textContent = best;
         }
-
-        // Step 2: Place player and portal far apart
-        // Find cells at extremes of the carved area
-        var minR = 12, maxR = 0, minC = 12, maxC = 0;
-        for (var i = 0; i < carveList.length; i++) {
-          var p = carveList[i];
-          if (p.r < minR) minR = p.r;
-          if (p.r > maxR) maxR = p.r;
-          if (p.c < minC) minC = p.c;
-          if (p.c > maxC) maxC = p.c;
+        if (finalScore > siteBest) {
+          siteBest = finalScore;
+          sbEl.textContent = siteBest;
         }
-        // Find valid corner cells
-        var corners = [
-          {r: minR, c: minC}, {r: minR, c: maxC},
-          {r: maxR, c: minC}, {r: maxR, c: maxC}
-        ];
-        // Find closest carved cell to each corner
-        function closestTo(tr, tc) {
-          var bestD = 999, bestCell = carveList[0];
-          for (var i = 0; i < carveList.length; i++) {
-            var d = Math.abs(carveList[i].r - tr) + Math.abs(carveList[i].c - tc);
-            if (d < bestD) { bestD = d; bestCell = carveList[i]; }
-          }
-          return bestCell;
-        }
-        var playerCell = closestTo(corners[2].r, corners[2].c); // bottom-left
-        var portalCell = closestTo(corners[1].r, corners[1].c); // top-right
-        // Ensure they're different
-        if (playerCell.r === portalCell.r && playerCell.c === portalCell.c) {
-          portalCell = closestTo(corners[0].r, corners[0].c);
-        }
-        g[playerCell.r][playerCell.c] = EMPTY;
-        g[portalCell.r][portalCell.c] = PORTAL;
+        R2BScores.submit('mdungeon', finalScore);
+        lastSavedScore = finalScore;
+      }
 
-        // Step 3: Fill most floor cells with ice
-        var iceChance = diff === 0 ? 0.55 : diff === 1 ? 0.65 : 0.72;
-        for (i = 0; i < carveList.length; i++) {
-          var cc = carveList[i];
-          if (cc.r === playerCell.r && cc.c === playerCell.c) continue;
-          if (g[cc.r][cc.c] !== EMPTY) continue;
-          if (Math.random() < iceChance) g[cc.r][cc.c] = ICE;
-        }
-
-        // Step 4: Add hazards and items based on difficulty + level
-        var openCells = [];
-        for (i = 0; i < carveList.length; i++) {
-          var oc = carveList[i];
-          if (oc.r === playerCell.r && oc.c === playerCell.c) continue;
-          if (g[oc.r][oc.c] === PORTAL) continue;
-          openCells.push(oc);
-        }
-        function shuffleArr(a) { for (var j = a.length - 1; j > 0; j--) { var k = Math.floor(Math.random() * (j + 1)); var t = a[j]; a[j] = a[k]; a[k] = t; } }
-        shuffleArr(openCells);
-        var placeIdx = 0;
-        function placeItem(tile) {
-          if (placeIdx >= openCells.length || placeIdx >= maxItems) return;
-          g[openCells[placeIdx].r][openCells[placeIdx].c] = tile;
-          placeIdx++;
-        }
-
-        // Item budget: cap total placed items to keep levels navigable
-        var maxItems = Math.floor(openCells.length * 0.45);
-
-        // Mobs
-        var mobCount = diff === 0 ? Math.floor(lvNum / 4) : diff === 1 ? Math.floor(lvNum / 3) + 1 : Math.floor(lvNum / 2.5) + 1;
-        mobCount = Math.min(mobCount, 4);
-        if (mobCount > 0) placeItem(SWORD_T); // give sword if mobs present
-        for (i = 0; i < mobCount; i++) {
-          var mobType = Math.random() < 0.5 ? ZOMBIE : (Math.random() < 0.6 ? SKELETON : CREEPER);
-          placeItem(mobType);
-        }
-
-        // Chest
-        var chestCount = 1 + (lvNum > 5 ? 1 : 0);
-        for (i = 0; i < chestCount; i++) placeItem(CHEST_T);
-
-        // Hazards by difficulty
-        if (diff >= 1 || lvNum >= 3) {
-          var crackCount = 1 + Math.floor(lvNum / 4);
-          crackCount = Math.min(crackCount, 3);
-          for (i = 0; i < crackCount; i++) placeItem(CRACK);
-        }
-        if (diff >= 1 || lvNum >= 5) {
-          var lavaCount = Math.floor(lvNum / 5) + (diff === 2 ? 1 : 0);
-          lavaCount = Math.min(lavaCount, 3);
-          for (i = 0; i < lavaCount; i++) placeItem(LAVA);
-        }
-        if (diff >= 1 && lvNum >= 5) {
-          placeItem(SPIKE);
-          if (diff === 2 && lvNum >= 9) placeItem(SPIKE);
-        }
-
-        // Key + door puzzle (normal+ after level 3, easy after level 6)
-        if ((diff >= 1 && lvNum >= 3) || (diff === 0 && lvNum >= 6)) {
-          placeItem(KEY_T);
-          // Place door: find a cell adjacent to portal
-          var doorPlaced = false;
-          var pdirs = [[-1,0],[1,0],[0,-1],[0,1]];
-          shuffleArr(pdirs);
-          for (var di = 0; di < pdirs.length; di++) {
-            var dr = portalCell.r + pdirs[di][0], dc = portalCell.c + pdirs[di][1];
-            if (dr >= 0 && dr < 12 && dc >= 0 && dc < 12 && g[dr][dc] !== WALL && g[dr][dc] !== PORTAL) {
-              g[dr][dc] = DOOR;
-              doorPlaced = true;
-              break;
-            }
-          }
-        }
-
-        // Pickaxe + stone wall puzzle
-        if (lvNum >= 5 && Math.random() < 0.5) {
-          placeItem(PICK_T);
-          placeItem(STONE_W);
-        }
-
-        // Crate + plate (normal+ after level 6)
-        if (diff >= 1 && lvNum >= 6 && Math.random() < 0.6) {
-          placeItem(CRATE);
-          placeItem(PLATE);
-        }
-
-        // Dark tiles (hard after level 6, normal after level 10)
-        if ((diff === 2 && lvNum >= 6) || (diff === 1 && lvNum >= 10)) {
-          placeItem(TORCH_T);
-          var darkCount = 2 + Math.floor(lvNum / 3);
-          darkCount = Math.min(darkCount, 6);
-          // Convert some cells to DARK
-          for (i = placeIdx; i < Math.min(placeIdx + darkCount, openCells.length); i++) {
-            var dc2 = openCells[i];
-            if (g[dc2.r][dc2.c] === EMPTY || g[dc2.r][dc2.c] === ICE) {
-              g[dc2.r][dc2.c] = DARK;
-            }
-          }
-        }
-
-        // Heart (occasional)
-        if (lvNum >= 2 && Math.random() < 0.35) placeItem(HEART_T);
-
-        // Water/gravel stop tiles
-        var stopCount = diff === 0 ? 2 : diff === 1 ? 1 : 1;
-        for (i = 0; i < stopCount; i++) {
-          placeItem(Math.random() < 0.5 ? WATER : GRAVEL_T);
-        }
-
-        // Step 5: Calculate par
-        var dist = Math.abs(playerCell.r - portalCell.r) + Math.abs(playerCell.c - portalCell.c);
-        var basePar = Math.max(4, Math.ceil(dist * 0.7) + 2);
-        if (diff === 0) basePar += 3;
-        else if (diff === 2) basePar -= 1;
-        basePar = Math.max(4, Math.min(basePar, 18));
-
-        // Mark player start
-        g[playerCell.r][playerCell.c] = 'P';
-
-        return { par: basePar, grid: g };
+      function toDifficultyMenu(fromPause) {
+        menuMode = fromPause ? 'pause' : 'start';
+        state = 'difficulty';
+        player = null;
+        grid = [];
+        runLevels = [];
+        level = 0;
+        totalScore = 0;
+        score = 0;
+        sEl.textContent = '0';
+        updateHUD();
       }
 
       // ── Load level ─────────────────────────────────
       function loadLevel(n) {
-        if (n >= LEVELS_PER_RUN) { state = 'victory'; draw(); return; }
-        // Reuse cached level on retry; generate fresh only on first visit
-        if (!levelCache[n]) levelCache[n] = generateLevel(n);
-        var lv = levelCache[n];
-        grid = []; player = null; heartsTaken = 0;
+        if (n >= runLevels.length) { state = 'victory'; finalizeRun(); draw(); return; }
+        var lv = runLevels[n];
+        grid = [];
+        player = null;
+        heartsTaken = 0;
         for (var r = 0; r < ROWS; r++) {
           grid[r] = [];
           for (var cl = 0; cl < COLS; cl++) {
@@ -2996,60 +3014,59 @@
             else grid[r][cl] = v;
           }
         }
-        maxMoves = lv.par + 2;
+        var parBonus = difficulty === 'easy' ? 3 : (difficulty === 'hard' ? 1 : 2);
+        maxMoves = lv.par + parBonus;
         movesLeft = maxMoves;
         inventory = {};
-        score = 0; state = 'playing';
+        score = 0;
+        state = 'playing';
         msg = ''; msgTimer = 0;
         litCells = {};
-        slideTrail = []; slideAnim = 0;
-        sliding = false; slideAnimPath = []; particles = [];
-        genFloorVar();
-        if (player) { playerDrawR = player.r; playerDrawC = player.c; }
-        updateLight(); updateHUD();
+        slideTrail = [];
+        slideAnim = 0;
+        updateLight();
+        updateHUD();
       }
 
       // ── Fog of war ────────────────────────────────
       function updateLight() {
         var rad = inventory.torch ? 5 : 3;
-        for (var dr = -rad; dr <= rad; dr++)
-          for (var dc = -rad; dc <= rad; dc++)
+        for (var dr = -rad; dr <= rad; dr++) {
+          for (var dc = -rad; dc <= rad; dc++) {
             if (Math.abs(dr) + Math.abs(dc) <= rad) {
               var lr = player.r + dr, lc = player.c + dc;
               if (lr >= 0 && lr < ROWS && lc >= 0 && lc < COLS) litCells[lr + ',' + lc] = true;
             }
+          }
+        }
       }
       function isLit(r, cl) { return litCells[r + ',' + cl]; }
 
       // ── Slide mechanic ────────────────────────────
       function slide(dr, dc) {
-        if (sliding) return;
         if (state !== 'playing' || !player) return;
         if (movesLeft <= 0) { state = 'outofmoves'; draw(); return; }
         var r = player.r, cl = player.c;
-        var slid = false, hitSolid = false;
+        var slid = false;
         slideTrail = [{r: r, c: cl}];
 
         while (true) {
           var nr = r + dr, nc = cl + dc;
-          if (nr < 0 || nr >= ROWS || nc < 0 || nc >= COLS) { hitSolid = true; break; }
+          if (nr < 0 || nr >= ROWS || nc < 0 || nc >= COLS) break;
           var tile = grid[nr][nc];
 
-          if (tile === WALL) { hitSolid = true; break; }
-          if (tile === DARK) {
-            if (!isLit(nr, nc)) { hitSolid = true; break; }
-            grid[nr][nc] = EMPTY; // reveal lit dark tile
-            r = nr; cl = nc; slid = true;
-            slideTrail.push({r: r, c: cl}); continue;
-          }
+          // Solid blockers
+          if (tile === WALL || tile === DARK) break;
           if (tile === DOOR) {
             if (inventory.key) { delete inventory.key; grid[nr][nc] = EMPTY; showMsg('Unlocked!'); }
-            else { hitSolid = true; break; }
+            else break;
           }
           if (tile === STONE_W) {
             if (inventory.pick) { grid[nr][nc] = EMPTY; showMsg('Mined!'); }
-            else { hitSolid = true; break; }
+            else break;
           }
+
+          // Crate — push
           if (tile === CRATE) {
             var br = nr + dr, bc = nc + dc;
             if (br >= 0 && br < ROWS && bc >= 0 && bc < COLS) {
@@ -3059,9 +3076,10 @@
                 else if (behind === PLATE) {
                   grid[br][bc] = EMPTY; showMsg('Plate pressed!');
                   for (var rr = 0; rr < ROWS; rr++)
-                    for (var cc2 = 0; cc2 < COLS; cc2++)
-                      if (grid[rr][cc2] === DOOR) grid[rr][cc2] = EMPTY;
-                } else { grid[br][bc] = CRATE; }
+                    for (var cc = 0; cc < COLS; cc++)
+                      if (grid[rr][cc] === DOOR) grid[rr][cc] = EMPTY;
+                }
+                else { grid[br][bc] = CRATE; }
                 grid[nr][nc] = EMPTY;
                 r = nr; cl = nc; slid = true;
                 slideTrail.push({r: r, c: cl});
@@ -3069,439 +3087,332 @@
             }
             break;
           }
+
+          // Lava — lose a life
           if (tile === LAVA) { loseLife(); break; }
+
+          // Spikes — pass through, lose a life
           if (tile === SPIKE) {
             r = nr; cl = nc; slid = true;
             slideTrail.push({r: r, c: cl});
-            loseLife(); if (state === 'dead') break; continue;
+            loseLife();
+            if (state === 'dead') break;
+            continue;
           }
+
+          // Water/gravel — stop on
           if (tile === WATER || tile === GRAVEL_T) {
             r = nr; cl = nc; slid = true;
-            slideTrail.push({r: r, c: cl}); break;
+            slideTrail.push({r: r, c: cl});
+            break;
           }
+
+          // Mobs
           if (tile === ZOMBIE || tile === SKELETON || tile === CREEPER) {
             if (inventory.sword) {
               grid[nr][nc] = EMPTY;
-              var pts = tile === CREEPER ? 200 : tile === SKELETON ? 150 : 100;
-              score += pts; showMsg('Kill! +' + pts);
-              spawnBurst(OX + nc * CELL + CELL / 2, OY + nr * CELL + CELL / 2, 12, '#f44', CELL, 20);
+              score += (tile === CREEPER ? 200 : tile === SKELETON ? 150 : 100);
+              showMsg('Kill! +' + (tile === CREEPER ? 200 : tile === SKELETON ? 150 : 100));
               r = nr; cl = nc; slid = true;
-              slideTrail.push({r: r, c: cl}); continue;
-            } else { loseLife(); triggerShake(4, 10); break; }
+              slideTrail.push({r: r, c: cl});
+              continue;
+            } else {
+              loseLife();
+              break;
+            }
           }
-          if (tile === KEY_T) { inventory.key = true; grid[nr][nc] = EMPTY; showMsg('+Key'); spawnBurst(OX + nc * CELL + CELL / 2, OY + nr * CELL + CELL / 2, 8, '#ff0', CELL, 18); }
-          else if (tile === HEART_T) {
-            lives = Math.min(lives + 1, 5); grid[nr][nc] = EMPTY; heartsTaken++;
-            maxMoves = maxMoves - 1;
-            if (movesLeft > maxMoves) movesLeft = maxMoves;
-            showMsg('+Life! Max moves -1');
-            spawnBurst(OX + nc * CELL + CELL / 2, OY + nr * CELL + CELL / 2, 10, '#f55', CELL, 18);
-          }
-          else if (tile === SWORD_T) { inventory.sword = true; grid[nr][nc] = EMPTY; showMsg('+Sword'); spawnBurst(OX + nc * CELL + CELL / 2, OY + nr * CELL + CELL / 2, 8, '#aaf', CELL, 18); }
-          else if (tile === PICK_T) { inventory.pick = true; grid[nr][nc] = EMPTY; showMsg('+Pickaxe'); spawnBurst(OX + nc * CELL + CELL / 2, OY + nr * CELL + CELL / 2, 8, '#cca', CELL, 18); }
-          else if (tile === TORCH_T) { inventory.torch = true; grid[nr][nc] = EMPTY; showMsg('+Torch'); spawnBurst(OX + nc * CELL + CELL / 2, OY + nr * CELL + CELL / 2, 10, '#fa3', CELL, 18); }
 
+          // Pickups
+          if (tile === KEY_T) { inventory.key = true; grid[nr][nc] = EMPTY; showMsg('+Key'); }
+          else if (tile === HEART_T) {
+            grid[nr][nc] = EMPTY;
+            if (difficulty === 'hard') {
+              lives = Math.min(lives + 1, 5);
+              heartsTaken++;
+              maxMoves = runLevels[level].par + 1 - heartsTaken;
+              if (movesLeft > maxMoves) movesLeft = maxMoves;
+              showMsg('+Life! Max moves -1');
+            } else {
+              score += 60;
+              showMsg('+60 (no extra life on this mode)');
+            }
+          }
+          else if (tile === SWORD_T) { inventory.sword = true; grid[nr][nc] = EMPTY; showMsg('+Sword'); }
+          else if (tile === PICK_T) { inventory.pick = true; grid[nr][nc] = EMPTY; showMsg('+Pickaxe'); }
+          else if (tile === TORCH_T) { inventory.torch = true; grid[nr][nc] = EMPTY; showMsg('+Torch'); }
+
+          // Chest — loot and stop
           if (tile === CHEST_T) {
-            grid[nr][nc] = EMPTY; score += 200; showMsg('+200 Loot!');
-            spawnBurst(OX + nc * CELL + CELL / 2, OY + nr * CELL + CELL / 2, 15, '#fc0', CELL, 24);
-            r = nr; cl = nc; slid = true; slideTrail.push({r: r, c: cl}); break;
+            grid[nr][nc] = EMPTY;
+            score += 200;
+            showMsg('+200 Loot!');
+            r = nr; cl = nc; slid = true;
+            slideTrail.push({r: r, c: cl});
+            break;
           }
+
+          // Portal
           if (tile === PORTAL) {
-            r = nr; cl = nc; slid = true; slideTrail.push({r: r, c: cl});
-            completeLevel(); break;
+            r = nr; cl = nc; slid = true;
+            slideTrail.push({r: r, c: cl});
+            completeLevel();
+            break;
           }
+
+          // Cracked floor — becomes lava after stepping
           if (tile === CRACK) {
-            r = nr; cl = nc; slid = true; slideTrail.push({r: r, c: cl});
-            grid[nr][nc] = LAVA; continue;
+            r = nr; cl = nc; slid = true;
+            slideTrail.push({r: r, c: cl});
+            grid[nr][nc] = LAVA;
+            continue;
           }
+
+          // Ice — keep sliding
           if (tile === ICE) {
-            r = nr; cl = nc; slid = true; slideTrail.push({r: r, c: cl}); continue;
+            r = nr; cl = nc; slid = true;
+            slideTrail.push({r: r, c: cl});
+            continue;
           }
-          r = nr; cl = nc; slid = true; slideTrail.push({r: r, c: cl}); break;
+
+          // Empty/plate — stop
+          r = nr; cl = nc; slid = true;
+          slideTrail.push({r: r, c: cl});
+          if (difficulty === 'normal' && tile === EMPTY && Math.random() < 0.14) {
+            grid[r][cl] = SPIKE;
+            loseLife();
+            showMsg('Tricked floor!');
+          }
+          break;
         }
 
         if (slid) {
           player.r = r; player.c = cl;
           movesLeft--;
           updateLight();
-          sliding = true;
-          slideAnimPath = slideTrail.slice();
-          slideAnimIdx = 0; slideAnimT = 0;
-          if (hitSolid && slideTrail.length > 2) triggerShake(3, 6);
-          if (movesLeft <= 0 && state === 'playing') state = 'outofmoves';
+          slideAnim = 6;
+          if (movesLeft <= 0 && state === 'playing') {
+            state = 'outofmoves';
+          }
         }
+
         updateHUD();
         sEl.textContent = totalScore + score;
       }
 
-      function updateSlideAnim() {
-        if (!sliding) return;
-        slideAnimT += SLIDE_SPEED;
-        spawnIceTrail(OX + playerDrawC * CELL, OY + playerDrawR * CELL);
-        while (slideAnimT >= 1 && slideAnimIdx < slideAnimPath.length - 1) {
-          slideAnimT -= 1; slideAnimIdx++;
-        }
-        if (slideAnimIdx >= slideAnimPath.length - 1) {
-          sliding = false;
-          playerDrawR = player.r; playerDrawC = player.c;
-        } else {
-          var from = slideAnimPath[slideAnimIdx], to = slideAnimPath[slideAnimIdx + 1];
-          playerDrawR = from.r + (to.r - from.r) * Math.min(slideAnimT, 1);
-          playerDrawC = from.c + (to.c - from.c) * Math.min(slideAnimT, 1);
+      function loseLife() {
+        lives--;
+        showMsg('Ouch! -1 Life');
+        if (lives <= 0) {
+          lives = 0;
+          finalizeRun();
+          state = 'dead';
         }
       }
 
-      function loseLife() {
-        lives--; showMsg('Ouch! -1 Life'); triggerShake(4, 8);
-        if (player) spawnBurst(OX + player.c * CELL + CELL / 2, OY + player.r * CELL + CELL / 2, 10, '#f44', CELL, 18);
-        if (lives <= 0) { lives = 0; state = 'dead'; }
-      }
       function showMsg(m) { msg = m; msgTimer = 80; }
+
       function updateHUD() {
-        hEl.textContent = 'Lv ' + (level + 1) + '/' + LEVELS_PER_RUN + ' (' + diffNames[difficulty] + ') | Moves: ' + movesLeft + '/' + maxMoves + ' | Lives: ' + lives;
+        if (state === 'difficulty') {
+          hEl.textContent = 'Select difficulty for a 3-room run. Lives start at 3 in all modes.';
+          return;
+        }
+        var d = difficulty ? (difficulty.charAt(0).toUpperCase() + difficulty.slice(1)) : '-';
+        hEl.textContent = d + ' | Room ' + (level + 1) + '/' + runLevels.length + ' | Moves: ' + movesLeft + '/' + maxMoves + ' | Lives: ' + lives;
       }
+
       function completeLevel() {
         var moveBonus = movesLeft * 30;
-        score += 300 + moveBonus; totalScore += score;
+        score += 300 + moveBonus;
+        totalScore += score;
         sEl.textContent = totalScore;
-        spawnBurst(cvs.width / 2, cvs.height / 2, 30, '#5f5', 100, 30);
         state = 'levelcomplete';
-      }
-
-      function startRun(diff) {
-        difficulty = diff;
-        level = 0; totalScore = 0; lives = diff === 0 ? 5 : diff === 1 ? 3 : 2;
-        levelCache = {}; // fresh layouts for each run
-        sEl.textContent = '0';
-        loadLevel(0);
       }
 
       // ── DRAW ──────────────────────────────────────
       function draw() {
         var W = cvs.width, H = cvs.height;
-        c.save();
-        c.translate(Math.round(shakeX), Math.round(shakeY));
-        c.fillStyle = '#0e0e12'; c.fillRect(-4, -4, W + 8, H + 8);
-        var now = Date.now();
+        c.fillStyle = '#111'; c.fillRect(0, 0, W, H);
 
-        // ── Difficulty select screen ────────────────
-        if (state === 'diffselect') {
-          // Obsidian-style bg
-          for (var dr = 0; dr < ROWS; dr++)
-            for (var dcl = 0; dcl < COLS; dcl++)
-              dt(5, 2, OX + dcl * CELL, OY + dr * CELL);
-          c.fillStyle = 'rgba(0,0,0,0.65)'; c.fillRect(0, 0, W, H);
-
-          c.fillStyle = '#fc0'; c.font = '20px Minecraft, sans-serif'; c.textAlign = 'center';
-          c.fillText('Mine Dungeon', W / 2, OY + CELL * 2);
-
-          c.fillStyle = '#aaa'; c.font = '11px Minecraft, sans-serif';
-          c.fillText('Choose Difficulty', W / 2, OY + CELL * 3 + 4);
-
-          for (var di = 0; di < 3; di++) {
-            var bx = W / 2 - 75, by = OY + CELL * 4 + di * 50;
-            drawBtn(bx, by, 150, 32, diffNames[di]);
-            // Tint button with difficulty color
-            c.fillStyle = diffColors[di]; c.globalAlpha = 0.15;
-            c.fillRect(bx + 1, by + 1, 148, 30);
-            c.globalAlpha = 1;
-            c.fillStyle = '#888'; c.font = '9px sans-serif'; c.textAlign = 'center';
-            c.fillText(diffDescs[di], W / 2, by + 44);
-          }
-
-          c.fillStyle = '#555'; c.font = '9px sans-serif'; c.textAlign = 'center';
-          c.fillText(LEVELS_PER_RUN + ' randomly generated levels', W / 2, H - CELL - 10);
-          c.fillText('Best: ' + best + ' | Site: ' + siteBest, W / 2, H - CELL + 4);
-          c.restore();
-          return;
-        }
-
-        // ── Game board ──────────────────────────────
         for (var r = 0; r < ROWS; r++) {
           for (var cl = 0; cl < COLS; cl++) {
             var px = OX + cl * CELL, py = OY + r * CELL;
-            var tile = grid[r][cl];
-            var fv = floorVar[r] ? floorVar[r][cl] : 0.5;
+            var tile = (grid[r] && grid[r][cl] !== undefined) ? grid[r][cl] : WALL;
 
             // Fog
             if (tile === DARK && !isLit(r, cl)) {
-              c.fillStyle = '#08080c'; c.fillRect(px, py, CELL, CELL); continue;
+              c.fillStyle = '#0a0a0a'; c.fillRect(px, py, CELL, CELL); continue;
             }
             if (tile === DARK) tile = EMPTY;
 
-            // Floor base with variation
-            if (fv < 0.12) dt(1, 0, px, py);       // stone
-            else if (fv < 0.22) dt(4, 2, px, py);   // mossy cobble
-            else dt(0, 1, px, py);                    // cobblestone
+            // Floor base
+            dt(0, 1, px, py);
 
-            if (tile === WALL) {
-              // Obsidian wall
-              dt(5, 2, px, py);
-              // Subtle purple sheen
-              var oSheen = 0.05 + 0.03 * Math.sin(now / 600 + r * 3 + cl * 7);
-              c.fillStyle = 'rgba(80,20,120,' + oSheen + ')'; c.fillRect(px, py, CELL, CELL);
-              c.fillStyle = 'rgba(0,0,0,0.15)'; c.fillRect(px, py + CELL - 3, CELL, 3);
-            }
-            else if (tile === ICE) {
-              dt(2, 4, px, py);
-              var shim = 0.08 + 0.06 * Math.sin(now / 400 + r * 7 + cl * 13);
-              c.fillStyle = 'rgba(180,220,255,' + shim + ')'; c.fillRect(px, py, CELL, CELL);
-              c.fillStyle = 'rgba(255,255,255,' + (0.12 + 0.08 * Math.sin(now / 300 + cl * 5)) + ')';
-              c.fillRect(px + 5, py + 4, 7, 2);
-              c.fillRect(px + CELL - 14, py + CELL - 9, 6, 2);
-            }
-            else if (tile === STONE_W) {
-              dt(1, 0, px, py);
-              c.fillStyle = 'rgba(0,0,0,0.12)'; c.fillRect(px, py + CELL - 2, CELL, 2);
-            }
-            else if (tile === CHEST_T) {
-              dt(11, 1, px, py);
-              c.fillStyle = 'rgba(255,200,50,' + (0.08 + 0.05 * Math.sin(now / 350)) + ')';
-              c.fillRect(px + 3, py + 3, CELL - 6, CELL - 6);
-            }
-            else if (tile === DOOR) {
-              dt(6, 1, px, py);
-              c.strokeStyle = 'rgba(80,60,30,0.5)'; c.lineWidth = 1;
-              c.strokeRect(px + 3, py + 3, CELL - 6, CELL - 6);
-            }
+            if (tile === WALL) dt(7, 0, px, py);
+            else if (tile === ICE) dt(2, 4, px, py);
+            else if (tile === STONE_W) dt(1, 0, px, py);
+            else if (tile === CHEST_T) dt(11, 1, px, py);
+            else if (tile === DOOR) dt(6, 1, px, py);
             else if (tile === PORTAL) {
               dt(5, 2, px, py);
-              var pulse = 0.2 + 0.25 * Math.sin(now / 200);
-              c.fillStyle = 'rgba(128,0,255,' + pulse + ')'; c.fillRect(px + 3, py + 3, CELL - 6, CELL - 6);
-              c.fillStyle = 'rgba(200,100,255,' + (0.12 + 0.12 * Math.sin(now / 150 + 1)) + ')';
-              c.fillRect(px + 7, py + 7, CELL - 14, CELL - 14);
-              if (Math.random() < 0.12) particles.push({
-                x: px + CELL / 2 + (Math.random() - 0.5) * CELL * 0.5,
-                y: py + CELL / 2 + (Math.random() - 0.5) * CELL * 0.5,
-                vx: (Math.random() - 0.5) * 0.8, vy: -Math.random() * 1.5 - 0.3,
-                color: Math.random() > 0.5 ? '#a4f' : '#c6f',
-                life: 15 + Math.random() * 10, maxLife: 25, size: 1.5 + Math.random() * 2
-              });
+              var pulse = 0.3 + 0.3 * Math.sin(Date.now() / 250);
+              c.fillStyle = 'rgba(128,0,255,' + pulse + ')';
+              c.fillRect(px + 3, py + 3, CELL - 6, CELL - 6);
             }
-            else if (tile === LAVA) {
-              dt(13, 14, px, py);
-              c.fillStyle = 'rgba(255,100,0,' + (0.12 + 0.08 * Math.sin(now / 400 + r * 3 + cl * 5)) + ')';
-              c.fillRect(px, py, CELL, CELL);
-              if (Math.random() < 0.05) particles.push({
-                x: px + Math.random() * CELL, y: py,
-                vx: (Math.random() - 0.5) * 0.5, vy: -Math.random() - 0.5,
-                color: Math.random() > 0.5 ? '#f80' : '#fa0',
-                life: 12 + Math.random() * 8, maxLife: 20, size: 1 + Math.random() * 2
-              });
-            }
-            else if (tile === WATER) {
-              dt(13, 12, px, py);
-              c.fillStyle = 'rgba(100,150,255,' + (0.06 + 0.04 * Math.sin(now / 500 + r + cl)) + ')';
-              c.fillRect(px, py, CELL, CELL);
-            }
+            else if (tile === LAVA) dt(13, 14, px, py);
+            else if (tile === WATER) dt(13, 12, px, py);
             else if (tile === GRAVEL_T) dt(3, 1, px, py);
-            else if (tile === CRATE) {
-              dt(4, 0, px, py);
-              c.strokeStyle = 'rgba(60,40,20,0.4)'; c.lineWidth = 1;
-              c.strokeRect(px + 4, py + 4, CELL - 8, CELL - 8);
-              c.beginPath(); c.moveTo(px + 4, py + 4); c.lineTo(px + CELL - 4, py + CELL - 4); c.stroke();
-              c.beginPath(); c.moveTo(px + CELL - 4, py + 4); c.lineTo(px + 4, py + CELL - 4); c.stroke();
-            }
+            else if (tile === CRATE) dt(4, 0, px, py);
             else if (tile === PLATE) {
-              c.fillStyle = '#5a5a5a'; c.fillRect(px + 6, py + CELL - 9, CELL - 12, 6);
-              c.fillStyle = '#777'; c.fillRect(px + 7, py + CELL - 8, CELL - 14, 4);
-              c.fillStyle = 'rgba(255,255,255,0.1)'; c.fillRect(px + 7, py + CELL - 8, CELL - 14, 1);
+              c.fillStyle = '#777'; c.fillRect(px + 5, py + CELL - 5, CELL - 10, 3);
             }
             else if (tile === SPIKE) {
-              var spW = CELL / 4;
-              for (var si = 0; si < 4; si++) {
-                var sx = px + si * spW;
-                c.fillStyle = '#777';
-                c.beginPath(); c.moveTo(sx, py + CELL); c.lineTo(sx + spW / 2, py + 5); c.lineTo(sx + spW, py + CELL); c.fill();
-                c.fillStyle = 'rgba(200,200,200,0.35)';
-                c.beginPath(); c.moveTo(sx + spW / 2, py + 5); c.lineTo(sx + spW / 2 + 2, py + 8);
-                c.lineTo(sx + 1, py + CELL); c.lineTo(sx, py + CELL); c.fill();
+              c.fillStyle = '#888';
+              for (var si = 0; si < 3; si++) {
+                c.beginPath();
+                c.moveTo(px + 2 + si * 8, py + CELL - 2);
+                c.lineTo(px + 6 + si * 8, py + 4);
+                c.lineTo(px + 10 + si * 8, py + CELL - 2);
+                c.fill();
               }
             }
             else if (tile === CRACK) {
-              dt(0, 1, px, py);
-              c.fillStyle = 'rgba(60,40,20,0.25)'; c.fillRect(px, py, CELL, CELL);
-              c.strokeStyle = 'rgba(30,15,5,0.7)'; c.lineWidth = 1.5;
-              c.beginPath(); c.moveTo(px + 5, py + 4); c.lineTo(px + CELL / 2 + 1, py + CELL / 2 + 2); c.lineTo(px + CELL - 6, py + CELL - 5); c.stroke();
-              c.beginPath(); c.moveTo(px + CELL - 5, py + 6); c.lineTo(px + CELL / 2 - 3, py + CELL / 2); c.lineTo(px + 7, py + CELL - 4); c.stroke();
+              c.fillStyle = '#5a4830'; c.fillRect(px, py, CELL, CELL);
+              c.strokeStyle = '#333'; c.lineWidth = 1;
+              c.beginPath(); c.moveTo(px + 3, py + 3); c.lineTo(px + CELL - 6, py + CELL - 3); c.stroke();
+              c.beginPath(); c.moveTo(px + CELL - 3, py + 5); c.lineTo(px + 5, py + CELL - 5); c.stroke();
             }
-            else if (tile === ZOMBIE) dm(imgZombie, px, py);
-            else if (tile === SKELETON) dm(imgSkeleton, px, py);
-            else if (tile === CREEPER) dm(imgCreeper, px, py);
-            else if (tile === KEY_T) {
-              di(7, 1, px, py);
-              c.fillStyle = 'rgba(255,255,100,' + (0.1 + 0.06 * Math.sin(now / 300)) + ')';
-              c.fillRect(px + 5, py + 5, CELL - 10, CELL - 10);
-            }
+            else if (tile === ZOMBIE) { dt(0, 1, px, py); dm(imgZombie, px, py); }
+            else if (tile === SKELETON) { dt(0, 1, px, py); dm(imgSkeleton, px, py); }
+            else if (tile === CREEPER) { dt(0, 1, px, py); dm(imgCreeper, px, py); }
+            else if (tile === KEY_T) { di(7, 1, px, py); }
             else if (tile === HEART_T) {
-              var hcx = px + CELL / 2, hcy = py + CELL / 2 - 1, hs = CELL * 0.3;
-              c.fillStyle = '#d22';
-              c.beginPath(); c.moveTo(hcx, hcy + hs);
-              c.bezierCurveTo(hcx - hs * 1.5, hcy, hcx - hs * 1.5, hcy - hs, hcx, hcy - hs * 0.3);
-              c.bezierCurveTo(hcx + hs * 1.5, hcy - hs, hcx + hs * 1.5, hcy, hcx, hcy + hs);
-              c.fill();
-              c.fillStyle = 'rgba(255,150,150,0.5)';
-              c.beginPath(); c.arc(hcx - hs * 0.4, hcy - hs * 0.1, hs * 0.25, 0, Math.PI * 2); c.fill();
-              c.fillStyle = 'rgba(255,50,50,' + (0.08 + 0.06 * Math.sin(now / 250)) + ')';
-              c.fillRect(px + 3, py + 3, CELL - 6, CELL - 6);
+              dt(0, 1, px, py);
+              c.fillStyle = '#f22'; c.font = (CELL * 0.85) + 'px sans-serif'; c.textAlign = 'center';
+              c.fillText('\u2764', px + CELL / 2, py + CELL * 0.82);
             }
-            else if (tile === SWORD_T) di(2, 4, px, py);
-            else if (tile === PICK_T) di(2, 6, px, py);
+            else if (tile === SWORD_T) { dt(0, 1, px, py); di(2, 4, px, py); }
+            else if (tile === PICK_T) { dt(0, 1, px, py); di(2, 6, px, py); }
             else if (tile === TORCH_T) {
-              var tg = 0.12 + 0.08 * Math.sin(now / 200);
-              c.fillStyle = 'rgba(255,150,30,' + tg + ')';
-              c.fillRect(px + 2, py + 2, CELL - 4, CELL - 4);
-              c.fillStyle = '#7a5a3a';
-              c.fillRect(px + CELL / 2 - 2, py + CELL * 0.35, 4, CELL * 0.5);
-              c.fillStyle = '#fa0';
-              c.beginPath(); c.arc(px + CELL / 2, py + CELL * 0.28, CELL * 0.18, 0, Math.PI * 2); c.fill();
-              c.fillStyle = '#ff4';
-              c.beginPath(); c.arc(px + CELL / 2, py + CELL * 0.25, CELL * 0.1, 0, Math.PI * 2); c.fill();
+              dt(0, 1, px, py);
+              c.fillStyle = '#fa0'; c.font = (CELL * 0.7) + 'px sans-serif'; c.textAlign = 'center';
+              c.fillText('\uD83D\uDD25', px + CELL / 2, py + CELL * 0.78);
             }
           }
         }
 
-        // Wall shadows
-        for (var r = 0; r < ROWS; r++) {
-          for (var cl = 0; cl < COLS; cl++) {
-            var t2 = grid[r][cl];
-            if (t2 === WALL || t2 === STONE_W) {
-              if (r + 1 < ROWS && grid[r+1][cl] !== WALL && grid[r+1][cl] !== STONE_W && grid[r+1][cl] !== DARK) {
-                c.fillStyle = 'rgba(0,0,0,0.18)'; c.fillRect(OX + cl * CELL, OY + (r + 1) * CELL, CELL, 6);
-              }
-              if (cl + 1 < COLS && grid[r][cl+1] !== WALL && grid[r][cl+1] !== STONE_W && grid[r][cl+1] !== DARK) {
-                c.fillStyle = 'rgba(0,0,0,0.1)'; c.fillRect(OX + (cl + 1) * CELL, OY + r * CELL, 3, CELL);
-              }
-            }
-          }
-        }
-
-        // Ice slide trail glow
-        if (sliding && slideAnimPath.length > 1) {
-          for (var ti = 0; ti <= slideAnimIdx && ti < slideAnimPath.length; ti++) {
-            var tp = slideAnimPath[ti];
-            var fade = 0.18 * (1 - ti / slideAnimPath.length);
-            c.fillStyle = 'rgba(130,200,255,' + fade + ')';
-            c.fillRect(OX + tp.c * CELL + 4, OY + tp.r * CELL + 4, CELL - 8, CELL - 8);
-          }
-        }
-        if (!sliding && slideAnim > 0) {
+        // Slide trail
+        if (slideAnim > 0) {
           slideAnim--;
-          c.fillStyle = 'rgba(100,200,255,' + (slideAnim / 6 * 0.2) + ')';
+          c.fillStyle = 'rgba(100,200,255,' + (slideAnim / 6 * 0.25) + ')';
           for (var ti = 0; ti < slideTrail.length - 1; ti++) {
             var tp = slideTrail[ti];
             c.fillRect(OX + tp.c * CELL + 4, OY + tp.r * CELL + 4, CELL - 8, CELL - 8);
           }
         }
 
-        drawParticles();
-
         // Player
         if (player && state !== 'dead') {
-          var pdx = OX + playerDrawC * CELL, pdy = OY + playerDrawR * CELL;
-          c.fillStyle = 'rgba(0,0,0,0.25)';
-          c.beginPath();
-          c.ellipse(pdx + CELL / 2, pdy + CELL - 2, CELL * 0.35, CELL * 0.12, 0, 0, Math.PI * 2);
-          c.fill();
-          dm(imgPlayer, pdx, pdy);
-          if (inventory.sword) {
-            c.strokeStyle = 'rgba(150,150,255,0.25)'; c.lineWidth = 1.5;
-            c.strokeRect(pdx, pdy, CELL, CELL);
-          }
+          dm(imgPlayer, OX + player.c * CELL, OY + player.r * CELL);
         }
 
-        // ── HUD ─────────────────────────────────────
-        var hudY = OY + ROWS * CELL + 4;
-        c.fillStyle = '#141418'; c.fillRect(0, OY + ROWS * CELL, W, HUD_H + 4);
-        c.fillStyle = 'rgba(255,255,255,0.06)'; c.fillRect(0, OY + ROWS * CELL, W, 1);
-        for (var h = 0; h < 5; h++) {
-          c.fillStyle = h < lives ? '#e22' : '#333';
-          c.font = '14px sans-serif'; c.textAlign = 'left';
-          c.fillText('\u2764', OX + h * 16, hudY + 13);
+        // HUD
+        var hudY = OY + ROWS * CELL + 2;
+        c.fillStyle = '#1a1a1a'; c.fillRect(0, hudY, W, HUD_H);
+        for (var h = 0; h < 3; h++) {
+          c.fillStyle = h < lives ? '#f22' : '#333';
+          c.font = '12px sans-serif'; c.textAlign = 'left';
+          c.fillText('\u2764', OX + h * 14, hudY + 13);
         }
-        var invX = OX + 90;
-        c.font = '11px Minecraft, sans-serif';
-        if (inventory.key) { c.fillStyle = '#ff0'; c.fillText('\u26B7 Key', invX, hudY + 14); invX += 44; }
-        if (inventory.sword) { c.fillStyle = '#aaf'; c.fillText('\u2694 Swd', invX, hudY + 14); invX += 44; }
-        if (inventory.pick) { c.fillStyle = '#cca'; c.fillText('\u26CF Pick', invX, hudY + 14); invX += 46; }
-        if (inventory.torch) { c.fillStyle = '#fa0'; c.fillText('\u2600 Trch', invX, hudY + 14); invX += 46; }
-        c.textAlign = 'right'; c.font = '12px Minecraft, sans-serif';
-        c.fillStyle = movesLeft <= 1 ? '#f44' : (movesLeft <= 2 ? '#fa0' : '#aaa');
-        c.fillText('Moves: ' + movesLeft + '/' + maxMoves, W - OX, hudY + 14);
-        c.font = '10px Minecraft, sans-serif'; c.textAlign = 'left';
-        c.fillStyle = '#fc0'; c.fillText('Score: ' + (totalScore + score), OX, hudY + 29);
-        c.fillStyle = '#888'; c.textAlign = 'center';
-        c.fillText('Lv ' + (level + 1) + '/' + LEVELS_PER_RUN, W / 2, hudY + 29);
-        c.fillStyle = '#555'; c.textAlign = 'right';
-        c.fillText('[R] Restart', W - OX, hudY + 29);
+        var invX = OX + 50;
+        c.font = '10px sans-serif'; c.fillStyle = '#aaa';
+        if (inventory.key) { c.fillText('Key', invX, hudY + 13); invX += 28; }
+        if (inventory.sword) { c.fillText('Swd', invX, hudY + 13); invX += 28; }
+        if (inventory.pick) { c.fillText('Pick', invX, hudY + 13); invX += 28; }
+        if (inventory.torch) { c.fillText('Trch', invX, hudY + 13); invX += 28; }
+        c.fillStyle = movesLeft <= 1 ? '#f44' : '#aaa';
+        c.textAlign = 'right'; c.font = '10px sans-serif';
+        c.fillText('Moves: ' + movesLeft + '/' + maxMoves, W - OX, hudY + 13);
+        c.fillStyle = '#fc0'; c.textAlign = 'left'; c.font = '9px sans-serif';
+        c.fillText('Score: ' + (totalScore + score), OX, hudY + 26);
+        c.fillStyle = '#666'; c.textAlign = 'right';
+        c.fillText('[R] Restart', W - OX, hudY + 26);
 
         // Message
         if (msgTimer > 0) {
           msgTimer--;
-          var mA = Math.min(1, msgTimer / 25);
-          c.fillStyle = 'rgba(0,0,0,' + (mA * 0.5) + ')';
-          var mW = c.measureText(msg).width + 16;
-          c.fillRect(W / 2 - mW / 2, OY - 18, mW, 18);
-          c.fillStyle = 'rgba(255,255,100,' + mA + ')';
-          c.font = 'bold 12px Minecraft, sans-serif'; c.textAlign = 'center';
-          c.fillText(msg, W / 2, OY - 4);
+          c.fillStyle = 'rgba(255,255,100,' + Math.min(1, msgTimer / 25) + ')';
+          c.font = 'bold 11px Minecraft, sans-serif'; c.textAlign = 'center';
+          c.fillText(msg, W / 2, OY - 2);
         }
 
-        // ── Overlays ────────────────────────────────
+        // Overlays
         if (state === 'dead') {
-          c.fillStyle = 'rgba(80,0,0,0.88)'; c.fillRect(-4, -4, W + 8, H + 8);
-          c.fillStyle = '#f44'; c.font = '22px Minecraft, sans-serif'; c.textAlign = 'center';
-          c.fillText('You Died!', W / 2, H / 2 - 28);
-          c.fillStyle = '#ccc'; c.font = '13px Minecraft, sans-serif';
-          c.fillText('Final Score: ' + totalScore, W / 2, H / 2 + 2);
-          drawBtn(W / 2 - 60, H / 2 + 16, 120, 28, 'New Game');
+          c.fillStyle = 'rgba(80,0,0,0.85)'; c.fillRect(0, 0, W, H);
+          c.fillStyle = '#f44'; c.font = '18px Minecraft, sans-serif'; c.textAlign = 'center';
+          c.fillText('You Died!', W / 2, H / 2 - 20);
+          c.fillStyle = '#ccc'; c.font = '11px Minecraft, sans-serif';
+          c.fillText('Final Score: ' + totalScore, W / 2, H / 2 + 5);
+          drawBtn(W / 2 - 50, H / 2 + 20, 100, 24, 'Restart Game');
+        }
+        if (state === 'difficulty') {
+          c.fillStyle = 'rgba(0,0,0,0.9)'; c.fillRect(0, 0, W, H);
+          c.fillStyle = '#8ef58e'; c.font = '18px Minecraft, sans-serif'; c.textAlign = 'center';
+          c.fillText('Mine Dungeon', W / 2, H / 2 - 70);
+          c.fillStyle = '#ccc'; c.font = '11px Minecraft, sans-serif';
+          c.fillText('Choose difficulty (3 rooms each)', W / 2, H / 2 - 50);
+          c.fillText('Lives are the same in all modes. Hard can gain extra life.', W / 2, H / 2 - 34);
+          if (menuMode === 'pause') {
+            c.fillStyle = '#ffdd88';
+            c.fillText('Paused run. Choose a new difficulty or Give Up to bank score.', W / 2, H / 2 - 18);
+          }
+          drawBtn(W / 2 - 88, H / 2 - 2, 56, 24, 'Easy');
+          drawBtn(W / 2 - 28, H / 2 - 2, 56, 24, 'Normal');
+          drawBtn(W / 2 + 32, H / 2 - 2, 56, 24, 'Hard');
+          drawBtn(W / 2 - 50, H / 2 + 30, 100, 24, 'Give Up');
+          if (lastSavedScore !== null) {
+            c.fillStyle = '#fc0'; c.font = '10px Minecraft, sans-serif';
+            c.fillText('Last saved score: ' + lastSavedScore, W / 2, H / 2 + 66);
+          }
         }
         if (state === 'outofmoves') {
-          c.fillStyle = 'rgba(60,30,0,0.88)'; c.fillRect(-4, -4, W + 8, H + 8);
-          c.fillStyle = '#fa0'; c.font = '18px Minecraft, sans-serif'; c.textAlign = 'center';
-          c.fillText('Out of Moves!', W / 2, H / 2 - 36);
-          c.fillStyle = '#ccc'; c.font = '11px Minecraft, sans-serif';
-          c.fillText('Lives remaining: ' + lives, W / 2, H / 2 - 10);
-          drawBtn(W / 2 - 65, H / 2 + 8, 60, 26, 'Retry');
-          drawBtn(W / 2 + 5, H / 2 + 8, 60, 26, 'Quit');
+          c.fillStyle = 'rgba(60,30,0,0.85)'; c.fillRect(0, 0, W, H);
+          c.fillStyle = '#fa0'; c.font = '16px Minecraft, sans-serif'; c.textAlign = 'center';
+          c.fillText('Out of Moves!', W / 2, H / 2 - 30);
+          c.fillStyle = '#ccc'; c.font = '10px Minecraft, sans-serif';
+          c.fillText('Lives remaining: ' + lives, W / 2, H / 2 - 5);
+          drawBtn(W / 2 - 55, H / 2 + 10, 50, 22, 'Retry');
+          drawBtn(W / 2 + 5, H / 2 + 10, 50, 22, 'Quit');
         }
         if (state === 'levelcomplete') {
-          c.fillStyle = 'rgba(0,0,0,0.82)'; c.fillRect(-4, -4, W + 8, H + 8);
-          c.fillStyle = '#5f5'; c.font = '18px Minecraft, sans-serif'; c.textAlign = 'center';
-          c.fillText('Level ' + (level + 1) + ' Escaped!', W / 2, H / 2 - 46);
-          c.fillStyle = '#fc0'; c.font = '14px Minecraft, sans-serif';
-          c.fillText('+' + score + ' pts', W / 2, H / 2 - 20);
-          c.fillStyle = '#ccc'; c.font = '11px sans-serif';
-          c.fillText('Moves left: ' + movesLeft + ' | Lives: ' + lives, W / 2, H / 2 + 2);
-          drawBtn(W / 2 - 85, H / 2 + 18, 80, 26, 'Retry');
-          drawBtn(W / 2 + 5, H / 2 + 18, 80, 26, 'Next');
+          c.fillStyle = 'rgba(0,0,0,0.8)'; c.fillRect(0, 0, W, H);
+          c.fillStyle = '#5f5'; c.font = '16px Minecraft, sans-serif'; c.textAlign = 'center';
+          c.fillText('Level ' + (level + 1) + ' Escaped!', W / 2, H / 2 - 40);
+          c.fillStyle = '#fc0'; c.font = '12px Minecraft, sans-serif';
+          c.fillText('+' + score + ' pts', W / 2, H / 2 - 15);
+          c.fillStyle = '#ccc'; c.font = '10px sans-serif';
+          c.fillText('Moves left: ' + movesLeft + ' | Lives: ' + lives, W / 2, H / 2 + 5);
+          drawBtn(W / 2 - 80, H / 2 + 20, 70, 22, 'Retry');
+          drawBtn(W / 2 + 10, H / 2 + 20, 70, 22, 'Next');
         }
         if (state === 'victory') {
-          c.fillStyle = 'rgba(0,0,0,0.92)'; c.fillRect(-4, -4, W + 8, H + 8);
-          c.fillStyle = '#fc0'; c.font = '22px Minecraft, sans-serif'; c.textAlign = 'center';
-          c.fillText('Dungeon Cleared!', W / 2, H / 2 - 50);
-          c.fillStyle = '#5f5'; c.font = '16px Minecraft, sans-serif';
-          c.fillText('Total: ' + totalScore, W / 2, H / 2 - 20);
-          c.fillStyle = diffColors[difficulty]; c.font = '12px Minecraft, sans-serif';
-          c.fillText('Difficulty: ' + diffNames[difficulty], W / 2, H / 2);
-          c.fillStyle = '#aaa'; c.font = '11px sans-serif';
-          c.fillText('Best: ' + best + ' | Site: ' + siteBest, W / 2, H / 2 + 18);
-          drawBtn(W / 2 - 60, H / 2 + 32, 120, 26, 'New Game');
-          if (totalScore > best) {
-            best = totalScore; localStorage.setItem('r2b_mdungeon_best', best); bEl.textContent = best;
-          }
-          R2BScores.submit('mdungeon', totalScore);
+          c.fillStyle = 'rgba(0,0,0,0.9)'; c.fillRect(0, 0, W, H);
+          c.fillStyle = '#fc0'; c.font = '20px Minecraft, sans-serif'; c.textAlign = 'center';
+          c.fillText('3 Rooms Cleared!', W / 2, H / 2 - 40);
+          c.fillStyle = '#5f5'; c.font = '14px Minecraft, sans-serif';
+          c.fillText('Total: ' + totalScore, W / 2, H / 2 - 10);
+          c.fillStyle = '#aaa'; c.font = '10px sans-serif';
+          c.fillText('Best: ' + best + ' | Site: ' + siteBest, W / 2, H / 2 + 10);
+          drawBtn(W / 2 - 50, H / 2 + 25, 100, 22, 'Difficulty Menu');
         }
-        c.restore();
       }
 
       function drawBtn(x, y, w, h, text) {
-        c.fillStyle = '#374'; c.fillRect(x, y, w, h);
-        c.fillStyle = '#495'; c.fillRect(x + 1, y + 1, w - 2, h - 2);
-        c.fillStyle = 'rgba(255,255,255,0.06)'; c.fillRect(x + 1, y + 1, w - 2, h / 2);
-        c.fillStyle = '#fff'; c.font = '11px Minecraft, sans-serif'; c.textAlign = 'center';
+        c.fillStyle = '#484'; c.fillRect(x, y, w, h);
+        c.fillStyle = '#5a5'; c.fillRect(x + 1, y + 1, w - 2, h - 2);
+        c.fillStyle = '#fff'; c.font = '10px Minecraft, sans-serif'; c.textAlign = 'center';
         c.fillText(text, x + w / 2, y + h / 2 + 4);
       }
+
       function inBtn(cx, cy, x, y, w, h) {
         return cx >= x && cx <= x + w && cy >= y && cy <= y + h;
       }
@@ -3516,43 +3427,49 @@
         else { ex = e.clientX; ey = e.clientY; }
         return {x: (ex - rect.left) * sx, y: (ey - rect.top) * sy};
       }
+
       var swipeStart = null;
 
       function handleOverlayClick(pos) {
         var W = cvs.width, H = cvs.height;
-        if (state === 'diffselect') {
-          for (var di = 0; di < 3; di++) {
-            var bx = W / 2 - 75, by = OY + CELL * 4 + di * 50;
-            if (inBtn(pos.x, pos.y, bx, by, 150, 32)) { startRun(di); return true; }
+        if (state === 'difficulty') {
+          if (inBtn(pos.x, pos.y, W / 2 - 88, H / 2 - 2, 56, 24)) { menuMode = 'start'; startRun('easy'); return true; }
+          if (inBtn(pos.x, pos.y, W / 2 - 28, H / 2 - 2, 56, 24)) { menuMode = 'start'; startRun('normal'); return true; }
+          if (inBtn(pos.x, pos.y, W / 2 + 32, H / 2 - 2, 56, 24)) { menuMode = 'start'; startRun('hard'); return true; }
+          if (inBtn(pos.x, pos.y, W / 2 - 50, H / 2 + 30, 100, 24)) {
+            if (menuMode === 'pause') finalizeRun();
+            toDifficultyMenu(false);
+            return true;
           }
           return true;
         }
         if (state === 'dead') {
-          if (inBtn(pos.x, pos.y, W / 2 - 60, H / 2 + 16, 120, 28)) {
-            state = 'diffselect'; draw();
+          if (inBtn(pos.x, pos.y, W / 2 - 50, H / 2 + 20, 100, 24)) {
+            toDifficultyMenu(false);
           }
           return true;
         }
         if (state === 'outofmoves') {
-          if (inBtn(pos.x, pos.y, W / 2 - 65, H / 2 + 8, 60, 26)) {
-            lives--; if (lives <= 0) { state = 'dead'; draw(); return true; }
+          if (inBtn(pos.x, pos.y, W / 2 - 55, H / 2 + 10, 50, 22)) {
+            lives--; if (lives <= 0) { finalizeRun(); state = 'dead'; draw(); return true; }
             loadLevel(level);
           }
-          if (inBtn(pos.x, pos.y, W / 2 + 5, H / 2 + 8, 60, 26)) {
+          if (inBtn(pos.x, pos.y, W / 2 + 5, H / 2 + 10, 50, 22)) {
+            finalizeRun();
             state = 'dead'; lives = 0; draw();
           }
           return true;
         }
         if (state === 'levelcomplete') {
-          if (inBtn(pos.x, pos.y, W / 2 - 85, H / 2 + 18, 80, 26)) {
+          if (inBtn(pos.x, pos.y, W / 2 - 80, H / 2 + 20, 70, 22)) {
             totalScore -= score; sEl.textContent = totalScore; loadLevel(level);
           }
-          if (inBtn(pos.x, pos.y, W / 2 + 5, H / 2 + 18, 80, 26)) { level++; loadLevel(level); }
+          if (inBtn(pos.x, pos.y, W / 2 + 10, H / 2 + 20, 70, 22)) { level++; loadLevel(level); }
           return true;
         }
         if (state === 'victory') {
-          if (inBtn(pos.x, pos.y, W / 2 - 60, H / 2 + 32, 120, 26)) {
-            state = 'diffselect'; draw();
+          if (inBtn(pos.x, pos.y, W / 2 - 50, H / 2 + 25, 100, 22)) {
+            toDifficultyMenu(false);
           }
           return true;
         }
@@ -3561,8 +3478,10 @@
 
       function onTouchStart(e) {
         if (e.target !== cvs) return;
-        e.preventDefault(); swipeStart = getPos(e);
+        e.preventDefault();
+        swipeStart = getPos(e);
       }
+
       function onTouchEnd(e) {
         if (e.target !== cvs) return;
         e.preventDefault();
@@ -3575,6 +3494,7 @@
         if (Math.abs(dx) > Math.abs(dy)) slide(0, dx > 0 ? 1 : -1);
         else slide(dy > 0 ? 1 : -1, 0);
       }
+
       function onClick(e) {
         var pos = getPos(e);
         if (handleOverlayClick(pos)) return;
@@ -3586,20 +3506,29 @@
         if (Math.abs(dx) > Math.abs(dy)) slide(0, dx > 0 ? 1 : -1);
         else slide(dy > 0 ? 1 : -1, 0);
       }
+
       function onKey(e) {
-        if (state === 'diffselect') {
-          if (e.key === '1') { startRun(0); e.preventDefault(); }
-          else if (e.key === '2') { startRun(1); e.preventDefault(); }
-          else if (e.key === '3') { startRun(2); e.preventDefault(); }
+        if (state === 'difficulty') {
+          if (e.key === '1') { startRun('easy'); e.preventDefault(); }
+          else if (e.key === '2') { startRun('normal'); e.preventDefault(); }
+          else if (e.key === '3') { startRun('hard'); e.preventDefault(); }
+          else if (e.key === 'g' || e.key === 'G') { if (menuMode === 'pause') finalizeRun(); toDifficultyMenu(false); e.preventDefault(); }
+          return;
+        }
+        if (state === 'playing' && (e.key === 'Escape' || e.code === 'Escape')) {
+          menuMode = 'pause';
+          state = 'difficulty';
+          updateHUD();
+          e.preventDefault();
           return;
         }
         if (state === 'dead') {
-          if (e.key === ' ') { state = 'diffselect'; draw(); e.preventDefault(); }
+          if (e.key === ' ') { toDifficultyMenu(false); e.preventDefault(); }
           return;
         }
         if (state === 'outofmoves') {
           if (e.key === ' ' || e.key === 'Enter') {
-            lives--; if (lives <= 0) { state = 'dead'; draw(); return; }
+            lives--; if (lives <= 0) { finalizeRun(); state = 'dead'; draw(); return; }
             loadLevel(level); e.preventDefault();
           }
           return;
@@ -3610,7 +3539,7 @@
           return;
         }
         if (state === 'victory') {
-          if (e.key === ' ') { state = 'diffselect'; draw(); e.preventDefault(); }
+          if (e.key === ' ') { toDifficultyMenu(false); e.preventDefault(); }
           return;
         }
         if (e.key === 'r' || e.key === 'R') {
@@ -3632,15 +3561,9 @@
       cvs.addEventListener('touchend', onTouchEnd, {passive: false});
       document.addEventListener('keydown', onKey);
 
-      // Start at difficulty select
-      state = 'diffselect';
-      function loop() {
-        updateSlideAnim();
-        updateParticles();
-        updateShake();
-        draw();
-        setAnim(requestAnimationFrame(loop));
-      }
+      lives = 3;
+      toDifficultyMenu(false);
+      function loop() { draw(); setAnim(requestAnimationFrame(loop)); }
       loop();
 
       return {
