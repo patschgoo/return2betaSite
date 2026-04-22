@@ -175,33 +175,57 @@
       margin-bottom: 16px;
     }
 
-    /* ── Game switcher ──────────────────────────────────── */
+    /* ── Game tabs ──────────────────────────────────────── */
+    .game-tabs {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-bottom: 0;
+      max-width: 860px;
+    }
+    .game-tab {
+      padding: 10px 18px;
+      background: rgba(0,0,0,0.45);
+      border: 2px solid rgba(85,255,85,0.15);
+      border-bottom: none;
+      border-radius: 6px 6px 0 0;
+      color: #888;
+      font-family: 'Minecraft', sans-serif;
+      font-size: 0.68rem;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+      text-shadow: 1px 1px 0 rgba(0,0,0,0.7);
+    }
+    .game-tab:hover {
+      color: #ccc;
+      background: rgba(0,0,0,0.55);
+    }
+    .game-tab.active {
+      background: rgba(0,0,0,0.65);
+      border-color: rgba(85,255,85,0.35);
+      border-bottom: 2px solid transparent;
+      color: #55ff55;
+      margin-bottom: -2px;
+      position: relative;
+      z-index: 2;
+    }
+    .game-panel {
+      width: min(860px, 100%);
+      background: rgba(0,0,0,0.55);
+      border: 2px solid rgba(85,255,85,0.25);
+      border-radius: 0 0 8px 8px;
+      padding: 24px 28px 20px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
     .game-switcher {
       display: flex;
       align-items: center;
-      gap: 16px;
-      margin-bottom: 20px;
-    }
-    .game-arrow {
-      background: rgba(8,14,8,0.82);
-      border: 2px solid rgba(85,255,85,0.45);
-      border-radius: 4px;
-      color: #55ff55;
-      font-family: 'Minecraft', sans-serif;
-      font-size: 1.2rem;
-      width: 36px;
-      height: 36px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
       justify-content: center;
-      text-shadow: 1px 1px 0 rgba(0,0,0,0.9);
-      transition: background 0.15s, color 0.15s;
-      user-select: none;
-    }
-    .game-arrow:hover {
-      background: rgba(20,40,20,0.9);
-      color: #aaff88;
+      margin-bottom: 20px;
     }
     .game-title {
       font-size: clamp(0.85rem, 1.6vw, 1.1rem);
@@ -344,6 +368,13 @@
     .header-band > .nav-dropdown > .nav-link.nav-current { color: #c8e8c8; text-shadow: 0 0 6px rgba(255,255,255,0.2); }
     .nav-carousel .howto-link { white-space: normal; }
     @media (max-width: 720px) {
+      .game-tab {
+        padding: 8px 12px;
+        font-size: 0.6rem;
+      }
+      .game-panel {
+        padding: 16px 14px 18px;
+      }
       .header-band {
         min-height: 48px;
         gap: 0 24px;
@@ -397,39 +428,48 @@
 
   <main class="content">
     <h1>Games</h1>
-    <div class="game-switcher">
-      <button class="game-arrow" id="gamePrev" title="Previous game">&#9664;</button>
-      <span class="game-title" id="gameTitle">Flappy Bird</span>
-      <button class="game-arrow" id="gameNext" title="Next game">&#9654;</button>
+    <div class="game-tabs" id="gameTabs" aria-label="Game tabs">
+      <button class="game-tab active" data-game="0">Flappy Chicken</button>
+      <button class="game-tab" data-game="1">Blocktris</button>
+      <button class="game-tab" data-game="2">Hatch (Snake)</button>
+      <button class="game-tab" data-game="3">Minecreeper</button>
+      <button class="game-tab" data-game="4">Block Crush</button>
+      <button class="game-tab" data-game="5">Mine Dungeon</button>
+      <button class="game-tab" data-game="6">Mine Blocks</button>
     </div>
-    <div class="game-container" id="gameContainer">
-      <canvas id="gameCanvas" width="320" height="480"></canvas>
-      <iframe id="gameIframe" width="480" height="360" allowfullscreen style="display:none"></iframe>
-    </div>
-    <button class="mine-mode-toggle" id="mineModeToggle">Mode: Reveal</button>
-    <p class="game-hint" id="gameHint">Press Space or Tap to play</p>
-    <div class="game-scores">
-      <div>Score: <span id="scoreDisplay">0</span></div>
-      <div>Your Best: <span id="bestDisplay">0</span></div>
-      <div>Site Record: <span id="siteBestDisplay">0</span></div>
-    </div>
-    <div class="version-switcher" id="versionSwitcher">
-      <button class="version-arrow" id="versionPrev" title="Previous version">&#9664;</button>
-      <span class="version-label" id="versionLabel">Mine Blocks</span>
-      <button class="version-arrow" id="versionNext" title="Next version">&#9654;</button>
-    </div>
-    <div class="mineblocks-link" id="mineblocksLink">Visit Mine Blocks on their official Website: <a href="https://mineblocks.com/" target="_blank" rel="noopener noreferrer">MineBlocks.com</a></div>
-    <div id="iframeConsent" style="display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center;padding:24px;color:#d8d8d8;font-size:0.72rem;text-shadow:1px 1px 0 rgba(0,0,0,0.6);min-height:300px;">
-      <p id="iframeConsentText" style="max-width:420px;line-height:1.7;"></p>
-      <button id="iframeConsentBtn" style="font-family:inherit;background:rgba(6,10,6,0.88);color:#55ff55;border:2px solid rgba(85,255,85,0.5);border-radius:4px;padding:10px 24px;font-size:0.75rem;cursor:pointer;">Load Game</button>
-    </div>
-    <div id="perfWarning" style="display:none;position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(10,16,10,0.92);z-index:20;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;padding:24px;">
-      <p style="color:#ff5555;font-size:1.1rem;">This game doesn't run smoothly on your device.</p>
-      <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;">
-        <button id="perfContinue" style="font-family:inherit;background:#2a5a2a;color:#55ff55;border:1px solid #55ff55;padding:6px 16px;cursor:pointer;font-size:0.85rem;">Continue Anyway</button>
-        <button id="perfSkip" style="font-family:inherit;background:#5a2a2a;color:#ff5555;border:1px solid #ff5555;padding:6px 16px;cursor:pointer;font-size:0.85rem;">Next Game &#9654;</button>
+    <section class="game-panel">
+      <div class="game-switcher">
+        <span class="game-title" id="gameTitle">Flappy Chicken</span>
       </div>
-    </div>
+      <div class="game-container" id="gameContainer">
+        <canvas id="gameCanvas" width="320" height="480"></canvas>
+        <iframe id="gameIframe" width="480" height="360" allowfullscreen style="display:none"></iframe>
+      </div>
+      <button class="mine-mode-toggle" id="mineModeToggle">Mode: Reveal</button>
+      <p class="game-hint" id="gameHint">Press Space or Tap to play</p>
+      <div class="game-scores">
+        <div>Score: <span id="scoreDisplay">0</span></div>
+        <div>Your Best: <span id="bestDisplay">0</span></div>
+        <div>Site Record: <span id="siteBestDisplay">0</span></div>
+      </div>
+      <div class="version-switcher" id="versionSwitcher">
+        <button class="version-arrow" id="versionPrev" title="Previous version">&#9664;</button>
+        <span class="version-label" id="versionLabel">Mine Blocks</span>
+        <button class="version-arrow" id="versionNext" title="Next version">&#9654;</button>
+      </div>
+      <div class="mineblocks-link" id="mineblocksLink">Visit Mine Blocks on their official Website: <a href="https://mineblocks.com/" target="_blank" rel="noopener noreferrer">MineBlocks.com</a></div>
+      <div id="iframeConsent" style="display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center;padding:24px;color:#d8d8d8;font-size:0.72rem;text-shadow:1px 1px 0 rgba(0,0,0,0.6);min-height:300px;">
+        <p id="iframeConsentText" style="max-width:420px;line-height:1.7;"></p>
+        <button id="iframeConsentBtn" style="font-family:inherit;background:rgba(6,10,6,0.88);color:#55ff55;border:2px solid rgba(85,255,85,0.5);border-radius:4px;padding:10px 24px;font-size:0.75rem;cursor:pointer;">Load Game</button>
+      </div>
+      <div id="perfWarning" style="display:none;position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(10,16,10,0.92);z-index:20;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;padding:24px;">
+        <p style="color:#ff5555;font-size:1.1rem;">This game doesn't run smoothly on your device.</p>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;">
+          <button id="perfContinue" style="font-family:inherit;background:#2a5a2a;color:#55ff55;border:1px solid #55ff55;padding:6px 16px;cursor:pointer;font-size:0.85rem;">Continue Anyway</button>
+          <button id="perfSkip" style="font-family:inherit;background:#5a2a2a;color:#ff5555;border:1px solid #ff5555;padding:6px 16px;cursor:pointer;font-size:0.85rem;">Next Game &#9654;</button>
+        </div>
+      </div>
+    </section>
   </main>
 
   <script>
@@ -596,8 +636,7 @@
     var scoreEl = document.getElementById('scoreDisplay');
     var bestEl = document.getElementById('bestDisplay');
     var siteBestEl = document.getElementById('siteBestDisplay');
-    var prevBtn = document.getElementById('gamePrev');
-    var nextBtn = document.getElementById('gameNext');
+    var gameTabs = Array.from(document.querySelectorAll('.game-tab'));
 
     var games = ['Flappy Chicken', 'Blocktris', 'Hatch (Snake)', 'Minecreeper', 'Block Crush', 'Mine Dungeon', 'Mine Blocks'];
     var currentGame = 0;
@@ -732,6 +771,9 @@
       stopGame();
       currentGame = idx;
       titleEl.textContent = games[idx];
+      gameTabs.forEach(function (tab) {
+        tab.classList.toggle('active', parseInt(tab.getAttribute('data-game'), 10) === idx);
+      });
       scoreEl.textContent = '0';
 
       // Reset perf monitor for new game
@@ -812,11 +854,11 @@
       mineModeBtn.classList.toggle('flag-mode', mineFlag);
     });
 
-    prevBtn.addEventListener('click', function () {
-      startGame((currentGame - 1 + games.length) % games.length);
-    });
-    nextBtn.addEventListener('click', function () {
-      startGame((currentGame + 1) % games.length);
+    gameTabs.forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        var idx = parseInt(tab.getAttribute('data-game'), 10);
+        if (!Number.isNaN(idx)) startGame(idx);
+      });
     });
 
     // Version switcher for Mine Blocks
