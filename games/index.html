@@ -3318,44 +3318,22 @@
             c.fillRect(px, py, CELL, CELL);
             break;
           case KEY:
-            // Lever — pulsing golden halo so it really pops on cobblestone backgrounds
-            var leverPulse = 0.45 + 0.35 * Math.sin(anim / 6);
-            // Big soft halo
-            c.fillStyle = 'rgba(255,210,60,' + (leverPulse * 0.35) + ')';
-            c.fillRect(px, py, CELL, CELL);
-            // Inner brighter ring
-            c.fillStyle = 'rgba(255,240,150,' + (leverPulse * 0.55) + ')';
-            c.fillRect(px + 4, py + 4, CELL - 8, CELL - 8);
-            // Cobblestone base disc
-            c.fillStyle = '#3a3a3a';
-            c.fillRect(px + CELL / 2 - 7, py + CELL - 9, 14, 6);
-            c.fillStyle = '#7a7a7a';
-            c.fillRect(px + CELL / 2 - 6, py + CELL - 8, 12, 1);
-            // Lever arm — thick wooden stick angled, dark outline first then wood color
-            c.strokeStyle = '#1a0d04';
-            c.lineWidth = 5;
-            c.beginPath();
-            c.moveTo(px + CELL / 2, py + CELL - 6);
-            c.lineTo(px + CELL / 2 + 5, py + 5);
-            c.stroke();
-            c.strokeStyle = '#a86a2a';
-            c.lineWidth = 3;
-            c.beginPath();
-            c.moveTo(px + CELL / 2, py + CELL - 6);
-            c.lineTo(px + CELL / 2 + 5, py + 5);
-            c.stroke();
+            // Lever — Minecraft terrain sprite (col 0, row 6) on cobblestone base,
+            // with a pulsing golden border + glow so it stands out from the floor.
+            dt(0, 1, px, py);                // cobblestone base
+            if (terrainReady) {              // lever sprite centered on it
+              c.imageSmoothingEnabled = false;
+              c.drawImage(terrainImg, 0 * T, 6 * T, T, T, px + 6, py + 4, CELL - 12, CELL - 8);
+            }
+            // Pulsing golden border — makes it clearly distinguishable
+            var leverPulse = 0.6 + 0.4 * Math.sin(anim / 6);
+            c.strokeStyle = 'rgba(255,220,60,' + leverPulse + ')';
+            c.lineWidth = 2;
+            c.strokeRect(px + 2, py + 2, CELL - 4, CELL - 4);
+            // Subtle warm inner glow behind the sprite
+            c.fillStyle = 'rgba(255,200,40,' + (leverPulse * 0.18) + ')';
+            c.fillRect(px + 3, py + 3, CELL - 6, CELL - 6);
             c.lineWidth = 1;
-            // Bright knob on top — gold/cream
-            c.fillStyle = '#1a0d04';
-            c.beginPath();
-            c.arc(px + CELL / 2 + 5, py + 4, 4.5, 0, Math.PI * 2);
-            c.fill();
-            c.fillStyle = '#ffe27a';
-            c.beginPath();
-            c.arc(px + CELL / 2 + 5, py + 4, 3.5, 0, Math.PI * 2);
-            c.fill();
-            c.fillStyle = '#fffacc';
-            c.fillRect(px + CELL / 2 + 4, py + 3, 2, 2);
             break;
           case SWORD:
             di(0, 4, px + 4, py + 4, CELL - 8);
