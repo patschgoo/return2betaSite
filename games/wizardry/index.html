@@ -1781,8 +1781,7 @@
         if (/key|chest|lock|unlock|open/.test(l)) return 'lever';
         if (/tablet|decode|spell|rune|read|warning|chant|incant|study/.test(l)) return 'book';
         if (/ember|steal|gem|treasure|loot/.test(l)) return 'diamond';
-        if (/search|scout|explore|look|investigate|inspect|examine|check/.test(l)) return 'compass';
-        if (/sneak|vent|cache|scavenge|hide|crawl|peek/.test(l)) return 'torch';
+        if (/search|scout|explore|look|investigate|inspect|examine|check|sneak|vent|cache|scavenge|hide|crawl|peek/.test(l)) return 'torch';
         if (/shoot|aim|snipe|arrow/.test(l)) return 'bow';
         if (/flee|stair|retreat|return|begin|drop|shaft|leave|fall back|climb|descend|ascend/.test(l)) return 'stairs';
         return '';

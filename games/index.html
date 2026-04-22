@@ -2794,7 +2794,8 @@
       // ── Game state ───────────────────────────────
       var level = 0, grid = [], player, lives, maxMoves, movesLeft, inventory,
           score, totalScore = 0, state = 'diffselect', msg = '', msgTimer = 0,
-          litCells = {}, slideTrail = [], slideAnim = 0, heartsTaken = 0;
+          litCells = {}, slideTrail = [], slideAnim = 0, heartsTaken = 0,
+          levelScoreBanked = false;
       var levelCache = {}; // cache generated levels so retry replays the same layout
 
       // ── Smooth‑slide animation ───────────────────
@@ -2969,9 +2970,10 @@
         shuffleArr(openCells);
         var placeIdx = 0;
         function placeItem(tile) {
-          if (placeIdx >= openCells.length || placeIdx >= maxItems) return;
+          if (placeIdx >= openCells.length || placeIdx >= maxItems) return false;
           g[openCells[placeIdx].r][openCells[placeIdx].c] = tile;
           placeIdx++;
+          return true;
         }
 
         // Item budget — purely difficulty-driven for 3-room runs
@@ -3006,30 +3008,29 @@
           if (Math.random() < 0.6) placeItem(SPIKE);
         }
 
-        // Key + door (normal sometimes, hard always)
+        // Key + door (normal sometimes, hard always) — only place door if key actually got placed
         if ((diff === 1 && Math.random() < 0.5) || diff === 2) {
-          placeItem(KEY_T);
-          var pdirs = [[-1,0],[1,0],[0,-1],[0,1]];
-          shuffleArr(pdirs);
-          for (var di = 0; di < pdirs.length; di++) {
-            var dr = portalCell.r + pdirs[di][0], dc = portalCell.c + pdirs[di][1];
-            if (dr >= 0 && dr < 12 && dc >= 0 && dc < 12 && g[dr][dc] !== WALL && g[dr][dc] !== PORTAL) {
-              g[dr][dc] = DOOR;
-              break;
+          if (placeItem(KEY_T)) {
+            var pdirs = [[-1,0],[1,0],[0,-1],[0,1]];
+            shuffleArr(pdirs);
+            for (var di = 0; di < pdirs.length; di++) {
+              var dr = portalCell.r + pdirs[di][0], dc = portalCell.c + pdirs[di][1];
+              if (dr >= 0 && dr < 12 && dc >= 0 && dc < 12 && g[dr][dc] !== WALL && g[dr][dc] !== PORTAL) {
+                g[dr][dc] = DOOR;
+                break;
+              }
             }
           }
         }
 
-        // Pickaxe + stone wall (normal/hard, sometimes)
+        // Pickaxe + stone wall (normal/hard, sometimes) — place pick first; only add wall if pick placed
         if (diff >= 1 && Math.random() < 0.4) {
-          placeItem(PICK_T);
-          placeItem(STONE_W);
+          if (placeItem(PICK_T)) placeItem(STONE_W);
         }
 
-        // Crate + plate (normal/hard, sometimes)
+        // Crate + plate (normal/hard, sometimes) — only place crate if plate placed
         if (diff >= 1 && Math.random() < 0.4) {
-          placeItem(CRATE);
-          placeItem(PLATE);
+          if (placeItem(PLATE)) placeItem(CRATE);
         }
 
         // Dark tiles — HARD only (main mind-game mechanic)
@@ -3116,6 +3117,7 @@
         movesLeft = maxMoves;
         inventory = {};
         score = 0; state = 'playing';
+        levelScoreBanked = false;
         msg = ''; msgTimer = 0;
         litCells = {};
         slideTrail = []; slideAnim = 0;
@@ -3274,7 +3276,8 @@
       }
       function die() {
         if (state === 'dead') return;
-        totalScore += score; score = 0;
+        if (!levelScoreBanked) { totalScore += score; }
+        score = 0;
         sEl.textContent = totalScore;
         if (totalScore > best) { best = totalScore; localStorage.setItem('r2b_mdungeon_best', best); bEl.textContent = best; }
         R2BScores.submit('mdungeon', totalScore);
@@ -3287,6 +3290,7 @@
       function completeLevel() {
         var moveBonus = movesLeft * 30;
         score += 300 + moveBonus; totalScore += score;
+        levelScoreBanked = true;
         sEl.textContent = totalScore;
         spawnBurst(cvs.width / 2, cvs.height / 2, 30, '#5f5', 100, 30);
         state = 'levelcomplete';
@@ -3720,7 +3724,9 @@
         }
         if (state === 'levelcomplete') {
           if (inBtn(pos.x, pos.y, W / 2 - 85, H / 2 + 18, 80, 26)) {
-            totalScore -= score; sEl.textContent = totalScore; loadLevel(level);
+            // Refund the just-banked level points so retry replays cleanly
+            if (levelScoreBanked) { totalScore -= score; levelScoreBanked = false; sEl.textContent = totalScore; }
+            loadLevel(level);
           }
           if (inBtn(pos.x, pos.y, W / 2 + 5, H / 2 + 18, 80, 26)) { level++; loadLevel(level); }
           return true;
@@ -3781,7 +3787,11 @@
         }
         if (state === 'levelcomplete') {
           if (e.key === ' ' || e.key === 'Enter') { level++; loadLevel(level); e.preventDefault(); }
-          if (e.key === 'r' || e.key === 'R') { totalScore -= score; sEl.textContent = totalScore; loadLevel(level); e.preventDefault(); }
+          if (e.key === 'r' || e.key === 'R') {
+            if (levelScoreBanked) { totalScore -= score; levelScoreBanked = false; sEl.textContent = totalScore; }
+            loadLevel(level);
+            e.preventDefault();
+          }
           return;
         }
         if (state === 'victory') {
