@@ -2699,7 +2699,7 @@
         'Balanced challenge',
         'Dense hazards, tight moves'
       ];
-      var LEVELS_PER_RUN = 15;
+      var LEVELS_PER_RUN = 3;
 
       // ── Game state ───────────────────────────────
       var level = 0, grid = [], player, lives, maxMoves, movesLeft, inventory,
@@ -2961,8 +2961,8 @@
           }
         }
 
-        // Heart (occasional)
-        if (lvNum >= 2 && Math.random() < 0.35) placeItem(HEART_T);
+        // Heart (hard difficulty only)
+        if (diff === 2 && Math.random() < 0.45) placeItem(HEART_T);
 
         // Water/gravel stop tiles
         var stopCount = diff === 0 ? 2 : diff === 1 ? 1 : 1;
@@ -3187,7 +3187,15 @@
       function loseLife() {
         lives--; showMsg('Ouch! -1 Life'); triggerShake(4, 8);
         if (player) spawnBurst(OX + player.c * CELL + CELL / 2, OY + player.r * CELL + CELL / 2, 10, '#f44', CELL, 18);
-        if (lives <= 0) { lives = 0; state = 'dead'; }
+        if (lives <= 0) { lives = 0; die(); }
+      }
+      function die() {
+        if (state === 'dead') return;
+        totalScore += score; score = 0;
+        sEl.textContent = totalScore;
+        if (totalScore > best) { best = totalScore; localStorage.setItem('r2b_mdungeon_best', best); bEl.textContent = best; }
+        R2BScores.submit('mdungeon', totalScore);
+        state = 'dead';
       }
       function showMsg(m) { msg = m; msgTimer = 80; }
       function updateHUD() {
@@ -3284,11 +3292,8 @@
               c.fillRect(px + CELL - 14, py + CELL - 9, 6, 2);
             }
             else if (tile === STONE_W) {
-              dt(4, 0, px, py);
-              c.fillStyle = 'rgba(60,35,15,0.35)';
-              c.fillRect(px, py + 6, CELL, 1);
-              c.fillRect(px, py + CELL - 7, CELL, 1);
-              c.fillStyle = 'rgba(0,0,0,0.18)'; c.fillRect(px, py + CELL - 2, CELL, 2);
+              dt(1, 0, px, py);
+              c.fillStyle = 'rgba(0,0,0,0.12)'; c.fillRect(px, py + CELL - 2, CELL, 2);
             }
             else if (tile === CHEST_T) {
               dt(11, 1, px, py);
@@ -3296,9 +3301,8 @@
               c.fillRect(px + 3, py + 3, CELL - 6, CELL - 6);
             }
             else if (tile === DOOR) {
-              dt(6, 1, px, py);
-              c.strokeStyle = 'rgba(80,60,30,0.5)'; c.lineWidth = 1;
-              c.strokeRect(px + 3, py + 3, CELL - 6, CELL - 6);
+              dt(1, 5, px, py);
+              c.fillStyle = 'rgba(0,0,0,0.18)'; c.fillRect(px, py + CELL - 2, CELL, 2);
             }
             else if (tile === PORTAL) {
               dt(5, 2, px, py);
@@ -3355,18 +3359,18 @@
               }
             }
             else if (tile === CRACK) {
-              dt(0, 1, px, py);
-              c.fillStyle = 'rgba(60,40,20,0.25)'; c.fillRect(px, py, CELL, CELL);
-              c.strokeStyle = 'rgba(30,15,5,0.7)'; c.lineWidth = 1.5;
-              c.beginPath(); c.moveTo(px + 5, py + 4); c.lineTo(px + CELL / 2 + 1, py + CELL / 2 + 2); c.lineTo(px + CELL - 6, py + CELL - 5); c.stroke();
-              c.beginPath(); c.moveTo(px + CELL - 5, py + 6); c.lineTo(px + CELL / 2 - 3, py + CELL / 2); c.lineTo(px + 7, py + CELL - 4); c.stroke();
+              dt(4, 0, px, py);
+              c.fillStyle = 'rgba(60,35,15,0.30)';
+              c.fillRect(px, py + 6, CELL, 1);
+              c.fillRect(px, py + CELL - 7, CELL, 1);
+              c.fillStyle = 'rgba(0,0,0,0.18)'; c.fillRect(px, py + CELL - 2, CELL, 2);
             }
             else if (tile === ZOMBIE) dm(imgZombie, px, py);
             else if (tile === SKELETON) dm(imgSkeleton, px, py);
             else if (tile === CREEPER) dm(imgCreeper, px, py);
             else if (tile === KEY_T) {
-              di(7, 1, px, py);
-              c.fillStyle = 'rgba(255,255,100,' + (0.1 + 0.06 * Math.sin(now / 300)) + ')';
+              dt(0, 6, px, py);
+              c.fillStyle = 'rgba(255,255,100,' + (0.10 + 0.06 * Math.sin(now / 300)) + ')';
               c.fillRect(px + 5, py + 5, CELL - 10, CELL - 10);
             }
             else if (tile === HEART_T) {
@@ -3489,10 +3493,14 @@
         if (state === 'dead') {
           c.fillStyle = 'rgba(80,0,0,0.88)'; c.fillRect(-4, -4, W + 8, H + 8);
           c.fillStyle = '#f44'; c.font = '22px Minecraft, sans-serif'; c.textAlign = 'center';
-          c.fillText('You Died!', W / 2, H / 2 - 28);
-          c.fillStyle = '#ccc'; c.font = '13px Minecraft, sans-serif';
-          c.fillText('Final Score: ' + totalScore, W / 2, H / 2 + 2);
-          drawBtn(W / 2 - 60, H / 2 + 16, 120, 28, 'New Game');
+          c.fillText('Run Over', W / 2, H / 2 - 40);
+          c.fillStyle = '#fc0'; c.font = '16px Minecraft, sans-serif';
+          c.fillText('Score: ' + totalScore, W / 2, H / 2 - 12);
+          c.fillStyle = diffColors[difficulty] || '#aaa'; c.font = '11px Minecraft, sans-serif';
+          c.fillText('Difficulty: ' + (diffNames[difficulty] || '-') + ' | Lv reached: ' + (level + 1) + '/' + LEVELS_PER_RUN, W / 2, H / 2 + 6);
+          c.fillStyle = '#aaa'; c.font = '10px sans-serif';
+          c.fillText('Best: ' + best + ' | Site: ' + siteBest, W / 2, H / 2 + 22);
+          drawBtn(W / 2 - 60, H / 2 + 32, 120, 28, 'New Game');
         }
         if (state === 'outofmoves') {
           c.fillStyle = 'rgba(60,30,0,0.88)'; c.fillRect(-4, -4, W + 8, H + 8);
@@ -3592,7 +3600,7 @@
           return true;
         }
         if (state === 'dead') {
-          if (inBtn(pos.x, pos.y, W / 2 - 60, H / 2 + 16, 120, 28)) {
+          if (inBtn(pos.x, pos.y, W / 2 - 60, H / 2 + 32, 120, 28)) {
             state = 'diffselect'; draw();
           }
           return true;
@@ -3601,17 +3609,17 @@
         if (state === 'playing' || state === 'outofmoves' || state === 'levelcomplete') {
           var hudY2 = OY + ROWS * CELL + 4;
           if (inBtn(pos.x, pos.y, W / 2 - 32, hudY2 + 18, 64, 16)) {
-            state = 'diffselect'; draw();
+            die(); draw();
             return true;
           }
         }
         if (state === 'outofmoves') {
           if (inBtn(pos.x, pos.y, W / 2 - 65, H / 2 + 8, 60, 26)) {
-            lives--; if (lives <= 0) { state = 'dead'; draw(); return true; }
+            lives--; if (lives <= 0) { die(); draw(); return true; }
             loadLevel(level);
           }
           if (inBtn(pos.x, pos.y, W / 2 + 5, H / 2 + 8, 60, 26)) {
-            state = 'dead'; lives = 0; draw();
+            die(); draw();
           }
           return true;
         }
@@ -3671,7 +3679,7 @@
         }
         if (state === 'outofmoves') {
           if (e.key === ' ' || e.key === 'Enter') {
-            lives--; if (lives <= 0) { state = 'dead'; draw(); return; }
+            lives--; if (lives <= 0) { die(); draw(); return; }
             loadLevel(level); e.preventDefault();
           }
           return;
