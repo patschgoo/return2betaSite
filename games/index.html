@@ -2762,6 +2762,12 @@
         c.imageSmoothingEnabled = false;
         c.drawImage(terrainImg, col * T, row * T, T, T, dx, dy, CELL, CELL);
       }
+      // Draw a half-tile slice of a sprite (sy = source y offset 0 or 8) at given dest height
+      function dtHalf(col, row, sy, dx, dy, dh) {
+        if (!terrainReady) return;
+        c.imageSmoothingEnabled = false;
+        c.drawImage(terrainImg, col * T, row * T + sy, T, T / 2, dx, dy, CELL, dh);
+      }
       function di(col, row, dx, dy, sz) {
         sz = sz || CELL;
         if (!itemsReady) return;
@@ -2850,12 +2856,16 @@
 
       // BFS reachability check from player to portal (treating walls/lava/doors blockless except WALL)
       function reachable(target) {
+        return bfsDistance(player, target) >= 0;
+      }
+      // BFS shortest distance treating WALL as blocking; doors/items/floor passable. Returns -1 if unreachable.
+      function bfsDistance(from, target) {
         var seen = {};
-        var q = [{ r: player.r, c: player.c }];
-        seen[player.r + ',' + player.c] = true;
+        var q = [{ r: from.r, c: from.c, d: 0 }];
+        seen[from.r + ',' + from.c] = true;
         while (q.length) {
           var n = q.shift();
-          if (n.r === target.r && n.c === target.c) return true;
+          if (n.r === target.r && n.c === target.c) return n.d;
           var dirs = [[-1,0],[1,0],[0,-1],[0,1]];
           for (var i = 0; i < 4; i++) {
             var nr = n.r + dirs[i][0], nc = n.c + dirs[i][1];
@@ -2863,12 +2873,11 @@
             if (seen[nr + ',' + nc]) continue;
             var t = grid[nr][nc];
             if (t === WALL) continue;
-            // Doors are passable since key may be obtained
             seen[nr + ',' + nc] = true;
-            q.push({ r: nr, c: nc });
+            q.push({ r: nr, c: nc, d: n.d + 1 });
           }
         }
-        return false;
+        return -1;
       }
 
       // ── Room generation ───────────────────────────
@@ -2943,9 +2952,11 @@
         var mobTypes = [];
         for (var m = 0; m < mobCount; m++) {
           var roll = Math.random();
-          if (roll < 0.5) mobTypes.push(ZOMBIE);
-          else if (roll < 0.85) mobTypes.push(SKELETON);
-          else mobTypes.push(CREEPER);
+          // Creepers are deadlier now (auto-explode), so weight them lower on Easy/Normal
+          var creeperChance = difficulty === 0 ? 0 : difficulty === 1 ? 0.10 : 0.25;
+          if (roll < creeperChance) mobTypes.push(CREEPER);
+          else if (roll < 0.6) mobTypes.push(ZOMBIE);
+          else mobTypes.push(SKELETON);
         }
         for (var mt = 0; mt < mobTypes.length; mt++) {
           // Don't spawn mobs adjacent to player
@@ -2964,14 +2975,21 @@
         // 9) Torch on Normal/Hard (Hard rooms are dark)
         if (difficulty >= 1) placeOnEmpty(TORCH, 1);
 
-        // 10) Heart pickup if player is hurt (small chance)
-        if (lives < MAX_LIVES && Math.random() < 0.5) placeOnEmpty(HEART, 1);
+        // 10) Heart pickup — ONLY on Hard, and rare
+        if (difficulty === 2 && lives < MAX_LIVES && Math.random() < 0.25) placeOnEmpty(HEART, 1);
 
         // 11) Dark only on Hard (already set above for door logic)
         // darkRoom is set in step 5
 
-        // 12) Per‑room move budget — difficulty‑scaled, generous on Easy
-        maxMoves = difficulty === 0 ? 40 : difficulty === 1 ? 28 : 22;
+        // 12) Per‑room move budget — based on actual path length + difficulty buffer
+        //     Generous on Easy, tight on Hard.
+        var portalPos0 = { r: portalR, c: portalC };
+        var pathLen = bfsDistance(player, portalPos0);
+        if (pathLen < 0) pathLen = manhattan(player, portalPos0); // fallback
+        // Add detour for the lever pickup (door always required — except optional dark trick)
+        var leverDetour = doorOptional ? 0 : 6;
+        var diffBuffer = difficulty === 0 ? 18 : difficulty === 1 ? 10 : 5;
+        maxMoves = pathLen + leverDetour + diffBuffer;
         movesLeft = maxMoves;
 
         // 13) Validate reachability to portal — if not, knock down some walls
@@ -3124,10 +3142,41 @@
         player.r = nr; player.c = nc;
         movesLeft--;
         updateLight();
+        // Adjacent creepers ALWAYS explode — unavoidable
+        checkCreeperBlast();
+        if (state !== 'playing') return;
         updateHUD();
         if (movesLeft <= 0 && state === 'playing') {
           // Out of moves — costs a life
           loseLife('Out of moves!');
+        }
+      }
+
+      // Creeper auto-explode: if any creeper is orthogonally adjacent to the player, BOOM.
+      function checkCreeperBlast() {
+        var adj = [[-1,0],[1,0],[0,-1],[0,1]];
+        var blasted = false;
+        for (var i = 0; i < adj.length; i++) {
+          var rr = player.r + adj[i][0], cc = player.c + adj[i][1];
+          if (!inBounds(rr, cc)) continue;
+          if (grid[rr][cc] === CREEPER) {
+            grid[rr][cc] = FLOOR;
+            // Blast radius: clear most non-portal tiles within 1
+            for (var br = rr - 1; br <= rr + 1; br++) {
+              for (var bc = cc - 1; bc <= cc + 1; bc++) {
+                if (!inBounds(br, bc)) continue;
+                var bt = grid[br][bc];
+                if (bt === PORTAL || bt === DOOR) continue;
+                if (bt === WALL && (br === 0 || br === ROWS - 1 || bc === 0 || bc === COLS - 1)) continue;
+                if (bt !== FLOOR) grid[br][bc] = FLOOR;
+              }
+            }
+            blasted = true;
+          }
+        }
+        if (blasted) {
+          shake = 14;
+          loseLife('Creeper blast!');
         }
       }
 
@@ -3196,45 +3245,40 @@
             c.fillRect(px, py + CELL - 3, CELL, 3);
             break;
           case DOOR:
-            // Heavy oak door (closed) — with iron handle accent
-            dt(1, 5, px, py);
-            dt(1, 6, px, py + CELL / 2); // bottom half if exists
-            c.fillStyle = '#5a3a1a';
-            c.fillRect(px + 2, py + 2, CELL - 4, CELL - 4);
-            // Plank texture stripes
-            c.fillStyle = '#7a4a22';
-            c.fillRect(px + 3, py + 4, CELL - 6, 4);
-            c.fillRect(px + 3, py + 12, CELL - 6, 4);
-            c.fillRect(px + 3, py + 20, CELL - 6, 4);
-            // Iron handle
-            c.fillStyle = '#bbb';
-            c.fillRect(px + CELL - 8, py + CELL / 2 - 1, 4, 2);
-            // Outline
-            c.fillStyle = '#2a1a0a';
-            c.fillRect(px + 1, py + 1, CELL - 2, 1);
-            c.fillRect(px + 1, py + CELL - 2, CELL - 2, 1);
-            c.fillRect(px + 1, py + 1, 1, CELL - 2);
-            c.fillRect(px + CELL - 2, py + 1, 1, CELL - 2);
+            // Real Minecraft wooden door — top half + bottom half stacked
+            dtHalf(1, 5, 0, px, py, CELL / 2);            // door upper (top half of sprite)
+            dtHalf(1, 6, 8, px, py + CELL / 2, CELL / 2); // door lower (bottom half of sprite)
             break;
           case PORTAL:
-            // Obsidian frame
+            // Obsidian frame from real terrain sprite + animated nether swirl
             dt(5, 2, px, py);
             // Animated purple swirl interior
-            var pglow = 0.6 + 0.25 * Math.sin(anim / 8);
+            var pglow = 0.55 + 0.30 * Math.sin(anim / 8);
             c.fillStyle = 'rgba(80,20,140,' + pglow + ')';
             c.fillRect(px + 3, py + 3, CELL - 6, CELL - 6);
+            // Diagonal swirl streaks
+            c.strokeStyle = 'rgba(220,170,255,' + (0.35 + 0.25 * Math.sin(anim / 6)) + ')';
+            c.lineWidth = 1.5;
+            for (var sw = 0; sw < 3; sw++) {
+              var off = (anim / 3 + sw * 8) % 14;
+              c.beginPath();
+              c.moveTo(px + 3 + off, py + 3);
+              c.lineTo(px + 3, py + 3 + off);
+              c.stroke();
+              c.beginPath();
+              c.moveTo(px + CELL - 3 - off, py + CELL - 3);
+              c.lineTo(px + CELL - 3, py + CELL - 3 - off);
+              c.stroke();
+            }
+            c.lineWidth = 1;
             // Sparkle dots
-            for (var sk = 0; sk < 6; sk++) {
+            for (var sk = 0; sk < 5; sk++) {
               var ax = px + 4 + ((anim * 3 + sk * 17) % (CELL - 8));
               var ay = py + 4 + ((anim * 5 + sk * 23) % (CELL - 8));
               var sa = 0.4 + 0.4 * Math.sin(anim / 4 + sk);
-              c.fillStyle = 'rgba(220,170,255,' + sa + ')';
+              c.fillStyle = 'rgba(240,200,255,' + sa + ')';
               c.fillRect(ax, ay, 2, 2);
             }
-            // Inner border
-            c.strokeStyle = 'rgba(255,255,255,0.25)';
-            c.lineWidth = 1;
-            c.strokeRect(px + 3.5, py + 3.5, CELL - 7, CELL - 7);
             break;
           case LAVA:
             dt(14, 14, px, py); // lava sprite
@@ -3243,26 +3287,17 @@
             c.fillRect(px, py, CELL, CELL);
             break;
           case KEY:
-            // Lever — cobblestone base + wooden lever arm
-            c.fillStyle = '#5a5a5a';
-            c.fillRect(px + CELL / 2 - 5, py + CELL - 9, 10, 5);
-            c.fillStyle = '#8a8a8a';
-            c.fillRect(px + CELL / 2 - 4, py + CELL - 8, 8, 1);
-            // Lever arm angled
-            c.strokeStyle = '#6a3a18';
-            c.lineWidth = 3;
-            c.beginPath();
-            c.moveTo(px + CELL / 2, py + CELL - 6);
-            c.lineTo(px + CELL / 2 + 4, py + 6);
-            c.stroke();
-            c.lineWidth = 1;
-            // Lever knob
-            c.fillStyle = '#c8a878';
-            c.beginPath();
-            c.arc(px + CELL / 2 + 4, py + 5, 3, 0, Math.PI * 2);
-            c.fill();
-            c.fillStyle = '#3a1a08';
-            c.fillRect(px + CELL / 2 + 3, py + 4, 2, 2);
+            // Real Minecraft lever — cobblestone base from terrain + lever arm sprite
+            dt(0, 1, px, py);                                 // cobblestone base
+            // Lever sprite tile (terrain.png lever location — beta layout col 0, row 6)
+            // Drawn small and centered on the base
+            if (terrainReady) {
+              c.imageSmoothingEnabled = false;
+              c.drawImage(terrainImg, 0 * T, 6 * T, T, T, px + 8, py + 4, CELL - 16, CELL - 8);
+            }
+            // Subtle highlight to make it pop
+            c.fillStyle = 'rgba(255,255,180,0.10)';
+            c.fillRect(px + 8, py + 4, CELL - 16, CELL - 8);
             break;
           case SWORD:
             di(0, 4, px + 4, py + 4, CELL - 8);
