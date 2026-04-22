@@ -691,6 +691,12 @@
       background-size: contain;
     }
     .mc-icon.bow    { background-position: -80px -16px; }
+    .mc-icon.compass{ background-position: -96px -96px; }
+    .mc-icon.torch  {
+      background: url('../../images/minecraft/terrain.png') no-repeat;
+      background-size: 256px 256px;
+      background-position: 0 -80px;
+    }
     .mc-icon.lever {
       background: url('../../images/minecraft/terrain.png') no-repeat;
       background-size: 256px 256px;
@@ -1739,14 +1745,16 @@
 
       function choiceIcon(label) {
         var l = label.toLowerCase();
-        if (/fight|duel|spider|combat/.test(l)) return 'sword';
-        if (/unleash|seal the/.test(l)) return 'dsword';
-        if (/offer|blessing/.test(l)) return 'gold';
-        if (/key|chest|lock|force/.test(l)) return 'lever';
-        if (/tablet|decode|spell|rune|read|warning/.test(l)) return 'book';
-        if (/ember|steal/.test(l)) return 'diamond';
-        if (/search|scavenge|cache|sneak|vent/.test(l)) return 'bow';
-        if (/flee|stair|retreat|return|begin|drop|shaft|leave|fall back/.test(l)) return 'stairs';
+        if (/fight|duel|spider|combat|attack|strike|slay|kill/.test(l)) return 'sword';
+        if (/unleash|seal the|smash|break|force|pry|bash/.test(l)) return 'sword';
+        if (/offer|blessing|donate|pray/.test(l)) return 'gold';
+        if (/key|chest|lock|unlock|open/.test(l)) return 'lever';
+        if (/tablet|decode|spell|rune|read|warning|chant|incant|study/.test(l)) return 'book';
+        if (/ember|steal|gem|treasure|loot/.test(l)) return 'diamond';
+        if (/search|scout|explore|look|investigate|inspect|examine|check/.test(l)) return 'compass';
+        if (/sneak|vent|cache|scavenge|hide|crawl|peek/.test(l)) return 'torch';
+        if (/shoot|aim|snipe|arrow/.test(l)) return 'bow';
+        if (/flee|stair|retreat|return|begin|drop|shaft|leave|fall back|climb|descend|ascend/.test(l)) return 'stairs';
         return '';
       }
 
