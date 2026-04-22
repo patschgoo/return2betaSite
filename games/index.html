@@ -284,6 +284,88 @@
       text-shadow: 1px 1px 0 rgba(0,0,0,0.8);
     }
     .game-scores span { color: #ffdd55; }
+
+    /* Mizardry promo popup */
+    .mizardry-popup {
+      position: fixed;
+      top: 70px;
+      right: 16px;
+      z-index: 950;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      background: rgba(8,14,8,0.94);
+      border: 2px solid rgba(170,120,255,0.55);
+      border-radius: 6px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.55), 0 0 18px rgba(140,80,255,0.18);
+      color: #e8e0ff;
+      font-family: Minecraft, sans-serif;
+      font-size: 0.72rem;
+      line-height: 1.25;
+      max-width: 260px;
+      text-shadow: 1px 1px 0 rgba(0,0,0,0.85);
+      animation: mizardryPopIn 0.45s ease-out;
+    }
+    @keyframes mizardryPopIn {
+      from { transform: translateY(-12px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    .mizardry-popup a.mizardry-popup-text {
+      color: inherit;
+      text-decoration: none;
+      display: block;
+    }
+    .mizardry-popup a.mizardry-popup-text:hover { color: #fff; }
+    .mizardry-popup .mizardry-popup-text strong {
+      color: #c9a8ff;
+      display: block;
+      font-size: 0.78rem;
+    }
+    .mizardry-popup .mizardry-popup-icon {
+      position: relative;
+      width: 48px;
+      height: 48px;
+      flex-shrink: 0;
+      background: #111 url('../images/mobs/2d/Player_Head.png') center/contain no-repeat;
+      image-rendering: pixelated;
+      border: 1px solid rgba(170,120,255,0.45);
+      border-radius: 4px;
+    }
+    .mizardry-popup .mizardry-popup-icon::after {
+      content: '';
+      position: absolute;
+      top: -8px;
+      left: 50%;
+      width: 56px;
+      height: 32px;
+      transform: translateX(-50%) rotate(10deg);
+      transform-origin: center;
+      background: url('../images/wizardry/wizard_hat.png') center/contain no-repeat;
+      image-rendering: pixelated;
+      pointer-events: none;
+    }
+    .mizardry-popup .mizardry-popup-close {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      width: 20px;
+      height: 20px;
+      background: #2a1a3a;
+      border: 1px solid rgba(170,120,255,0.55);
+      color: #c9a8ff;
+      font-size: 12px;
+      line-height: 1;
+      cursor: pointer;
+      border-radius: 50%;
+      padding: 0;
+      font-family: inherit;
+    }
+    .mizardry-popup .mizardry-popup-close:hover { background: #3a2454; color: #fff; }
+    @media (max-width: 600px) {
+      .mizardry-popup { top: 60px; right: 8px; max-width: 220px; padding: 8px 10px; font-size: 0.66rem; }
+      .mizardry-popup .mizardry-popup-icon { width: 40px; height: 40px; }
+    }
     /* Version switcher for Paper Minecraft */
     .version-switcher {
       display: none;
@@ -396,6 +478,14 @@
   </header>
 
   <main class="content">
+    <div class="mizardry-popup" id="mizardryPopup" role="dialog" aria-label="Try Mizardry">
+      <button type="button" class="mizardry-popup-close" id="mizardryPopupClose" aria-label="Dismiss">&times;</button>
+      <a class="mizardry-popup-text" href="/games/wizardry/">
+        <strong>Now try our new</strong>
+        text adventure game!
+      </a>
+      <a class="mizardry-popup-icon" href="/games/wizardry/" aria-label="Open Mizardry"></a>
+    </div>
     <h1>Games</h1>
     <div class="game-switcher">
       <button class="game-arrow" id="gamePrev" title="Previous game">&#9664;</button>
@@ -3737,6 +3827,23 @@
         }
       };
     }
+
+    // Mizardry promo popup
+    (function () {
+      var popup = document.getElementById('mizardryPopup');
+      var closeBtn = document.getElementById('mizardryPopupClose');
+      if (!popup || !closeBtn) return;
+      try {
+        if (localStorage.getItem('r2b_mizardry_popup_dismissed') === '1') {
+          popup.style.display = 'none';
+          return;
+        }
+      } catch (_) {}
+      closeBtn.addEventListener('click', function () {
+        popup.style.display = 'none';
+        try { localStorage.setItem('r2b_mizardry_popup_dismissed', '1'); } catch (_) {}
+      });
+    })();
 
     // Start with game from URL param or default to Flappy Chicken
     var urlParams = new URLSearchParams(window.location.search);

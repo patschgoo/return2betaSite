@@ -1110,66 +1110,96 @@
 
       var S = '../../images/wizardry/screenshots/';
       var ambience = {
+        // "You descend into the Cobble Catacombs" — cave/underground entrances
         entrance: { bg: [
           S + 'night/bigger%20cave%20entrance.png',
           S + 'night/crawl%20hole%20outside%20entrance.png',
           S + 'day/mountain%20underground%20gateway%20entrance.png',
-          S + 'day/forrest%20side%20underground%20entrance.png'
+          S + 'day/forrest%20side%20underground%20entrance.png',
+          S + 'day/ravaine%20underground%20entrence.png',
+          S + 'day/underground%20hole%20entrence.png',
+          S + 'day/snowy%20view%20with%20a%20hole%20to%20underground.png',
+          S + 'underground/outside%20view%20of%20underground%20entrance%20night.png',
+          S + 'underground/dark%20entrance%20underground.png'
         ], tone: 'A torch crackles beside cracked stone stairs.' },
+        // "Dusty shelves hide spell fragments, maps, and traps" — old buildings/ruins
         library: { bg: [
           S + 'buildings/basic%20house%20in%20mountainwall.png',
-          S + 'buildings/farmhouse%20wheatfield%20night.png',
-          S + 'buildings/windmill%20night.png',
-          S + 'buildings/farmhouse%20by%20river.png'
+          S + 'structures/day/ruins%20on%20grassland.png',
+          S + 'structures/day/ruin%20imprint%20in%20grassland.png',
+          S + 'structures/day/snowy%20ruins%20in%20high%20land.png',
+          S + 'structures/night/snowy%20ruins%20near%20pine%20forrest.png',
+          S + 'structures/day/samll%20ruins%20in%20frozen%20lake%20small%20island%20near%20land.png'
         ], tone: 'Books hum quietly as if they remember your name.' },
+        // "Bones and old helmets crunch... broken shaft in floor" — dark holes & tunnels
         pit: { bg: [
           S + 'underground/dark%20entrance%20underground.png',
           S + 'underground/two%20way%20split.png',
           S + 'underground/small%20hole%20walkway.png',
-          S + 'day/underwater.png',
-          S + 'day/swimming%20in%20ater%20near%20shore.png',
-          S + 'day/underwater%20diving%20up%20to%20shore.png'
+          S + 'underground/going%20undetrground%20near%20lava%20in%20mineing%20tunnel.webp',
+          S + 'night/big%20hole%20through%20mountain%20with%20water%20underneath.png',
+          S + 'night/holeway%20underneath%20green%20grass%20way.png',
+          S + 'underground/view%20outside%20of%20ravaine.png'
         ], tone: 'Rotten air rises from a broken shaft in the floor.' },
+        // "furnace idol asks for tribute... ember runes" — nether glowstone & lava shrines
         shrine: { bg: [
           S + 'nether/glowstone%20near%20soulsand%20area%20grat%20view.png',
           S + 'nether/walls%20overhang%20with%20glowstone%20and%20a%20bit%20of%20lava.png',
-          S + 'nether/nether%20portal%20in%20nether%20with%20lava%20pools%20behind%20it.png',
+          S + 'nether/area%20soul%20sand%20pigman%20and%20walls.png',
+          S + 'nether/mushrooms%20growing%20near%20lava%20area.png',
           S + 'nether/nether%20portal%20in%20open%20area.png',
-          S + 'nether/nether%20portal%20fire%20spread%20around%20it.png',
-          S + 'nether/nether%20portal%20with%20ghast%20in%20background.png'
+          S + 'nether/nether%20portal%20fire%20spread%20around%20it.png'
         ], tone: 'An old furnace altar glows with ember runes.' },
+        // "Hall of armor echoes... helm with blue fire" — dungeon spawners, skeletons, mobs
         echo: { bg: [
           S + 'structures/dungeon/monster%20dungeon%20zombie%20spawner%20near%20ravaine%20mointain%20entrance%20underground.png',
+          S + 'structures/dungeon/spider%20dungeon%20with%20spawner%20room.png',
           S + 'structures/dungeon/big%20mine%20with%20rails%20and%20spider%20dungen%20monsteres%20spawned%20already.png',
-          S + 'underground/mining%20near%20lava.png',
-          S + 'underground/lava%20between%20ores%20and%20stone.png'
+          S + 'underground/skeleton%20trapped%20underground%20but%20viewscreen%20removed.png',
+          S + 'underground/skeletons%20trapped%20underground%20lab.png',
+          S + 'night/zombie%20coming%20onto%20attacking%20you.png'
         ], tone: 'Armor clinks in the dark, then suddenly stops.' },
+        // "iron vault door... redstone locks... hum shakes dust" — mines with rails & locked entrances
         vault: { bg: [
           S + 'structures/dungeon/big%20mine%20with%20rails%20and%20spider%20dungen%20no%20monsteres%20spawned.png',
           S + 'structures/dungeon/big%20mine%20with%20rails%20and%20spider%20dungen%20monsteres%20spawner%20in%20background.png',
           S + 'structures/night/mine%20under%20sand.png',
+          S + 'structures/day/mine%20entrance%20on%20mountain%20wall.png',
+          S + 'structures/day/blocked%20mine%20entrance%20in%20sand%20dune%20land.png',
           S + 'structures/night/skeleton%20near%20mine%20entrance%20in%20snowy%20pine%20area.png'
         ], tone: 'Gold glitters across pressure plates and wires.' },
+        // "Warden of Cobble awakens. Deepslate plates" — boss-scale nether/lava/ghast scenes
         boss: { bg: [
-          S + 'structures/dungeon/spider%20dungeon%20with%20spawner%20room.png',
           S + 'nether/aggressive%20ghast.png',
+          S + 'nether/big%20open%20area%20ghasts%20in%20background.png',
+          S + 'nether/big%20nether%20area%20with%20lava%20ocean%20near.png',
+          S + 'nether/mountain%20walls%20with%20lava%20and%20ghast.png',
           S + 'nether/burning%20near%20lava%20pool%20with%20ghast%20in%20background.png',
-          S + 'nether/blown%20up%20out%20nether%20portal.png'
+          S + 'nether/nether%20portal%20with%20ghast%20in%20background.png'
         ], tone: 'The Warden stirs behind a deepslate gate.' },
+        // "stagger into moonlight... village bells at dawn" — open sky, moonlit, dawn vistas
         win: { bg: [
           S + 'day/sky%20with%20sun.png',
           S + 'day/cloudy%20sunny%20sky.png',
           S + 'day/roses%20on%20grassland.png',
-          S + 'day/snow/snowy%20wonderland.png',
-          S + 'day/snow/snow%20birch%20and%20oak%20grass%20land.png',
-          S + 'day/snow/snowy%20area%20open%20with%20sheep.png',
-          S + 'day/on%20nether%20portal%20in%20snowy%20area.png'
+          S + 'day/grassland%20forrest%20with%20mountain%20in%20background.png',
+          S + 'day/river%20grasland.png',
+          S + 'day/high%20land%20area.png',
+          S + 'night/moon%20night%20star%20sky.png',
+          S + 'night/big%20overview%20around%20big%20area.png',
+          S + 'night/top%20view%20of%20high%20big%20mountain%20area%20great%20view%20with%20rivers.png',
+          S + 'buildings/farmhouse%20by%20river.png'
         ], tone: 'The relic sings while daylight floods the exit.' },
+        // "carried out by strangers at sunrise. The dungeon keeps what it took." — death/lava/burning
         loss: { bg: [
           S + 'underground/lava%20pools%20underground.webp',
           S + 'underground/skeleton%20trapped%20underground%20but%20viewscreen%20removed.png',
+          S + 'underground/skeletons%20trapped%20underground%20lab.png',
           S + 'nether/burning%20in%20lava%20flows%20with%20a%20lot%20ov%20flows%20near%20it.png',
-          S + 'nether/burning%20on%20soulsand%20land%20with%20lava%20flow%20from%20wall.png'
+          S + 'nether/burning%20on%20soulsand%20land%20with%20lava%20flow%20from%20wall.png',
+          S + 'nether/burning%20underneath%20or%20in%20lava%20lavapool.png',
+          S + 'nether/burning%20while%20swimming%20in%20lavapool%20great%20view.png',
+          S + 'nether/blown%20up%20out%20nether%20portal.png'
         ], tone: 'Your footsteps fade into the stone forever.' }
       };
 
