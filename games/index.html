@@ -2879,8 +2879,7 @@
         var areaW = 10, areaH = 10;
         var ox = 1, oy = 1; // top-left of playable area
 
-        // Step 1: Carve a connected area using random walk from center
-        var cx = ox + Math.floor(areaW / 2), cy = oy + Math.floor(areaH / 2);
+        // Step 1: Carve the ENTIRE playable area open (guarantees a complete room every time)
         var carved = {};
         var carveList = [];
         function carveCell(cr, cc) {
@@ -2892,26 +2891,26 @@
           carveList.push({r: cr, c: cc});
           return true;
         }
-        carveCell(cy, cx);
-
-        // Random walk to carve cells — fill most of the area so rooms always look complete
-        var targetCells = diff === 0 ? 70 : diff === 1 ? 80 : 88;
-        targetCells = Math.min(targetCells, areaW * areaH - 4);
-        var wr = cy, wc = cx;
-        var dirs = [[-1,0],[1,0],[0,-1],[0,1]];
-        var safety = 0;
-        while (carveList.length < targetCells && safety < 2000) {
-          safety++;
-          var d = dirs[Math.floor(Math.random() * 4)];
-          var nr = wr + d[0], nc = wc + d[1];
-          if (nr >= oy && nr < oy + areaH && nc >= ox && nc < ox + areaW) {
-            carveCell(nr, nc);
-            wr = nr; wc = nc;
+        for (var rr = oy; rr < oy + areaH; rr++) {
+          for (var ccx = ox; ccx < ox + areaW; ccx++) {
+            carveCell(rr, ccx);
           }
-          // Occasionally jump to a random carved cell to avoid getting stuck
-          if (safety % 30 === 0 && carveList.length > 0) {
-            var jump = carveList[Math.floor(Math.random() * carveList.length)];
-            wr = jump.r; wc = jump.c;
+        }
+
+        // Sprinkle a few interior wall pillars for variety (more on harder difficulties)
+        var pillarCount = diff === 0 ? 3 : diff === 1 ? 6 : 9;
+        for (var pi = 0; pi < pillarCount; pi++) {
+          var pr = oy + 1 + Math.floor(Math.random() * (areaH - 2));
+          var pc = ox + 1 + Math.floor(Math.random() * (areaW - 2));
+          if (g[pr][pc] === EMPTY) {
+            g[pr][pc] = WALL;
+            // remove from carveList
+            for (var ci = 0; ci < carveList.length; ci++) {
+              if (carveList[ci].r === pr && carveList[ci].c === pc) {
+                carveList.splice(ci, 1); break;
+              }
+            }
+            delete carved[pr + ',' + pc];
           }
         }
 
