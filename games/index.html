@@ -2981,15 +2981,46 @@
         // 11) Dark only on Hard (already set above for door logic)
         // darkRoom is set in step 5
 
-        // 12) Per‑room move budget — based on actual path length + difficulty buffer
-        //     Generous on Easy, tight on Hard.
+        // 12) Per‑room move budget — based on actual route the player has to take.
+        //     Sums shortest-path detours through every required pickup (lever, sword if
+        //     mobs are present, heart if one spawned), then a small difficulty buffer.
         var portalPos0 = { r: portalR, c: portalC };
+        function findTile(tile) {
+          for (var rr = 0; rr < ROWS; rr++)
+            for (var cc = 0; cc < COLS; cc++)
+              if (grid[rr][cc] === tile) return { r: rr, c: cc };
+          return null;
+        }
+        function detour(viaPos, fromPos, toPos) {
+          // Extra cost of going from->via->to vs going from->to directly
+          if (!viaPos) return 0;
+          var d1 = bfsDistance(fromPos, viaPos);
+          var d2 = bfsDistance(viaPos, toPos);
+          var dDirect = bfsDistance(fromPos, toPos);
+          if (d1 < 0 || d2 < 0 || dDirect < 0) return 0;
+          var extra = (d1 + d2) - dDirect;
+          return extra > 0 ? extra : 0;
+        }
         var pathLen = bfsDistance(player, portalPos0);
-        if (pathLen < 0) pathLen = manhattan(player, portalPos0); // fallback
-        // Add detour for the lever pickup (door always required — except optional dark trick)
-        var leverDetour = doorOptional ? 0 : 6;
-        var diffBuffer = difficulty === 0 ? 18 : difficulty === 1 ? 10 : 5;
-        maxMoves = pathLen + leverDetour + diffBuffer;
+        if (pathLen < 0) pathLen = manhattan(player, portalPos0);
+
+        var leverPos = findTile(KEY);
+        var swordPos = findTile(SWORD);
+        var heartPos = findTile(HEART);
+
+        var hasMobs = false;
+        for (var mr = 0; mr < ROWS && !hasMobs; mr++)
+          for (var mc = 0; mc < COLS && !hasMobs; mc++)
+            if (isMob(grid[mr][mc])) hasMobs = true;
+
+        var leverCost = doorOptional ? 0 : detour(leverPos, player, portalPos0);
+        var swordCost = hasMobs ? detour(swordPos, player, portalPos0) : 0;
+        var heartCost = heartPos ? detour(heartPos, player, portalPos0) : 0;
+
+        var diffBuffer = difficulty === 0 ? 12 : difficulty === 1 ? 6 : 3;
+        maxMoves = pathLen + leverCost + swordCost + heartCost + diffBuffer;
+        // Floor on the budget so even the simplest path has wiggle room
+        if (maxMoves < pathLen + 5) maxMoves = pathLen + 5;
         movesLeft = maxMoves;
 
         // 13) Validate reachability to portal — if not, knock down some walls
@@ -3287,17 +3318,44 @@
             c.fillRect(px, py, CELL, CELL);
             break;
           case KEY:
-            // Real Minecraft lever — cobblestone base from terrain + lever arm sprite
-            dt(0, 1, px, py);                                 // cobblestone base
-            // Lever sprite tile (terrain.png lever location — beta layout col 0, row 6)
-            // Drawn small and centered on the base
-            if (terrainReady) {
-              c.imageSmoothingEnabled = false;
-              c.drawImage(terrainImg, 0 * T, 6 * T, T, T, px + 8, py + 4, CELL - 16, CELL - 8);
-            }
-            // Subtle highlight to make it pop
-            c.fillStyle = 'rgba(255,255,180,0.10)';
-            c.fillRect(px + 8, py + 4, CELL - 16, CELL - 8);
+            // Lever — pulsing golden halo so it really pops on cobblestone backgrounds
+            var leverPulse = 0.45 + 0.35 * Math.sin(anim / 6);
+            // Big soft halo
+            c.fillStyle = 'rgba(255,210,60,' + (leverPulse * 0.35) + ')';
+            c.fillRect(px, py, CELL, CELL);
+            // Inner brighter ring
+            c.fillStyle = 'rgba(255,240,150,' + (leverPulse * 0.55) + ')';
+            c.fillRect(px + 4, py + 4, CELL - 8, CELL - 8);
+            // Cobblestone base disc
+            c.fillStyle = '#3a3a3a';
+            c.fillRect(px + CELL / 2 - 7, py + CELL - 9, 14, 6);
+            c.fillStyle = '#7a7a7a';
+            c.fillRect(px + CELL / 2 - 6, py + CELL - 8, 12, 1);
+            // Lever arm — thick wooden stick angled, dark outline first then wood color
+            c.strokeStyle = '#1a0d04';
+            c.lineWidth = 5;
+            c.beginPath();
+            c.moveTo(px + CELL / 2, py + CELL - 6);
+            c.lineTo(px + CELL / 2 + 5, py + 5);
+            c.stroke();
+            c.strokeStyle = '#a86a2a';
+            c.lineWidth = 3;
+            c.beginPath();
+            c.moveTo(px + CELL / 2, py + CELL - 6);
+            c.lineTo(px + CELL / 2 + 5, py + 5);
+            c.stroke();
+            c.lineWidth = 1;
+            // Bright knob on top — gold/cream
+            c.fillStyle = '#1a0d04';
+            c.beginPath();
+            c.arc(px + CELL / 2 + 5, py + 4, 4.5, 0, Math.PI * 2);
+            c.fill();
+            c.fillStyle = '#ffe27a';
+            c.beginPath();
+            c.arc(px + CELL / 2 + 5, py + 4, 3.5, 0, Math.PI * 2);
+            c.fill();
+            c.fillStyle = '#fffacc';
+            c.fillRect(px + CELL / 2 + 4, py + 3, 2, 2);
             break;
           case SWORD:
             di(0, 4, px + 4, py + 4, CELL - 8);
