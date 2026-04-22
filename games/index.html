@@ -2796,6 +2796,7 @@
       var MAX_LIVES = 3;
 
       // Lives are LINKED — single shared pool, persists across diff switches & rooms.
+      // totalScore also persists across runs/difficulties — only resets on death or give‑up.
       var lives = MAX_LIVES;
       var totalScore = 0, roomScore = 0;
       var room = 0;
@@ -2805,6 +2806,8 @@
       var msg = '', msgT = 0;
       var litCells = {};               // visibility map (when room is dark)
       var darkRoom = false;
+      var doorOptional = false;        // dark-room trick: door isn't strictly needed
+      var maxMoves = 0, movesLeft = 0; // per-room move budget
       var anim = 0;                    // generic animation tick
       var shake = 0;
 
@@ -2902,16 +2905,34 @@
         // 4) Place portal
         grid[portalR][portalC] = PORTAL;
 
-        // 5) Place key + door (always — gates the portal)
-        // Door placed adjacent to portal, on a floor tile, then a key elsewhere
-        var doorPlaced = false;
-        var dirs = shuffle([[-1,0],[1,0],[0,-1],[0,1]]);
-        for (var di2 = 0; di2 < dirs.length; di2++) {
-          var dr = portalR + dirs[di2][0], dc = portalC + dirs[di2][1];
-          if (!inBounds(dr, dc)) continue;
-          if (grid[dr][dc] === FLOOR) { grid[dr][dc] = DOOR; doorPlaced = true; break; }
+        // 5) Wall‑off the portal so it can ONLY be reached through a single door
+        //    (Dark rooms have a small chance to leave a secondary opening — a trick:
+        //     the door is then optional, so picking up the key wastes precious moves.)
+        darkRoom = (difficulty === 2);
+        doorOptional = darkRoom && Math.random() < 0.35;
+        var portalDirs = shuffle([[-1,0],[1,0],[0,-1],[0,1]]);
+        var doorR = -1, doorC = -1;
+        for (var pdi = 0; pdi < portalDirs.length; pdi++) {
+          var pr2 = portalR + portalDirs[pdi][0];
+          var pc2 = portalC + portalDirs[pdi][1];
+          if (!inBounds(pr2, pc2)) continue;
+          if (pdi === 0 && grid[pr2][pc2] === FLOOR) {
+            // First adjacent tile becomes the door
+            grid[pr2][pc2] = DOOR;
+            doorR = pr2; doorC = pc2;
+          } else if (grid[pr2][pc2] === FLOOR) {
+            // Other adjacent floor tiles become walls so the door is the only way in
+            // unless the dark‑room trick is active and we keep ONE secondary opening.
+            if (doorOptional && pdi === 1) {
+              // leave this one open
+            } else {
+              grid[pr2][pc2] = WALL;
+            }
+          }
         }
-        if (doorPlaced) placeOnEmpty(KEY, 1);
+        // Always place a key (lever) somewhere — even when door is optional, so it looks
+        // like the door is necessary.
+        if (doorR !== -1) placeOnEmpty(KEY, 1);
 
         // 6) Hazards
         var lavaCount = difficulty === 0 ? 0 : difficulty === 1 ? 3 : 5;
@@ -2946,10 +2967,14 @@
         // 10) Heart pickup if player is hurt (small chance)
         if (lives < MAX_LIVES && Math.random() < 0.5) placeOnEmpty(HEART, 1);
 
-        // 11) Dark only on Hard
-        darkRoom = (difficulty === 2);
+        // 11) Dark only on Hard (already set above for door logic)
+        // darkRoom is set in step 5
 
-        // 12) Validate reachability to portal — if not, knock down some walls
+        // 12) Per‑room move budget — difficulty‑scaled, generous on Easy
+        maxMoves = difficulty === 0 ? 40 : difficulty === 1 ? 28 : 22;
+        movesLeft = maxMoves;
+
+        // 13) Validate reachability to portal — if not, knock down some walls
         var portalPos = { r: portalR, c: portalC };
         var safety = 0;
         while (!reachable(portalPos) && safety++ < 30) {
@@ -2990,9 +3015,9 @@
       function startRun(diff) {
         difficulty = diff;
         room = 0;
-        totalScore = 0;
+        // totalScore PERSISTS across runs/difficulties — only reset on death/give‑up.
         if (lives <= 0) lives = MAX_LIVES; // refresh only after a full death
-        sEl.textContent = '0';
+        sEl.textContent = totalScore;
         loadRoom();
       }
       function loadRoom() {
@@ -3003,7 +3028,8 @@
       }
       function updateHUD() {
         hEl.textContent = 'Room ' + (room + 1) + '/' + ROOMS_PER_RUN +
-          ' (' + DIFF_NAMES[difficulty] + ')  •  Arrows/WASD to move  •  R to give up';
+          ' (' + DIFF_NAMES[difficulty] + ')  •  Moves: ' + movesLeft + '/' + maxMoves +
+          '  •  Arrows/WASD  •  R to give up';
       }
       function bankAndDie() {
         // Bank room score before dying so partial progress counts
@@ -3043,6 +3069,7 @@
       // ── Player turn ────────────────────────────────
       function tryMove(dr, dc) {
         if (state !== 'playing') return;
+        if (movesLeft <= 0) return;
         var nr = player.r + dr, nc = player.c + dc;
         if (!inBounds(nr, nc)) return;
         var t = grid[nr][nc];
@@ -3053,7 +3080,7 @@
             grid[nr][nc] = FLOOR;
             showMsg('Unlocked!');
           } else {
-            showMsg('Need a key');
+            showMsg('Need a lever');
             return;
           }
         }
@@ -3079,7 +3106,7 @@
             return;
           }
         }
-        if (t === KEY)   { inventory.key = true;   roomScore += 25; grid[nr][nc] = FLOOR; showMsg('+Key'); }
+        if (t === KEY)   { inventory.key = true;   roomScore += 25; grid[nr][nc] = FLOOR; showMsg('+Lever'); }
         if (t === SWORD) { inventory.sword = true; roomScore += 25; grid[nr][nc] = FLOOR; showMsg('+Sword'); }
         if (t === TORCH) { inventory.torch = true; roomScore += 25; grid[nr][nc] = FLOOR; showMsg('+Torch'); }
         if (t === HEART) {
@@ -3095,7 +3122,13 @@
         }
         // Move
         player.r = nr; player.c = nc;
+        movesLeft--;
         updateLight();
+        updateHUD();
+        if (movesLeft <= 0 && state === 'playing') {
+          // Out of moves — costs a life
+          loseLife('Out of moves!');
+        }
       }
 
       // ── Drawing ────────────────────────────────────
@@ -3163,16 +3196,45 @@
             c.fillRect(px, py + CELL - 3, CELL, 3);
             break;
           case DOOR:
-            dt(1, 5, px, py); // door top sprite
-            c.fillStyle = 'rgba(255,200,0,0.10)';
-            c.fillRect(px, py, CELL, CELL);
+            // Heavy oak door (closed) — with iron handle accent
+            dt(1, 5, px, py);
+            dt(1, 6, px, py + CELL / 2); // bottom half if exists
+            c.fillStyle = '#5a3a1a';
+            c.fillRect(px + 2, py + 2, CELL - 4, CELL - 4);
+            // Plank texture stripes
+            c.fillStyle = '#7a4a22';
+            c.fillRect(px + 3, py + 4, CELL - 6, 4);
+            c.fillRect(px + 3, py + 12, CELL - 6, 4);
+            c.fillRect(px + 3, py + 20, CELL - 6, 4);
+            // Iron handle
+            c.fillStyle = '#bbb';
+            c.fillRect(px + CELL - 8, py + CELL / 2 - 1, 4, 2);
+            // Outline
+            c.fillStyle = '#2a1a0a';
+            c.fillRect(px + 1, py + 1, CELL - 2, 1);
+            c.fillRect(px + 1, py + CELL - 2, CELL - 2, 1);
+            c.fillRect(px + 1, py + 1, 1, CELL - 2);
+            c.fillRect(px + CELL - 2, py + 1, 1, CELL - 2);
             break;
           case PORTAL:
-            // Glowing nether portal
-            dt(0, 14, px, py); // portal animation tile
-            var glow = 0.25 + 0.20 * Math.sin(anim / 10);
-            c.fillStyle = 'rgba(180,80,255,' + glow + ')';
-            c.fillRect(px + 2, py + 2, CELL - 4, CELL - 4);
+            // Obsidian frame
+            dt(5, 2, px, py);
+            // Animated purple swirl interior
+            var pglow = 0.6 + 0.25 * Math.sin(anim / 8);
+            c.fillStyle = 'rgba(80,20,140,' + pglow + ')';
+            c.fillRect(px + 3, py + 3, CELL - 6, CELL - 6);
+            // Sparkle dots
+            for (var sk = 0; sk < 6; sk++) {
+              var ax = px + 4 + ((anim * 3 + sk * 17) % (CELL - 8));
+              var ay = py + 4 + ((anim * 5 + sk * 23) % (CELL - 8));
+              var sa = 0.4 + 0.4 * Math.sin(anim / 4 + sk);
+              c.fillStyle = 'rgba(220,170,255,' + sa + ')';
+              c.fillRect(ax, ay, 2, 2);
+            }
+            // Inner border
+            c.strokeStyle = 'rgba(255,255,255,0.25)';
+            c.lineWidth = 1;
+            c.strokeRect(px + 3.5, py + 3.5, CELL - 7, CELL - 7);
             break;
           case LAVA:
             dt(14, 14, px, py); // lava sprite
@@ -3181,7 +3243,26 @@
             c.fillRect(px, py, CELL, CELL);
             break;
           case KEY:
-            di(8, 1, px + 6, py + 6, CELL - 12);
+            // Lever — cobblestone base + wooden lever arm
+            c.fillStyle = '#5a5a5a';
+            c.fillRect(px + CELL / 2 - 5, py + CELL - 9, 10, 5);
+            c.fillStyle = '#8a8a8a';
+            c.fillRect(px + CELL / 2 - 4, py + CELL - 8, 8, 1);
+            // Lever arm angled
+            c.strokeStyle = '#6a3a18';
+            c.lineWidth = 3;
+            c.beginPath();
+            c.moveTo(px + CELL / 2, py + CELL - 6);
+            c.lineTo(px + CELL / 2 + 4, py + 6);
+            c.stroke();
+            c.lineWidth = 1;
+            // Lever knob
+            c.fillStyle = '#c8a878';
+            c.beginPath();
+            c.arc(px + CELL / 2 + 4, py + 5, 3, 0, Math.PI * 2);
+            c.fill();
+            c.fillStyle = '#3a1a08';
+            c.fillRect(px + CELL / 2 + 3, py + 4, 2, 2);
             break;
           case SWORD:
             di(0, 4, px + 4, py + 4, CELL - 8);
@@ -3284,9 +3365,14 @@
         // Inventory icons
         var ix = OX + 12 + MAX_LIVES * 18 + 12;
         c.font = '11px Minecraft, sans-serif'; c.textAlign = 'left';
-        if (inventory.key)   { c.fillStyle = '#ff0'; c.fillText('Key',   ix, hudY + 16); ix += 36; }
+        if (inventory.key)   { c.fillStyle = '#cda'; c.fillText('Lever', ix, hudY + 16); ix += 42; }
         if (inventory.sword) { c.fillStyle = '#aaf'; c.fillText('Sword', ix, hudY + 16); ix += 46; }
         if (inventory.torch) { c.fillStyle = '#fa3'; c.fillText('Torch', ix, hudY + 16); ix += 46; }
+
+        // Moves remaining (under inventory)
+        c.fillStyle = movesLeft <= 3 ? '#f55' : movesLeft <= 6 ? '#fa3' : '#aaa';
+        c.font = '11px Minecraft, sans-serif'; c.textAlign = 'left';
+        c.fillText('Moves: ' + movesLeft + '/' + maxMoves, OX + 12, hudY + 38);
 
         // Score on right
         c.fillStyle = '#fc0'; c.font = '12px Minecraft, sans-serif'; c.textAlign = 'right';
@@ -3298,8 +3384,8 @@
         c.fillStyle = 'rgba(180,40,40,0.25)'; c.fillRect(gx + 1, gy + 1, 70, 16);
 
         // Room indicator
-        c.fillStyle = '#888'; c.font = '10px Minecraft, sans-serif'; c.textAlign = 'left';
-        c.fillText('Room ' + (room + 1) + '/' + ROOMS_PER_RUN, OX + 8, hudY + 38);
+        c.fillStyle = '#888'; c.font = '10px Minecraft, sans-serif'; c.textAlign = 'right';
+        c.fillText('Room ' + (room + 1) + '/' + ROOMS_PER_RUN, W - OX - 8, hudY + 38);
 
         // Message
         if (msgT > 0) {
@@ -3384,8 +3470,10 @@
         }
         if (state === 'dead') {
           if (inBtn(pos.x, pos.y, W / 2 - 70, H / 2 + 28, 140, 26)) {
-            // Reset lives only on returning to menu after a death
+            // Reset lives & accumulated score on returning to menu after a death
             lives = MAX_LIVES;
+            totalScore = 0;
+            sEl.textContent = '0';
             state = 'diffselect';
           }
           return;
@@ -3422,7 +3510,11 @@
         }
         if (state === 'dead' || state === 'victory') {
           if (e.key === ' ' || e.key === 'Enter') {
-            if (state === 'dead') lives = MAX_LIVES;
+            if (state === 'dead') {
+              lives = MAX_LIVES;
+              totalScore = 0;
+              sEl.textContent = '0';
+            }
             state = 'diffselect';
             e.preventDefault();
           }
