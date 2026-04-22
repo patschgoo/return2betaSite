@@ -3276,16 +3276,19 @@
               c.fillStyle = 'rgba(0,0,0,0.15)'; c.fillRect(px, py + CELL - 3, CELL, 3);
             }
             else if (tile === ICE) {
-              dt(2, 4, px, py);
+              dt(3, 4, px, py);
               var shim = 0.08 + 0.06 * Math.sin(now / 400 + r * 7 + cl * 13);
-              c.fillStyle = 'rgba(180,220,255,' + shim + ')'; c.fillRect(px, py, CELL, CELL);
-              c.fillStyle = 'rgba(255,255,255,' + (0.12 + 0.08 * Math.sin(now / 300 + cl * 5)) + ')';
+              c.fillStyle = 'rgba(120,180,255,' + shim + ')'; c.fillRect(px, py, CELL, CELL);
+              c.fillStyle = 'rgba(255,255,255,' + (0.18 + 0.10 * Math.sin(now / 300 + cl * 5)) + ')';
               c.fillRect(px + 5, py + 4, 7, 2);
               c.fillRect(px + CELL - 14, py + CELL - 9, 6, 2);
             }
             else if (tile === STONE_W) {
-              dt(1, 0, px, py);
-              c.fillStyle = 'rgba(0,0,0,0.12)'; c.fillRect(px, py + CELL - 2, CELL, 2);
+              dt(4, 0, px, py);
+              c.fillStyle = 'rgba(60,35,15,0.35)';
+              c.fillRect(px, py + 6, CELL, 1);
+              c.fillRect(px, py + CELL - 7, CELL, 1);
+              c.fillStyle = 'rgba(0,0,0,0.18)'; c.fillRect(px, py + CELL - 2, CELL, 2);
             }
             else if (tile === CHEST_T) {
               dt(11, 1, px, py);
@@ -3367,16 +3370,10 @@
               c.fillRect(px + 5, py + 5, CELL - 10, CELL - 10);
             }
             else if (tile === HEART_T) {
-              var hcx = px + CELL / 2, hcy = py + CELL / 2 - 1, hs = CELL * 0.3;
-              c.fillStyle = '#d22';
-              c.beginPath(); c.moveTo(hcx, hcy + hs);
-              c.bezierCurveTo(hcx - hs * 1.5, hcy, hcx - hs * 1.5, hcy - hs, hcx, hcy - hs * 0.3);
-              c.bezierCurveTo(hcx + hs * 1.5, hcy - hs, hcx + hs * 1.5, hcy, hcx, hcy + hs);
-              c.fill();
-              c.fillStyle = 'rgba(255,150,150,0.5)';
-              c.beginPath(); c.arc(hcx - hs * 0.4, hcy - hs * 0.1, hs * 0.25, 0, Math.PI * 2); c.fill();
-              c.fillStyle = 'rgba(255,50,50,' + (0.08 + 0.06 * Math.sin(now / 250)) + ')';
+              var hbob = Math.sin(now / 300 + r + cl) * 1.5;
+              c.fillStyle = 'rgba(255,80,80,' + (0.10 + 0.08 * Math.sin(now / 250)) + ')';
               c.fillRect(px + 3, py + 3, CELL - 6, CELL - 6);
+              drawMcHeart(px + CELL / 2, py + CELL / 2 + hbob, CELL * 0.78);
             }
             else if (tile === SWORD_T) di(2, 4, px, py);
             else if (tile === PICK_T) di(2, 6, px, py);
@@ -3448,9 +3445,8 @@
         c.fillStyle = '#141418'; c.fillRect(0, OY + ROWS * CELL, W, HUD_H + 4);
         c.fillStyle = 'rgba(255,255,255,0.06)'; c.fillRect(0, OY + ROWS * CELL, W, 1);
         for (var h = 0; h < 5; h++) {
-          c.fillStyle = h < lives ? '#e22' : '#333';
-          c.font = '14px sans-serif'; c.textAlign = 'left';
-          c.fillText('\u2764', OX + h * 16, hudY + 13);
+          if (h < lives) drawMcHeart(OX + 8 + h * 16, hudY + 9, 14);
+          else drawMcHeart(OX + 8 + h * 16, hudY + 9, 14, true);
         }
         var invX = OX + 90;
         c.font = '11px Minecraft, sans-serif';
@@ -3467,6 +3463,15 @@
         c.fillText('Lv ' + (level + 1) + '/' + LEVELS_PER_RUN, W / 2, hudY + 29);
         c.fillStyle = '#555'; c.textAlign = 'right';
         c.fillText('[R] Restart', W - OX, hudY + 29);
+        // Give Up button (during a run)
+        if (state === 'playing' || state === 'outofmoves' || state === 'levelcomplete') {
+          var gx = W / 2 - 32, gy = hudY + 18;
+          c.fillStyle = '#5a2a2a'; c.fillRect(gx, gy, 64, 16);
+          c.fillStyle = '#7a3a3a'; c.fillRect(gx + 1, gy + 1, 62, 14);
+          c.fillStyle = 'rgba(255,255,255,0.08)'; c.fillRect(gx + 1, gy + 1, 62, 7);
+          c.fillStyle = '#ff8888'; c.font = '9px Minecraft, sans-serif'; c.textAlign = 'center';
+          c.fillText('Give Up', W / 2, gy + 11);
+        }
 
         // Message
         if (msgTimer > 0) {
@@ -3528,6 +3533,32 @@
         c.restore();
       }
 
+      // Pixel-art Minecraft heart
+      function drawMcHeart(cx, cy, size, empty) {
+        var rows = [
+          ' ## ## ',
+          '#++#..#',
+          '#+....#',
+          '#.....#',
+          ' #...# ',
+          '  #.#  ',
+          '   #   '
+        ];
+        var p = size / 7;
+        var outline = '#3a0606';
+        var fill = empty ? '#3a3a3a' : '#e62121';
+        var hi = empty ? '#5a5a5a' : '#ff8a8a';
+        var ox2 = cx - size / 2, oy2 = cy - size / 2;
+        for (var ry = 0; ry < rows.length; ry++) {
+          for (var cx2 = 0; cx2 < rows[ry].length; cx2++) {
+            var ch = rows[ry][cx2];
+            if (ch === ' ') continue;
+            c.fillStyle = ch === '#' ? outline : (ch === '+' ? hi : fill);
+            c.fillRect(Math.round(ox2 + cx2 * p), Math.round(oy2 + ry * p), Math.ceil(p), Math.ceil(p));
+          }
+        }
+      }
+
       function drawBtn(x, y, w, h, text) {
         c.fillStyle = '#374'; c.fillRect(x, y, w, h);
         c.fillStyle = '#495'; c.fillRect(x + 1, y + 1, w - 2, h - 2);
@@ -3565,6 +3596,14 @@
             state = 'diffselect'; draw();
           }
           return true;
+        }
+        // Give Up button (during a run)
+        if (state === 'playing' || state === 'outofmoves' || state === 'levelcomplete') {
+          var hudY2 = OY + ROWS * CELL + 4;
+          if (inBtn(pos.x, pos.y, W / 2 - 32, hudY2 + 18, 64, 16)) {
+            state = 'diffselect'; draw();
+            return true;
+          }
         }
         if (state === 'outofmoves') {
           if (inBtn(pos.x, pos.y, W / 2 - 65, H / 2 + 8, 60, 26)) {
