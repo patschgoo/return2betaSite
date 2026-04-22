@@ -686,24 +686,9 @@
     .mc-icon.pearl  { background-position: -96px -64px; }
     .mc-icon.bone   { background-position: -128px 0; }
     .mc-icon.coal   { background-position: -112px 0; }
-    .mc-icon.ladder {
-      background: linear-gradient(
-          90deg,
-          transparent 0 3px,
-          #7d5a34 3px 5px,
-          transparent 5px 11px,
-          #7d5a34 11px 13px,
-          transparent 13px
-        ),
-        repeating-linear-gradient(
-          180deg,
-          transparent 0 2px,
-          #a97b46 2px 4px,
-          transparent 4px 8px
-        ),
-        #2b1f14;
-      border: 1px solid rgba(0, 0, 0, 0.35);
-      box-sizing: border-box;
+    .mc-icon.stairs {
+      background: url('../../images/wizardry/stairs.png') center/contain no-repeat;
+      background-size: contain;
     }
     .mc-icon.bow    { background-position: -80px -16px; }
     .mc-icon.lever {
@@ -1761,7 +1746,7 @@
         if (/tablet|decode|spell|rune|read|warning/.test(l)) return 'book';
         if (/ember|steal/.test(l)) return 'diamond';
         if (/search|scavenge|cache|sneak|vent/.test(l)) return 'bow';
-        if (/flee|stair|retreat|return|begin|drop|shaft|leave|fall back/.test(l)) return 'ladder';
+        if (/flee|stair|retreat|return|begin|drop|shaft|leave|fall back/.test(l)) return 'stairs';
         return '';
       }
 
