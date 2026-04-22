@@ -2736,126 +2736,79 @@
     }
 
     // ── Mine Dungeon ──────────────────────────────────────
-    // Dungeon slider with lives, max moves, mob/item textures
+    // Brand-new engine: turn-based step movement, procedural rooms, 3 linked lives.
     function mineDungeon(cvs, c, sEl, bEl, sbEl, hEl, setAnim) {
+      // ── Layout ──────────────────────────────────────
       var CELL = 32;
       var COLS = 12, ROWS = 12;
       var BORDER = 2;
-      var HUD_H = CELL + 20;
+      var HUD_H = 56;
       cvs.width = COLS * CELL + BORDER * 2;
       cvs.height = ROWS * CELL + BORDER * 2 + HUD_H;
       var OX = BORDER, OY = BORDER;
-      var T = 16;
+      var W = cvs.width, H = cvs.height;
+      var T = 16; // sprite source size
 
-      // ── Images ────────────────────────────────────
-      var imgPlayer = new Image(); imgPlayer.src = '../images/mobs/2d/Player_Head.png';
-      var imgZombie = new Image(); imgZombie.src = '../images/mobs/2d/Zombie_Head.png';
+      // ── Sprites ─────────────────────────────────────
+      var imgPlayer   = new Image(); imgPlayer.src   = '../images/mobs/2d/Player_Head.png';
+      var imgZombie   = new Image(); imgZombie.src   = '../images/mobs/2d/Zombie_Head.png';
       var imgSkeleton = new Image(); imgSkeleton.src = '../images/mobs/2d/Skeleton_Skull.png';
-      var imgCreeper = new Image(); imgCreeper.src = '../images/mobs/2d/Creeper_Head.png';
-      var imgItems = new Image(); imgItems.src = '../images/minecraft/items.png';
+      var imgCreeper  = new Image(); imgCreeper.src  = '../images/mobs/2d/Creeper_Head.png';
+      var imgItems    = new Image(); imgItems.src    = '../images/minecraft/items.png';
       var itemsReady = false; imgItems.onload = function () { itemsReady = true; };
 
-      // terrain.png sprite
       function dt(col, row, dx, dy) {
         if (!terrainReady) { c.fillStyle = '#444'; c.fillRect(dx, dy, CELL, CELL); return; }
+        c.imageSmoothingEnabled = false;
         c.drawImage(terrainImg, col * T, row * T, T, T, dx, dy, CELL, CELL);
       }
-      // items.png sprite
       function di(col, row, dx, dy, sz) {
         sz = sz || CELL;
         if (!itemsReady) return;
+        c.imageSmoothingEnabled = false;
         c.drawImage(imgItems, col * T, row * T, T, T, dx, dy, sz, sz);
       }
-      // mob head — centered and slightly smaller than cell
       function dm(img, dx, dy) {
         if (!img.complete || !img.naturalWidth) return;
         var pad = Math.round(CELL * 0.1);
+        c.imageSmoothingEnabled = false;
         c.drawImage(img, dx + pad, dy + pad, CELL - pad * 2, CELL - pad * 2);
       }
 
-      // ── Tile types ───────────────────────────────
-      var EMPTY = 0, WALL = 1, ICE = 2, CHEST_T = 3, DOOR = 4, PORTAL = 5,
-          LAVA = 6, WATER = 7, ZOMBIE = 8, SKELETON = 9, CREEPER = 10,
-          CRACK = 11, SPIKE = 12, CRATE = 13, PLATE = 14, KEY_T = 15,
-          HEART_T = 16, SWORD_T = 17, PICK_T = 18, TORCH_T = 19, STONE_W = 20,
-          DARK = 21, GRAVEL_T = 22;
+      // ── Tile constants ─────────────────────────────
+      var FLOOR = 0, WALL = 1, DOOR = 2, PORTAL = 3, LAVA = 4,
+          KEY = 5, HEART = 6, SWORD = 7, TORCH = 8,
+          ZOMBIE = 10, SKELETON = 11, CREEPER = 12;
 
-      // ── Difficulty ───────────────────────────────
-      var difficulty = -1; // -1 = not selected, 0=easy, 1=normal, 2=hard
-      var diffNames = ['Easy', 'Normal', 'Hard'];
-      var diffColors = ['#5f5', '#fc0', '#f55'];
-      var diffDescs = [
-        'Lots of moves, no traps',
-        'Chests, mobs, occasional traps',
-        'Tight moves, dark, mind games'
+      function isPickup(t) { return t === KEY || t === HEART || t === SWORD || t === TORCH; }
+      function isMob(t)    { return t === ZOMBIE || t === SKELETON || t === CREEPER; }
+
+      // ── State ──────────────────────────────────────
+      var difficulty = -1;             // 0 easy, 1 normal, 2 hard
+      var DIFF_NAMES = ['Easy', 'Normal', 'Hard'];
+      var DIFF_COLORS = ['#5f5', '#fc0', '#f55'];
+      var DIFF_DESCS = [
+        'Few mobs, no lava, dim torch always on',
+        'Mobs and lava, find a torch',
+        'Lots of mobs, more lava, dark room'
       ];
-      var LEVELS_PER_RUN = 3;
+      var ROOMS_PER_RUN = 3;
       var MAX_LIVES = 3;
 
-      // ── Game state ───────────────────────────────
-      // Lives are LINKED across all difficulties — one shared pool, persist across runs/diff switches
-      var level = 0, grid = [], player, lives = MAX_LIVES, maxMoves, movesLeft, inventory,
-          score, totalScore = 0, state = 'diffselect', msg = '', msgTimer = 0,
-          litCells = {}, slideTrail = [], slideAnim = 0, heartsTaken = 0,
-          levelScoreBanked = false;
-      var levelCache = {}; // cache generated levels so retry replays the same layout
+      // Lives are LINKED — single shared pool, persists across diff switches & rooms.
+      var lives = MAX_LIVES;
+      var totalScore = 0, roomScore = 0;
+      var room = 0;
+      var grid = [], player = { r: 0, c: 0 };
+      var inventory = { key: false, sword: false, torch: false };
+      var state = 'diffselect';        // diffselect | playing | roomclear | dead | victory
+      var msg = '', msgT = 0;
+      var litCells = {};               // visibility map (when room is dark)
+      var darkRoom = false;
+      var anim = 0;                    // generic animation tick
+      var shake = 0;
 
-      // ── Smooth‑slide animation ───────────────────
-      var sliding = false, slideAnimPath = [], slideAnimIdx = 0, slideAnimT = 0;
-      var SLIDE_SPEED = 0.28;
-      var playerDrawR = 0, playerDrawC = 0;
-
-      // ── Particles ────────────────────────────────
-      var particles = [];
-      function spawnBurst(x, y, n, col, spread, life) {
-        for (var i = 0; i < n; i++) particles.push({
-          x: x + (Math.random() - 0.5) * spread, y: y + (Math.random() - 0.5) * spread,
-          vx: (Math.random() - 0.5) * 3, vy: (Math.random() - 0.5) * 3 - 0.5,
-          color: col, life: life + Math.random() * life * 0.5,
-          maxLife: life * 1.5, size: 1.5 + Math.random() * 2.5
-        });
-      }
-      function spawnIceTrail(px, py) {
-        var cols = ['#adf','#cef','#8cf','#fff','#bef'];
-        for (var i = 0; i < 4; i++) particles.push({
-          x: px + Math.random() * CELL, y: py + Math.random() * CELL,
-          vx: (Math.random() - 0.5) * 1.2, vy: -Math.random() * 1.5 - 0.5,
-          color: cols[Math.floor(Math.random() * cols.length)],
-          life: 18 + Math.random() * 14, maxLife: 32, size: 1 + Math.random() * 2.5
-        });
-      }
-      function updateParticles() {
-        for (var i = particles.length - 1; i >= 0; i--) {
-          var p = particles[i]; p.x += p.vx; p.y += p.vy; p.vy += 0.04; p.life--;
-          if (p.life <= 0) particles.splice(i, 1);
-        }
-      }
-      function drawParticles() {
-        for (var i = 0; i < particles.length; i++) {
-          var p = particles[i];
-          c.globalAlpha = Math.max(0, p.life / p.maxLife);
-          c.fillStyle = p.color;
-          c.fillRect(Math.round(p.x - p.size / 2), Math.round(p.y - p.size / 2), p.size, p.size);
-        }
-        c.globalAlpha = 1;
-      }
-
-      // ── Screen shake ─────────────────────────────
-      var shakeX = 0, shakeY = 0, shakeDur = 0, shakeStr = 0;
-      function triggerShake(s, d) { shakeStr = s; shakeDur = d; }
-      function updateShake() {
-        if (shakeDur > 0) { shakeDur--; shakeX = (Math.random() - 0.5) * shakeStr * 2; shakeY = (Math.random() - 0.5) * shakeStr * 2; shakeStr *= 0.88; }
-        else { shakeX = 0; shakeY = 0; }
-      }
-
-      // ── Floor variation ──────────────────────────
-      var floorVar = [];
-      function genFloorVar() {
-        floorVar = [];
-        for (var r = 0; r < ROWS; r++) { floorVar[r] = []; for (var cl = 0; cl < COLS; cl++) floorVar[r][cl] = Math.random(); }
-      }
-
-      // ── Score tracking ───────────────────────────
+      // Persistent best
       var best = parseInt(localStorage.getItem('r2b_mdungeon_best') || '0', 10);
       var siteBest = R2BScores.get('mdungeon');
       bEl.textContent = best;
@@ -2864,914 +2817,597 @@
         if (s.mdungeon !== undefined && s.mdungeon > siteBest) { siteBest = s.mdungeon; sbEl.textContent = siteBest; }
       });
 
-      // ══════════════════════════════════════════════
-      // ── RANDOM LEVEL GENERATOR ────────────────────
-      // ══════════════════════════════════════════════
-
-      function generateLevel(lvNum) {
-        // diff 0=easy, 1=normal, 2=hard
-        var diff = difficulty;
-        var g = [];
-        var r, cl;
-        for (r = 0; r < 12; r++) { g[r] = []; for (cl = 0; cl < 12; cl++) g[r][cl] = WALL; }
-
-        // Playable area — consistent full size for ALL difficulties so every room loads completely
-        var areaW = 10, areaH = 10;
-        var ox = 1, oy = 1; // top-left of playable area
-
-        // Step 1: Carve the ENTIRE playable area open (guarantees a complete room every time)
-        var carved = {};
-        var carveList = [];
-        function carveCell(cr, cc) {
-          if (cr < oy || cr >= oy + areaH || cc < ox || cc >= ox + areaW) return false;
-          var k = cr + ',' + cc;
-          if (carved[k]) return false;
-          carved[k] = true;
-          g[cr][cc] = EMPTY;
-          carveList.push({r: cr, c: cc});
-          return true;
+      // ── Helpers ────────────────────────────────────
+      function showMsg(m) { msg = m; msgT = 60; }
+      function inBounds(r, cc) { return r >= 0 && r < ROWS && cc >= 0 && cc < COLS; }
+      function shuffle(a) {
+        for (var i = a.length - 1; i > 0; i--) {
+          var j = Math.floor(Math.random() * (i + 1));
+          var t = a[i]; a[i] = a[j]; a[j] = t;
         }
-        for (var rr = oy; rr < oy + areaH; rr++) {
-          for (var ccx = ox; ccx < ox + areaW; ccx++) {
-            carveCell(rr, ccx);
-          }
-        }
-
-        // Sprinkle a few interior wall pillars for variety (more on harder difficulties)
-        var pillarCount = diff === 0 ? 3 : diff === 1 ? 6 : 9;
-        for (var pi = 0; pi < pillarCount; pi++) {
-          var pr = oy + 1 + Math.floor(Math.random() * (areaH - 2));
-          var pc = ox + 1 + Math.floor(Math.random() * (areaW - 2));
-          if (g[pr][pc] === EMPTY) {
-            g[pr][pc] = WALL;
-            // remove from carveList
-            for (var ci = 0; ci < carveList.length; ci++) {
-              if (carveList[ci].r === pr && carveList[ci].c === pc) {
-                carveList.splice(ci, 1); break;
-              }
-            }
-            delete carved[pr + ',' + pc];
-          }
-        }
-
-        // Step 2: Place player and portal far apart
-        // Find cells at extremes of the carved area
-        var minR = 12, maxR = 0, minC = 12, maxC = 0;
-        for (var i = 0; i < carveList.length; i++) {
-          var p = carveList[i];
-          if (p.r < minR) minR = p.r;
-          if (p.r > maxR) maxR = p.r;
-          if (p.c < minC) minC = p.c;
-          if (p.c > maxC) maxC = p.c;
-        }
-        // Find valid corner cells
-        var corners = [
-          {r: minR, c: minC}, {r: minR, c: maxC},
-          {r: maxR, c: minC}, {r: maxR, c: maxC}
-        ];
-        // Find closest carved cell to each corner
-        function closestTo(tr, tc) {
-          var bestD = 999, bestCell = carveList[0];
-          for (var i = 0; i < carveList.length; i++) {
-            var d = Math.abs(carveList[i].r - tr) + Math.abs(carveList[i].c - tc);
-            if (d < bestD) { bestD = d; bestCell = carveList[i]; }
-          }
-          return bestCell;
-        }
-        var playerCell = closestTo(corners[2].r, corners[2].c); // bottom-left
-        var portalCell = closestTo(corners[1].r, corners[1].c); // top-right
-        // Ensure they're different
-        if (playerCell.r === portalCell.r && playerCell.c === portalCell.c) {
-          portalCell = closestTo(corners[0].r, corners[0].c);
-        }
-        g[playerCell.r][playerCell.c] = EMPTY;
-        g[portalCell.r][portalCell.c] = PORTAL;
-
-        // Step 3: Fill most floor cells with ice
-        var iceChance = diff === 0 ? 0.45 : diff === 1 ? 0.65 : 0.78;
-        for (i = 0; i < carveList.length; i++) {
-          var cc = carveList[i];
-          if (cc.r === playerCell.r && cc.c === playerCell.c) continue;
-          if (g[cc.r][cc.c] !== EMPTY) continue;
-          if (Math.random() < iceChance) g[cc.r][cc.c] = ICE;
-        }
-
-        // Step 4: Add hazards and items based on difficulty + level
-        var openCells = [];
-        for (i = 0; i < carveList.length; i++) {
-          var oc = carveList[i];
-          if (oc.r === playerCell.r && oc.c === playerCell.c) continue;
-          if (g[oc.r][oc.c] === PORTAL) continue;
-          openCells.push(oc);
-        }
-        function shuffleArr(a) { for (var j = a.length - 1; j > 0; j--) { var k = Math.floor(Math.random() * (j + 1)); var t = a[j]; a[j] = a[k]; a[k] = t; } }
-        shuffleArr(openCells);
-        var placeIdx = 0;
-        function placeItem(tile) {
-          if (placeIdx >= openCells.length || placeIdx >= maxItems) return false;
-          g[openCells[placeIdx].r][openCells[placeIdx].c] = tile;
-          placeIdx++;
-          return true;
-        }
-
-        // Item budget — purely difficulty-driven for 3-room runs
-        var budgetBase = diff === 0 ? 0.28 : diff === 1 ? 0.42 : 0.52;
-        var maxItems = Math.max(6, Math.floor(openCells.length * budgetBase));
-
-        // Mobs
-        var mobCount = diff === 0 ? 0 : diff === 1 ? 1 + Math.floor(Math.random() * 2) : 2 + Math.floor(Math.random() * 2);
-        if (mobCount > 0) placeItem(SWORD_T); // give sword if mobs present
-        for (i = 0; i < mobCount; i++) {
-          var mobType = Math.random() < 0.5 ? ZOMBIE : (Math.random() < 0.6 ? SKELETON : CREEPER);
-          placeItem(mobType);
-        }
-
-        // Chest — NORMAL only
-        if (diff === 1) {
-          var chestCount = 1 + (Math.random() < 0.4 ? 1 : 0);
-          for (i = 0; i < chestCount; i++) placeItem(CHEST_T);
-        }
-
-        // Hazards (crack = false plank that turns to lava — main confusion tile)
-        if (diff === 1) {
-          var crackCount = 1 + Math.floor(Math.random() * 2);
-          for (i = 0; i < crackCount; i++) placeItem(CRACK);
-          if (Math.random() < 0.5) placeItem(LAVA);
-        }
-        if (diff === 2) {
-          var crackCountH = 3 + Math.floor(Math.random() * 2);
-          for (i = 0; i < crackCountH; i++) placeItem(CRACK);
-          var lavaCountH = 1 + Math.floor(Math.random() * 2);
-          for (i = 0; i < lavaCountH; i++) placeItem(LAVA);
-          if (Math.random() < 0.6) placeItem(SPIKE);
-        }
-
-        // Key + door (normal sometimes, hard always) — only place door if key actually got placed
-        if ((diff === 1 && Math.random() < 0.5) || diff === 2) {
-          if (placeItem(KEY_T)) {
-            var pdirs = [[-1,0],[1,0],[0,-1],[0,1]];
-            shuffleArr(pdirs);
-            for (var di = 0; di < pdirs.length; di++) {
-              var dr = portalCell.r + pdirs[di][0], dc = portalCell.c + pdirs[di][1];
-              if (dr >= 0 && dr < 12 && dc >= 0 && dc < 12 && g[dr][dc] !== WALL && g[dr][dc] !== PORTAL) {
-                g[dr][dc] = DOOR;
-                break;
-              }
-            }
-          }
-        }
-
-        // Pickaxe + stone wall (normal/hard, sometimes) — place pick first; only add wall if pick placed
-        if (diff >= 1 && Math.random() < 0.4) {
-          if (placeItem(PICK_T)) placeItem(STONE_W);
-        }
-
-        // Crate + plate (normal/hard, sometimes) — only place crate if plate placed
-        if (diff >= 1 && Math.random() < 0.4) {
-          if (placeItem(PLATE)) placeItem(CRATE);
-        }
-
-        // Dark tiles — HARD only (main mind-game mechanic)
-        if (diff === 2) {
-          placeItem(TORCH_T);
-          var darkCount = 4 + Math.floor(Math.random() * 3);
-          for (i = placeIdx; i < Math.min(placeIdx + darkCount, openCells.length); i++) {
-            var dc2 = openCells[i];
-            if (g[dc2.r][dc2.c] === EMPTY || g[dc2.r][dc2.c] === ICE) {
-              g[dc2.r][dc2.c] = DARK;
-            }
-          }
-        }
-
-        // Heart — HARD only
-        if (diff === 2 && Math.random() < 0.45) placeItem(HEART_T);
-
-        // Water/gravel stop tiles — easy gets more (control), hard fewer (confusion)
-        var stopCount = diff === 0 ? 4 : diff === 1 ? 2 : 1;
-        for (i = 0; i < stopCount; i++) {
-          placeItem(Math.random() < 0.5 ? WATER : GRAVEL_T);
-        }
-
-        // Step 4.5: Fairness pass near spawn/portal
-        function isLethal(tile) {
-          return tile === LAVA || tile === SPIKE || tile === ZOMBIE ||
-                 tile === SKELETON || tile === CREEPER || tile === CRACK || tile === DARK;
-        }
-        function clearDangerZone(centerR, centerC, rad) {
-          for (var zr = centerR - rad; zr <= centerR + rad; zr++) {
-            for (var zc = centerC - rad; zc <= centerC + rad; zc++) {
-              if (zr < 0 || zr >= ROWS || zc < 0 || zc >= COLS) continue;
-              if (Math.abs(zr - centerR) + Math.abs(zc - centerC) > rad) continue;
-              if (g[zr][zc] === PORTAL || g[zr][zc] === DOOR || g[zr][zc] === WALL || g[zr][zc] === STONE_W) continue;
-              if (isLethal(g[zr][zc])) g[zr][zc] = EMPTY;
-            }
-          }
-        }
-        clearDangerZone(playerCell.r, playerCell.c, 1);
-        clearDangerZone(portalCell.r, portalCell.c, 1);
-
-        // Ensure one nearby stop tile so the opening move is controllable
-        var around = [[-1,0],[1,0],[0,-1],[0,1]];
-        shuffleArr(around);
-        for (i = 0; i < around.length; i++) {
-          var sr = playerCell.r + around[i][0], sc = playerCell.c + around[i][1];
-          if (sr < 0 || sr >= ROWS || sc < 0 || sc >= COLS) continue;
-          if (g[sr][sc] === EMPTY || g[sr][sc] === ICE) {
-            g[sr][sc] = WATER;
-            break;
-          }
-        }
-
-        // Step 5: Calculate par (move budget)
-        var dist = Math.abs(playerCell.r - portalCell.r) + Math.abs(playerCell.c - portalCell.c);
-        var basePar = Math.max(4, Math.ceil(dist * 0.7) + 2);
-        if (diff === 0) basePar += 5;       // generous on easy
-        else if (diff === 1) basePar += 1;  // balanced
-        else basePar -= 2;                  // tight on hard
-        basePar = Math.max(4, Math.min(basePar, 18));
-
-        // Mark player start
-        g[playerCell.r][playerCell.c] = 'P';
-
-        return { par: basePar, grid: g };
+        return a;
       }
-
-      // ── Load level ─────────────────────────────────
-      function loadLevel(n) {
-        if (n >= LEVELS_PER_RUN) { state = 'victory'; draw(); return; }
-        // Reuse cached level on retry; generate fresh only on first visit
-        if (!levelCache[n]) levelCache[n] = generateLevel(n);
-        var lv = levelCache[n];
-        grid = []; player = null; heartsTaken = 0;
-        for (var r = 0; r < ROWS; r++) {
-          grid[r] = [];
-          for (var cl = 0; cl < COLS; cl++) {
-            var v = lv.grid[r][cl];
-            if (v === 'P') { player = {r: r, c: cl}; grid[r][cl] = EMPTY; }
-            else grid[r][cl] = v;
-          }
-        }
-        maxMoves = lv.par + 2;
-        movesLeft = maxMoves;
-        inventory = {};
-        score = 0; state = 'playing';
-        levelScoreBanked = false;
-        msg = ''; msgTimer = 0;
-        litCells = {};
-        slideTrail = []; slideAnim = 0;
-        sliding = false; slideAnimPath = []; particles = [];
-        genFloorVar();
-        if (player) { playerDrawR = player.r; playerDrawC = player.c; }
-        updateLight(); updateHUD();
+      function emptyCells() {
+        var out = [];
+        for (var r = 0; r < ROWS; r++)
+          for (var cc = 0; cc < COLS; cc++)
+            if (grid[r][cc] === FLOOR && !(r === player.r && cc === player.c)) out.push({ r: r, c: cc });
+        return out;
       }
-
-      // ── Fog of war ────────────────────────────────
-      function updateLight() {
-        var rad = inventory.torch ? 5 : 3;
-        for (var dr = -rad; dr <= rad; dr++)
-          for (var dc = -rad; dc <= rad; dc++)
-            if (Math.abs(dr) + Math.abs(dc) <= rad) {
-              var lr = player.r + dr, lc = player.c + dc;
-              if (lr >= 0 && lr < ROWS && lc >= 0 && lc < COLS) litCells[lr + ',' + lc] = true;
-            }
+      function placeOnEmpty(tile, n) {
+        var cells = shuffle(emptyCells());
+        var placed = 0;
+        for (var i = 0; i < cells.length && placed < n; i++) {
+          grid[cells[i].r][cells[i].c] = tile;
+          placed++;
+        }
+        return placed;
       }
-      function isLit(r, cl) { return litCells[r + ',' + cl]; }
+      function manhattan(a, b) { return Math.abs(a.r - b.r) + Math.abs(a.c - b.c); }
 
-      // ── Slide mechanic ────────────────────────────
-      function slide(dr, dc) {
-        if (sliding) return;
-        if (state !== 'playing' || !player) return;
-        if (movesLeft <= 0) { state = 'outofmoves'; draw(); return; }
-        var r = player.r, cl = player.c;
-        var slid = false, hitSolid = false;
-        slideTrail = [{r: r, c: cl}];
-
-        while (true) {
-          var nr = r + dr, nc = cl + dc;
-          if (nr < 0 || nr >= ROWS || nc < 0 || nc >= COLS) { hitSolid = true; break; }
-          var tile = grid[nr][nc];
-
-          if (tile === WALL) { hitSolid = true; break; }
-          if (tile === DARK) {
-            if (!isLit(nr, nc)) { hitSolid = true; break; }
-            grid[nr][nc] = EMPTY; // reveal lit dark tile
-            r = nr; cl = nc; slid = true;
-            slideTrail.push({r: r, c: cl}); continue;
+      // BFS reachability check from player to portal (treating walls/lava/doors blockless except WALL)
+      function reachable(target) {
+        var seen = {};
+        var q = [{ r: player.r, c: player.c }];
+        seen[player.r + ',' + player.c] = true;
+        while (q.length) {
+          var n = q.shift();
+          if (n.r === target.r && n.c === target.c) return true;
+          var dirs = [[-1,0],[1,0],[0,-1],[0,1]];
+          for (var i = 0; i < 4; i++) {
+            var nr = n.r + dirs[i][0], nc = n.c + dirs[i][1];
+            if (!inBounds(nr, nc)) continue;
+            if (seen[nr + ',' + nc]) continue;
+            var t = grid[nr][nc];
+            if (t === WALL) continue;
+            // Doors are passable since key may be obtained
+            seen[nr + ',' + nc] = true;
+            q.push({ r: nr, c: nc });
           }
-          if (tile === DOOR) {
-            if (inventory.key) { delete inventory.key; grid[nr][nc] = EMPTY; showMsg('Unlocked!'); }
-            else { hitSolid = true; break; }
-          }
-          if (tile === STONE_W) {
-            if (inventory.pick) { grid[nr][nc] = EMPTY; showMsg('Mined!'); }
-            else { hitSolid = true; break; }
-          }
-          if (tile === CRATE) {
-            var br = nr + dr, bc = nc + dc;
-            if (br >= 0 && br < ROWS && bc >= 0 && bc < COLS) {
-              var behind = grid[br][bc];
-              if (behind === EMPTY || behind === LAVA || behind === PLATE) {
-                if (behind === LAVA) { grid[br][bc] = EMPTY; showMsg('Bridged lava!'); }
-                else if (behind === PLATE) {
-                  grid[br][bc] = EMPTY; showMsg('Plate pressed!');
-                  for (var rr = 0; rr < ROWS; rr++)
-                    for (var cc2 = 0; cc2 < COLS; cc2++)
-                      if (grid[rr][cc2] === DOOR) grid[rr][cc2] = EMPTY;
-                } else { grid[br][bc] = CRATE; }
-                grid[nr][nc] = EMPTY;
-                r = nr; cl = nc; slid = true;
-                slideTrail.push({r: r, c: cl});
-              }
-            }
-            break;
-          }
-          if (tile === LAVA) { loseLife(); break; }
-          if (tile === SPIKE) {
-            r = nr; cl = nc; slid = true;
-            slideTrail.push({r: r, c: cl});
-            loseLife(); if (state === 'dead') break; continue;
-          }
-          if (tile === WATER || tile === GRAVEL_T) {
-            r = nr; cl = nc; slid = true;
-            slideTrail.push({r: r, c: cl}); break;
-          }
-          if (tile === ZOMBIE || tile === SKELETON || tile === CREEPER) {
-            if (inventory.sword) {
-              grid[nr][nc] = EMPTY;
-              var pts = tile === CREEPER ? 200 : tile === SKELETON ? 150 : 100;
-              score += pts; showMsg('Kill! +' + pts);
-              spawnBurst(OX + nc * CELL + CELL / 2, OY + nr * CELL + CELL / 2, 12, '#f44', CELL, 20);
-              r = nr; cl = nc; slid = true;
-              slideTrail.push({r: r, c: cl}); continue;
-            } else { loseLife(); triggerShake(4, 10); break; }
-          }
-          if (tile === KEY_T) { inventory.key = true; grid[nr][nc] = EMPTY; showMsg('+Key'); spawnBurst(OX + nc * CELL + CELL / 2, OY + nr * CELL + CELL / 2, 8, '#ff0', CELL, 18); }
-          else if (tile === HEART_T) {
-            lives = Math.min(lives + 1, MAX_LIVES); grid[nr][nc] = EMPTY; heartsTaken++;
-            maxMoves = maxMoves - 1;
-            if (movesLeft > maxMoves) movesLeft = maxMoves;
-            showMsg('+Life! Max moves -1');
-            spawnBurst(OX + nc * CELL + CELL / 2, OY + nr * CELL + CELL / 2, 10, '#f55', CELL, 18);
-          }
-          else if (tile === SWORD_T) { inventory.sword = true; grid[nr][nc] = EMPTY; showMsg('+Sword'); spawnBurst(OX + nc * CELL + CELL / 2, OY + nr * CELL + CELL / 2, 8, '#aaf', CELL, 18); }
-          else if (tile === PICK_T) { inventory.pick = true; grid[nr][nc] = EMPTY; showMsg('+Pickaxe'); spawnBurst(OX + nc * CELL + CELL / 2, OY + nr * CELL + CELL / 2, 8, '#cca', CELL, 18); }
-          else if (tile === TORCH_T) { inventory.torch = true; grid[nr][nc] = EMPTY; showMsg('+Torch'); spawnBurst(OX + nc * CELL + CELL / 2, OY + nr * CELL + CELL / 2, 10, '#fa3', CELL, 18); }
-
-          if (tile === CHEST_T) {
-            grid[nr][nc] = EMPTY; score += 200; showMsg('+200 Loot!');
-            spawnBurst(OX + nc * CELL + CELL / 2, OY + nr * CELL + CELL / 2, 15, '#fc0', CELL, 24);
-            r = nr; cl = nc; slid = true; slideTrail.push({r: r, c: cl}); break;
-          }
-          if (tile === PORTAL) {
-            r = nr; cl = nc; slid = true; slideTrail.push({r: r, c: cl});
-            completeLevel(); break;
-          }
-          if (tile === CRACK) {
-            r = nr; cl = nc; slid = true; slideTrail.push({r: r, c: cl});
-            grid[nr][nc] = LAVA; continue;
-          }
-          if (tile === ICE) {
-            r = nr; cl = nc; slid = true; slideTrail.push({r: r, c: cl}); continue;
-          }
-          r = nr; cl = nc; slid = true; slideTrail.push({r: r, c: cl}); break;
-        }
-
-        if (slid) {
-          player.r = r; player.c = cl;
-          movesLeft--;
-          updateLight();
-          sliding = true;
-          slideAnimPath = slideTrail.slice();
-          slideAnimIdx = 0; slideAnimT = 0;
-          if (hitSolid && slideTrail.length > 2) triggerShake(3, 6);
-          if (movesLeft <= 0 && state === 'playing') state = 'outofmoves';
-        }
-        updateHUD();
-        sEl.textContent = totalScore + score;
-      }
-
-      function updateSlideAnim() {
-        if (!sliding) return;
-        slideAnimT += SLIDE_SPEED;
-        spawnIceTrail(OX + playerDrawC * CELL, OY + playerDrawR * CELL);
-        while (slideAnimT >= 1 && slideAnimIdx < slideAnimPath.length - 1) {
-          slideAnimT -= 1; slideAnimIdx++;
-        }
-        if (slideAnimIdx >= slideAnimPath.length - 1) {
-          sliding = false;
-          playerDrawR = player.r; playerDrawC = player.c;
-        } else {
-          var from = slideAnimPath[slideAnimIdx], to = slideAnimPath[slideAnimIdx + 1];
-          playerDrawR = from.r + (to.r - from.r) * Math.min(slideAnimT, 1);
-          playerDrawC = from.c + (to.c - from.c) * Math.min(slideAnimT, 1);
-        }
-      }
-
-      function loseLife() {
-        lives--; showMsg('Ouch! -1 Life'); triggerShake(4, 8);
-        if (player) spawnBurst(OX + player.c * CELL + CELL / 2, OY + player.r * CELL + CELL / 2, 10, '#f44', CELL, 18);
-        if (lives <= 0) { lives = 0; die(); }
-      }
-      function die() {
-        if (state === 'dead') return;
-        if (!levelScoreBanked) { totalScore += score; }
-        score = 0;
-        sEl.textContent = totalScore;
-        if (totalScore > best) { best = totalScore; localStorage.setItem('r2b_mdungeon_best', best); bEl.textContent = best; }
-        R2BScores.submit('mdungeon', totalScore);
-        state = 'dead';
-      }
-      function showMsg(m) { msg = m; msgTimer = 80; }
-      function updateHUD() {
-        hEl.textContent = 'Room ' + (level + 1) + '/' + LEVELS_PER_RUN + ' (' + diffNames[difficulty] + ') | Moves: ' + movesLeft + '/' + maxMoves;
-      }
-      function completeLevel() {
-        var moveBonus = movesLeft * 30;
-        score += 300 + moveBonus; totalScore += score;
-        levelScoreBanked = true;
-        sEl.textContent = totalScore;
-        spawnBurst(cvs.width / 2, cvs.height / 2, 30, '#5f5', 100, 30);
-        state = 'levelcomplete';
-      }
-
-      function startRun(diff) {
-        difficulty = diff;
-        level = 0; totalScore = 0;
-        // Lives are LINKED — only refresh to MAX_LIVES if pool is empty (full reset after death)
-        if (lives <= 0) lives = MAX_LIVES;
-        levelCache = {}; // fresh layouts for each run
-        sEl.textContent = '0';
-        loadLevel(0);
-      }
-
-      // ── DRAW ──────────────────────────────────────
-      function draw() {
-        var W = cvs.width, H = cvs.height;
-        c.save();
-        c.translate(Math.round(shakeX), Math.round(shakeY));
-        c.fillStyle = '#0e0e12'; c.fillRect(-4, -4, W + 8, H + 8);
-        var now = Date.now();
-
-        // ── Difficulty select screen ────────────────
-        if (state === 'diffselect') {
-          // Obsidian-style bg
-          for (var dr = 0; dr < ROWS; dr++)
-            for (var dcl = 0; dcl < COLS; dcl++)
-              dt(5, 2, OX + dcl * CELL, OY + dr * CELL);
-          c.fillStyle = 'rgba(0,0,0,0.65)'; c.fillRect(0, 0, W, H);
-
-          c.fillStyle = '#fc0'; c.font = '20px Minecraft, sans-serif'; c.textAlign = 'center';
-          c.fillText('Mine Dungeon', W / 2, OY + CELL * 2);
-
-          c.fillStyle = '#aaa'; c.font = '11px Minecraft, sans-serif';
-          c.fillText('Choose Difficulty — 3 random rooms', W / 2, OY + CELL * 3 + 4);
-
-          for (var di = 0; di < 3; di++) {
-            var bx = W / 2 - 95, by = OY + CELL * 4 + di * 48;
-            drawBtn(bx, by, 190, 32, diffNames[di]);
-            c.fillStyle = diffColors[di]; c.globalAlpha = 0.15;
-            c.fillRect(bx + 1, by + 1, 188, 30);
-            c.globalAlpha = 1;
-            c.fillStyle = '#888'; c.font = '9px sans-serif'; c.textAlign = 'center';
-            c.fillText(diffDescs[di], W / 2, by + 44);
-          }
-
-          // Shared lives row under all buttons (linked across difficulties)
-          var livesRowY = OY + CELL * 4 + 3 * 48 + 18;
-          c.fillStyle = '#fc0'; c.font = '11px Minecraft, sans-serif'; c.textAlign = 'center';
-          c.fillText('Lives', W / 2, livesRowY);
-          var heartSize = 16, heartGap = 4;
-          var totalW = MAX_LIVES * heartSize + (MAX_LIVES - 1) * heartGap;
-          var hx0 = W / 2 - totalW / 2 + heartSize / 2;
-          for (var lh = 0; lh < MAX_LIVES; lh++) {
-            drawMcHeart(hx0 + lh * (heartSize + heartGap), livesRowY + 18, heartSize, lh >= lives);
-          }
-
-          c.fillStyle = '#555'; c.font = '9px sans-serif'; c.textAlign = 'center';
-          c.fillText('Best: ' + best + ' | Site: ' + siteBest, W / 2, H - 8);
-          c.restore();
-          return;
-        }
-
-        // ── Game board ──────────────────────────────
-        for (var r = 0; r < ROWS; r++) {
-          for (var cl = 0; cl < COLS; cl++) {
-            var px = OX + cl * CELL, py = OY + r * CELL;
-            var tile = grid[r][cl];
-            var fv = floorVar[r] ? floorVar[r][cl] : 0.5;
-
-            // Fog
-            if (tile === DARK && !isLit(r, cl)) {
-              c.fillStyle = '#08080c'; c.fillRect(px, py, CELL, CELL); continue;
-            }
-            if (tile === DARK) tile = EMPTY;
-
-            // Floor base with variation
-            if (fv < 0.12) dt(1, 0, px, py);       // stone
-            else if (fv < 0.22) dt(4, 2, px, py);   // mossy cobble
-            else dt(0, 1, px, py);                    // cobblestone
-
-            if (tile === WALL) {
-              // Obsidian wall
-              dt(5, 2, px, py);
-              // Subtle purple sheen
-              var oSheen = 0.05 + 0.03 * Math.sin(now / 600 + r * 3 + cl * 7);
-              c.fillStyle = 'rgba(80,20,120,' + oSheen + ')'; c.fillRect(px, py, CELL, CELL);
-              c.fillStyle = 'rgba(0,0,0,0.15)'; c.fillRect(px, py + CELL - 3, CELL, 3);
-            }
-            else if (tile === ICE) {
-              dt(3, 4, px, py);
-              var shim = 0.08 + 0.06 * Math.sin(now / 400 + r * 7 + cl * 13);
-              c.fillStyle = 'rgba(120,180,255,' + shim + ')'; c.fillRect(px, py, CELL, CELL);
-              c.fillStyle = 'rgba(255,255,255,' + (0.18 + 0.10 * Math.sin(now / 300 + cl * 5)) + ')';
-              c.fillRect(px + 5, py + 4, 7, 2);
-              c.fillRect(px + CELL - 14, py + CELL - 9, 6, 2);
-            }
-            else if (tile === STONE_W) {
-              dt(1, 0, px, py);
-              c.fillStyle = 'rgba(0,0,0,0.12)'; c.fillRect(px, py + CELL - 2, CELL, 2);
-            }
-            else if (tile === CHEST_T) {
-              dt(11, 1, px, py);
-              c.fillStyle = 'rgba(255,200,50,' + (0.08 + 0.05 * Math.sin(now / 350)) + ')';
-              c.fillRect(px + 3, py + 3, CELL - 6, CELL - 6);
-            }
-            else if (tile === DOOR) {
-              dt(1, 5, px, py);
-              c.fillStyle = 'rgba(0,0,0,0.18)'; c.fillRect(px, py + CELL - 2, CELL, 2);
-            }
-            else if (tile === PORTAL) {
-              dt(5, 2, px, py);
-              var pulse = 0.2 + 0.25 * Math.sin(now / 200);
-              c.fillStyle = 'rgba(128,0,255,' + pulse + ')'; c.fillRect(px + 3, py + 3, CELL - 6, CELL - 6);
-              c.fillStyle = 'rgba(200,100,255,' + (0.12 + 0.12 * Math.sin(now / 150 + 1)) + ')';
-              c.fillRect(px + 7, py + 7, CELL - 14, CELL - 14);
-              if (Math.random() < 0.12) particles.push({
-                x: px + CELL / 2 + (Math.random() - 0.5) * CELL * 0.5,
-                y: py + CELL / 2 + (Math.random() - 0.5) * CELL * 0.5,
-                vx: (Math.random() - 0.5) * 0.8, vy: -Math.random() * 1.5 - 0.3,
-                color: Math.random() > 0.5 ? '#a4f' : '#c6f',
-                life: 15 + Math.random() * 10, maxLife: 25, size: 1.5 + Math.random() * 2
-              });
-            }
-            else if (tile === LAVA) {
-              dt(13, 14, px, py);
-              c.fillStyle = 'rgba(255,100,0,' + (0.12 + 0.08 * Math.sin(now / 400 + r * 3 + cl * 5)) + ')';
-              c.fillRect(px, py, CELL, CELL);
-              if (Math.random() < 0.05) particles.push({
-                x: px + Math.random() * CELL, y: py,
-                vx: (Math.random() - 0.5) * 0.5, vy: -Math.random() - 0.5,
-                color: Math.random() > 0.5 ? '#f80' : '#fa0',
-                life: 12 + Math.random() * 8, maxLife: 20, size: 1 + Math.random() * 2
-              });
-            }
-            else if (tile === WATER) {
-              dt(13, 12, px, py);
-              c.fillStyle = 'rgba(100,150,255,' + (0.06 + 0.04 * Math.sin(now / 500 + r + cl)) + ')';
-              c.fillRect(px, py, CELL, CELL);
-            }
-            else if (tile === GRAVEL_T) dt(3, 1, px, py);
-            else if (tile === CRATE) {
-              dt(4, 0, px, py);
-              c.strokeStyle = 'rgba(60,40,20,0.4)'; c.lineWidth = 1;
-              c.strokeRect(px + 4, py + 4, CELL - 8, CELL - 8);
-              c.beginPath(); c.moveTo(px + 4, py + 4); c.lineTo(px + CELL - 4, py + CELL - 4); c.stroke();
-              c.beginPath(); c.moveTo(px + CELL - 4, py + 4); c.lineTo(px + 4, py + CELL - 4); c.stroke();
-            }
-            else if (tile === PLATE) {
-              c.fillStyle = '#5a5a5a'; c.fillRect(px + 6, py + CELL - 9, CELL - 12, 6);
-              c.fillStyle = '#777'; c.fillRect(px + 7, py + CELL - 8, CELL - 14, 4);
-              c.fillStyle = 'rgba(255,255,255,0.1)'; c.fillRect(px + 7, py + CELL - 8, CELL - 14, 1);
-            }
-            else if (tile === SPIKE) {
-              var spW = CELL / 4;
-              for (var si = 0; si < 4; si++) {
-                var sx = px + si * spW;
-                c.fillStyle = '#777';
-                c.beginPath(); c.moveTo(sx, py + CELL); c.lineTo(sx + spW / 2, py + 5); c.lineTo(sx + spW, py + CELL); c.fill();
-                c.fillStyle = 'rgba(200,200,200,0.35)';
-                c.beginPath(); c.moveTo(sx + spW / 2, py + 5); c.lineTo(sx + spW / 2 + 2, py + 8);
-                c.lineTo(sx + 1, py + CELL); c.lineTo(sx, py + CELL); c.fill();
-              }
-            }
-            else if (tile === CRACK) {
-              dt(4, 0, px, py);
-              c.fillStyle = 'rgba(60,35,15,0.30)';
-              c.fillRect(px, py + 6, CELL, 1);
-              c.fillRect(px, py + CELL - 7, CELL, 1);
-              c.fillStyle = 'rgba(0,0,0,0.18)'; c.fillRect(px, py + CELL - 2, CELL, 2);
-            }
-            else if (tile === ZOMBIE) dm(imgZombie, px, py);
-            else if (tile === SKELETON) dm(imgSkeleton, px, py);
-            else if (tile === CREEPER) dm(imgCreeper, px, py);
-            else if (tile === KEY_T) {
-              dt(0, 6, px, py);
-              c.fillStyle = 'rgba(255,255,100,' + (0.10 + 0.06 * Math.sin(now / 300)) + ')';
-              c.fillRect(px + 5, py + 5, CELL - 10, CELL - 10);
-            }
-            else if (tile === HEART_T) {
-              var hbob = Math.sin(now / 300 + r + cl) * 1.5;
-              c.fillStyle = 'rgba(255,80,80,' + (0.10 + 0.08 * Math.sin(now / 250)) + ')';
-              c.fillRect(px + 3, py + 3, CELL - 6, CELL - 6);
-              drawMcHeart(px + CELL / 2, py + CELL / 2 + hbob, CELL * 0.78);
-            }
-            else if (tile === SWORD_T) di(2, 4, px, py);
-            else if (tile === PICK_T) di(2, 6, px, py);
-            else if (tile === TORCH_T) {
-              var tg = 0.12 + 0.08 * Math.sin(now / 200);
-              c.fillStyle = 'rgba(255,150,30,' + tg + ')';
-              c.fillRect(px + 2, py + 2, CELL - 4, CELL - 4);
-              c.fillStyle = '#7a5a3a';
-              c.fillRect(px + CELL / 2 - 2, py + CELL * 0.35, 4, CELL * 0.5);
-              c.fillStyle = '#fa0';
-              c.beginPath(); c.arc(px + CELL / 2, py + CELL * 0.28, CELL * 0.18, 0, Math.PI * 2); c.fill();
-              c.fillStyle = '#ff4';
-              c.beginPath(); c.arc(px + CELL / 2, py + CELL * 0.25, CELL * 0.1, 0, Math.PI * 2); c.fill();
-            }
-          }
-        }
-
-        // Wall shadows
-        for (var r = 0; r < ROWS; r++) {
-          for (var cl = 0; cl < COLS; cl++) {
-            var t2 = grid[r][cl];
-            if (t2 === WALL || t2 === STONE_W) {
-              if (r + 1 < ROWS && grid[r+1][cl] !== WALL && grid[r+1][cl] !== STONE_W && grid[r+1][cl] !== DARK) {
-                c.fillStyle = 'rgba(0,0,0,0.18)'; c.fillRect(OX + cl * CELL, OY + (r + 1) * CELL, CELL, 6);
-              }
-              if (cl + 1 < COLS && grid[r][cl+1] !== WALL && grid[r][cl+1] !== STONE_W && grid[r][cl+1] !== DARK) {
-                c.fillStyle = 'rgba(0,0,0,0.1)'; c.fillRect(OX + (cl + 1) * CELL, OY + r * CELL, 3, CELL);
-              }
-            }
-          }
-        }
-
-        // Ice slide trail glow
-        if (sliding && slideAnimPath.length > 1) {
-          for (var ti = 0; ti <= slideAnimIdx && ti < slideAnimPath.length; ti++) {
-            var tp = slideAnimPath[ti];
-            var fade = 0.18 * (1 - ti / slideAnimPath.length);
-            c.fillStyle = 'rgba(130,200,255,' + fade + ')';
-            c.fillRect(OX + tp.c * CELL + 4, OY + tp.r * CELL + 4, CELL - 8, CELL - 8);
-          }
-        }
-        if (!sliding && slideAnim > 0) {
-          slideAnim--;
-          c.fillStyle = 'rgba(100,200,255,' + (slideAnim / 6 * 0.2) + ')';
-          for (var ti = 0; ti < slideTrail.length - 1; ti++) {
-            var tp = slideTrail[ti];
-            c.fillRect(OX + tp.c * CELL + 4, OY + tp.r * CELL + 4, CELL - 8, CELL - 8);
-          }
-        }
-
-        drawParticles();
-
-        // Player
-        if (player && state !== 'dead') {
-          var pdx = OX + playerDrawC * CELL, pdy = OY + playerDrawR * CELL;
-          c.fillStyle = 'rgba(0,0,0,0.25)';
-          c.beginPath();
-          c.ellipse(pdx + CELL / 2, pdy + CELL - 2, CELL * 0.35, CELL * 0.12, 0, 0, Math.PI * 2);
-          c.fill();
-          dm(imgPlayer, pdx, pdy);
-          if (inventory.sword) {
-            c.strokeStyle = 'rgba(150,150,255,0.25)'; c.lineWidth = 1.5;
-            c.strokeRect(pdx, pdy, CELL, CELL);
-          }
-        }
-
-        // ── HUD ─────────────────────────────────────
-        var hudY = OY + ROWS * CELL + 4;
-        c.fillStyle = '#141418'; c.fillRect(0, OY + ROWS * CELL, W, HUD_H + 4);
-        c.fillStyle = 'rgba(255,255,255,0.06)'; c.fillRect(0, OY + ROWS * CELL, W, 1);
-        for (var h = 0; h < MAX_LIVES; h++) {
-          if (h < lives) drawMcHeart(OX + 8 + h * 16, hudY + 9, 14);
-          else drawMcHeart(OX + 8 + h * 16, hudY + 9, 14, true);
-        }
-        var invX = OX + 90;
-        c.font = '11px Minecraft, sans-serif';
-        if (inventory.key) { c.fillStyle = '#ff0'; c.fillText('\u26B7 Key', invX, hudY + 14); invX += 44; }
-        if (inventory.sword) { c.fillStyle = '#aaf'; c.fillText('\u2694 Swd', invX, hudY + 14); invX += 44; }
-        if (inventory.pick) { c.fillStyle = '#cca'; c.fillText('\u26CF Pick', invX, hudY + 14); invX += 46; }
-        if (inventory.torch) { c.fillStyle = '#fa0'; c.fillText('\u2600 Trch', invX, hudY + 14); invX += 46; }
-        c.textAlign = 'right'; c.font = '12px Minecraft, sans-serif';
-        c.fillStyle = movesLeft <= 1 ? '#f44' : (movesLeft <= 2 ? '#fa0' : '#aaa');
-        c.fillText('Moves: ' + movesLeft + '/' + maxMoves, W - OX, hudY + 14);
-        c.font = '10px Minecraft, sans-serif'; c.textAlign = 'left';
-        c.fillStyle = '#fc0'; c.fillText('Score: ' + (totalScore + score), OX, hudY + 29);
-        c.fillStyle = '#888'; c.textAlign = 'center';
-        c.fillText('Lv ' + (level + 1) + '/' + LEVELS_PER_RUN, W / 2, hudY + 29);
-        c.fillStyle = '#555'; c.textAlign = 'right';
-        c.fillText('[R] Restart', W - OX, hudY + 29);
-        // Give Up button (during a run)
-        if (state === 'playing' || state === 'outofmoves' || state === 'levelcomplete') {
-          var gx = W / 2 - 32, gy = hudY + 18;
-          c.fillStyle = '#5a2a2a'; c.fillRect(gx, gy, 64, 16);
-          c.fillStyle = '#7a3a3a'; c.fillRect(gx + 1, gy + 1, 62, 14);
-          c.fillStyle = 'rgba(255,255,255,0.08)'; c.fillRect(gx + 1, gy + 1, 62, 7);
-          c.fillStyle = '#ff8888'; c.font = '9px Minecraft, sans-serif'; c.textAlign = 'center';
-          c.fillText('Give Up', W / 2, gy + 11);
-        }
-
-        // Message
-        if (msgTimer > 0) {
-          msgTimer--;
-          var mA = Math.min(1, msgTimer / 25);
-          c.fillStyle = 'rgba(0,0,0,' + (mA * 0.5) + ')';
-          var mW = c.measureText(msg).width + 16;
-          c.fillRect(W / 2 - mW / 2, OY - 18, mW, 18);
-          c.fillStyle = 'rgba(255,255,100,' + mA + ')';
-          c.font = 'bold 12px Minecraft, sans-serif'; c.textAlign = 'center';
-          c.fillText(msg, W / 2, OY - 4);
-        }
-
-        // ── Overlays ────────────────────────────────
-        if (state === 'dead') {
-          c.fillStyle = 'rgba(80,0,0,0.88)'; c.fillRect(-4, -4, W + 8, H + 8);
-          c.fillStyle = '#f44'; c.font = '22px Minecraft, sans-serif'; c.textAlign = 'center';
-          c.fillText('Run Over', W / 2, H / 2 - 50);
-          // Empty hearts row
-          var maxL = MAX_LIVES;
-          for (var hh = 0; hh < maxL; hh++) {
-            drawMcHeart(W / 2 - (maxL * 14) / 2 + hh * 14 + 7, H / 2 - 28, 12, true);
-          }
-          c.fillStyle = '#fc0'; c.font = '16px Minecraft, sans-serif';
-          c.fillText('Score: ' + totalScore, W / 2, H / 2 - 4);
-          c.fillStyle = diffColors[difficulty] || '#aaa'; c.font = '11px Minecraft, sans-serif';
-          c.fillText('Difficulty: ' + (diffNames[difficulty] || '-') + ' | Room ' + (level + 1) + '/' + LEVELS_PER_RUN, W / 2, H / 2 + 12);
-          c.fillStyle = '#aaa'; c.font = '10px sans-serif';
-          c.fillText('Best: ' + best + ' | Site: ' + siteBest, W / 2, H / 2 + 26);
-          drawBtn(W / 2 - 60, H / 2 + 36, 120, 28, 'New Game');
-        }
-        if (state === 'outofmoves') {
-          c.fillStyle = 'rgba(60,30,0,0.88)'; c.fillRect(-4, -4, W + 8, H + 8);
-          c.fillStyle = '#fa0'; c.font = '18px Minecraft, sans-serif'; c.textAlign = 'center';
-          c.fillText('Out of Moves!', W / 2, H / 2 - 40);
-          for (var hh2 = 0; hh2 < lives; hh2++) {
-            drawMcHeart(W / 2 - (lives * 14) / 2 + hh2 * 14 + 7, H / 2 - 18, 12);
-          }
-          drawBtn(W / 2 - 65, H / 2 + 8, 60, 26, 'Retry');
-          drawBtn(W / 2 + 5, H / 2 + 8, 60, 26, 'Quit');
-        }
-        if (state === 'levelcomplete') {
-          c.fillStyle = 'rgba(0,0,0,0.82)'; c.fillRect(-4, -4, W + 8, H + 8);
-          c.fillStyle = '#5f5'; c.font = '18px Minecraft, sans-serif'; c.textAlign = 'center';
-          c.fillText('Room ' + (level + 1) + ' Cleared!', W / 2, H / 2 - 50);
-          c.fillStyle = '#fc0'; c.font = '14px Minecraft, sans-serif';
-          c.fillText('+' + score + ' pts', W / 2, H / 2 - 26);
-          for (var hh3 = 0; hh3 < lives; hh3++) {
-            drawMcHeart(W / 2 - (lives * 14) / 2 + hh3 * 14 + 7, H / 2 - 6, 12);
-          }
-          c.fillStyle = '#ccc'; c.font = '11px sans-serif';
-          c.fillText('Moves left: ' + movesLeft, W / 2, H / 2 + 12);
-          drawBtn(W / 2 - 85, H / 2 + 18, 80, 26, 'Retry');
-          drawBtn(W / 2 + 5, H / 2 + 18, 80, 26, 'Next');
-        }
-        if (state === 'victory') {
-          c.fillStyle = 'rgba(0,0,0,0.92)'; c.fillRect(-4, -4, W + 8, H + 8);
-          c.fillStyle = '#fc0'; c.font = '22px Minecraft, sans-serif'; c.textAlign = 'center';
-          c.fillText('Dungeon Cleared!', W / 2, H / 2 - 50);
-          c.fillStyle = '#5f5'; c.font = '16px Minecraft, sans-serif';
-          c.fillText('Total: ' + totalScore, W / 2, H / 2 - 20);
-          c.fillStyle = diffColors[difficulty]; c.font = '12px Minecraft, sans-serif';
-          c.fillText('Difficulty: ' + diffNames[difficulty], W / 2, H / 2);
-          c.fillStyle = '#aaa'; c.font = '11px sans-serif';
-          c.fillText('Best: ' + best + ' | Site: ' + siteBest, W / 2, H / 2 + 18);
-          drawBtn(W / 2 - 60, H / 2 + 32, 120, 26, 'New Game');
-          if (totalScore > best) {
-            best = totalScore; localStorage.setItem('r2b_mdungeon_best', best); bEl.textContent = best;
-          }
-          R2BScores.submit('mdungeon', totalScore);
-        }
-        c.restore();
-      }
-
-      // Pixel-art Minecraft heart
-      function drawMcHeart(cx, cy, size, empty) {
-        var rows = [
-          ' ## ## ',
-          '#++#..#',
-          '#+....#',
-          '#.....#',
-          ' #...# ',
-          '  #.#  ',
-          '   #   '
-        ];
-        var p = size / 7;
-        var outline = '#3a0606';
-        var fill = empty ? '#3a3a3a' : '#e62121';
-        var hi = empty ? '#5a5a5a' : '#ff8a8a';
-        var ox2 = cx - size / 2, oy2 = cy - size / 2;
-        for (var ry = 0; ry < rows.length; ry++) {
-          for (var cx2 = 0; cx2 < rows[ry].length; cx2++) {
-            var ch = rows[ry][cx2];
-            if (ch === ' ') continue;
-            c.fillStyle = ch === '#' ? outline : (ch === '+' ? hi : fill);
-            c.fillRect(Math.round(ox2 + cx2 * p), Math.round(oy2 + ry * p), Math.ceil(p), Math.ceil(p));
-          }
-        }
-      }
-
-      function drawBtn(x, y, w, h, text) {
-        c.fillStyle = '#374'; c.fillRect(x, y, w, h);
-        c.fillStyle = '#495'; c.fillRect(x + 1, y + 1, w - 2, h - 2);
-        c.fillStyle = 'rgba(255,255,255,0.06)'; c.fillRect(x + 1, y + 1, w - 2, h / 2);
-        c.fillStyle = '#fff'; c.font = '11px Minecraft, sans-serif'; c.textAlign = 'center';
-        c.fillText(text, x + w / 2, y + h / 2 + 4);
-      }
-      function inBtn(cx, cy, x, y, w, h) {
-        return cx >= x && cx <= x + w && cy >= y && cy <= y + h;
-      }
-
-      // ── Input ─────────────────────────────────────
-      function getPos(e) {
-        var rect = cvs.getBoundingClientRect();
-        var sx = cvs.width / rect.width, sy = cvs.height / rect.height;
-        var ex, ey;
-        if (e.touches && e.touches.length) { ex = e.touches[0].clientX; ey = e.touches[0].clientY; }
-        else if (e.changedTouches && e.changedTouches.length) { ex = e.changedTouches[0].clientX; ey = e.changedTouches[0].clientY; }
-        else { ex = e.clientX; ey = e.clientY; }
-        return {x: (ex - rect.left) * sx, y: (ey - rect.top) * sy};
-      }
-      var swipeStart = null;
-
-      function handleOverlayClick(pos) {
-        var W = cvs.width, H = cvs.height;
-        if (state === 'diffselect') {
-          for (var di = 0; di < 3; di++) {
-            var bx = W / 2 - 95, by = OY + CELL * 4 + di * 48;
-            if (inBtn(pos.x, pos.y, bx, by, 190, 32)) { startRun(di); return true; }
-          }
-          return true;
-        }
-        if (state === 'dead') {
-          if (inBtn(pos.x, pos.y, W / 2 - 60, H / 2 + 36, 120, 28)) {
-            state = 'diffselect'; draw();
-          }
-          return true;
-        }
-        // Give Up button (during a run)
-        if (state === 'playing' || state === 'outofmoves' || state === 'levelcomplete') {
-          var hudY2 = OY + ROWS * CELL + 4;
-          if (inBtn(pos.x, pos.y, W / 2 - 32, hudY2 + 18, 64, 16)) {
-            die(); draw();
-            return true;
-          }
-        }
-        if (state === 'outofmoves') {
-          if (inBtn(pos.x, pos.y, W / 2 - 65, H / 2 + 8, 60, 26)) {
-            lives--; if (lives <= 0) { die(); draw(); return true; }
-            loadLevel(level);
-          }
-          if (inBtn(pos.x, pos.y, W / 2 + 5, H / 2 + 8, 60, 26)) {
-            die(); draw();
-          }
-          return true;
-        }
-        if (state === 'levelcomplete') {
-          if (inBtn(pos.x, pos.y, W / 2 - 85, H / 2 + 18, 80, 26)) {
-            // Refund the just-banked level points so retry replays cleanly
-            if (levelScoreBanked) { totalScore -= score; levelScoreBanked = false; sEl.textContent = totalScore; }
-            loadLevel(level);
-          }
-          if (inBtn(pos.x, pos.y, W / 2 + 5, H / 2 + 18, 80, 26)) { level++; loadLevel(level); }
-          return true;
-        }
-        if (state === 'victory') {
-          if (inBtn(pos.x, pos.y, W / 2 - 60, H / 2 + 32, 120, 26)) {
-            state = 'diffselect'; draw();
-          }
-          return true;
         }
         return false;
       }
 
-      function onTouchStart(e) {
-        if (e.target !== cvs) return;
-        e.preventDefault(); swipeStart = getPos(e);
+      // ── Room generation ───────────────────────────
+      function genRoom() {
+        // 1) Open floor with wall border
+        grid = [];
+        for (var r = 0; r < ROWS; r++) {
+          grid[r] = [];
+          for (var cc = 0; cc < COLS; cc++) {
+            if (r === 0 || r === ROWS - 1 || cc === 0 || cc === COLS - 1) grid[r][cc] = WALL;
+            else grid[r][cc] = FLOOR;
+          }
+        }
+
+        // 2) Player & portal at opposite ends, with small jitter
+        player.r = ROWS - 2; player.c = 1 + Math.floor(Math.random() * 2);
+        var portalR = 1, portalC = COLS - 2 - Math.floor(Math.random() * 2);
+        // Carve player/portal cells (already FLOOR) — record portal placement after pillars
+
+        // 3) A few interior wall pillars (more on harder)
+        var pillars = difficulty === 0 ? 4 : difficulty === 1 ? 7 : 10;
+        for (var p = 0; p < pillars; p++) {
+          for (var tries = 0; tries < 12; tries++) {
+            var pr = 1 + Math.floor(Math.random() * (ROWS - 2));
+            var pc = 1 + Math.floor(Math.random() * (COLS - 2));
+            if (grid[pr][pc] !== FLOOR) continue;
+            if (Math.abs(pr - player.r) + Math.abs(pc - player.c) < 2) continue;
+            if (Math.abs(pr - portalR) + Math.abs(pc - portalC) < 2) continue;
+            grid[pr][pc] = WALL;
+            break;
+          }
+        }
+
+        // 4) Place portal
+        grid[portalR][portalC] = PORTAL;
+
+        // 5) Place key + door (always — gates the portal)
+        // Door placed adjacent to portal, on a floor tile, then a key elsewhere
+        var doorPlaced = false;
+        var dirs = shuffle([[-1,0],[1,0],[0,-1],[0,1]]);
+        for (var di2 = 0; di2 < dirs.length; di2++) {
+          var dr = portalR + dirs[di2][0], dc = portalC + dirs[di2][1];
+          if (!inBounds(dr, dc)) continue;
+          if (grid[dr][dc] === FLOOR) { grid[dr][dc] = DOOR; doorPlaced = true; break; }
+        }
+        if (doorPlaced) placeOnEmpty(KEY, 1);
+
+        // 6) Hazards
+        var lavaCount = difficulty === 0 ? 0 : difficulty === 1 ? 3 : 5;
+        placeOnEmpty(LAVA, lavaCount);
+
+        // 7) Mobs
+        var mobCount = difficulty === 0 ? 1 : difficulty === 1 ? 3 : 5;
+        var mobTypes = [];
+        for (var m = 0; m < mobCount; m++) {
+          var roll = Math.random();
+          if (roll < 0.5) mobTypes.push(ZOMBIE);
+          else if (roll < 0.85) mobTypes.push(SKELETON);
+          else mobTypes.push(CREEPER);
+        }
+        for (var mt = 0; mt < mobTypes.length; mt++) {
+          // Don't spawn mobs adjacent to player
+          var cells = shuffle(emptyCells());
+          for (var ci = 0; ci < cells.length; ci++) {
+            if (manhattan(cells[ci], player) >= 3) {
+              grid[cells[ci].r][cells[ci].c] = mobTypes[mt];
+              break;
+            }
+          }
+        }
+
+        // 8) Sword if any mobs
+        if (mobCount > 0) placeOnEmpty(SWORD, 1);
+
+        // 9) Torch on Normal/Hard (Hard rooms are dark)
+        if (difficulty >= 1) placeOnEmpty(TORCH, 1);
+
+        // 10) Heart pickup if player is hurt (small chance)
+        if (lives < MAX_LIVES && Math.random() < 0.5) placeOnEmpty(HEART, 1);
+
+        // 11) Dark only on Hard
+        darkRoom = (difficulty === 2);
+
+        // 12) Validate reachability to portal — if not, knock down some walls
+        var portalPos = { r: portalR, c: portalC };
+        var safety = 0;
+        while (!reachable(portalPos) && safety++ < 30) {
+          // Remove a random wall
+          var walls = [];
+          for (var rr = 1; rr < ROWS - 1; rr++)
+            for (var cc2 = 1; cc2 < COLS - 1; cc2++)
+              if (grid[rr][cc2] === WALL) walls.push({ r: rr, c: cc2 });
+          if (!walls.length) break;
+          var w = walls[Math.floor(Math.random() * walls.length)];
+          grid[w.r][w.c] = FLOOR;
+        }
+
+        // Reset per-room state
+        roomScore = 0;
+        inventory = { key: false, sword: false, torch: false };
+        litCells = {};
+        updateLight();
       }
-      function onTouchEnd(e) {
-        if (e.target !== cvs) return;
-        e.preventDefault();
-        if (!swipeStart) return;
-        var start = swipeStart; swipeStart = null;
-        if (handleOverlayClick(start)) return;
-        var end = getPos(e);
-        var dx = end.x - start.x, dy = end.y - start.y;
-        if (Math.sqrt(dx * dx + dy * dy) < 10) return;
-        if (Math.abs(dx) > Math.abs(dy)) slide(0, dx > 0 ? 1 : -1);
-        else slide(dy > 0 ? 1 : -1, 0);
+
+      // ── Visibility ─────────────────────────────────
+      function updateLight() {
+        if (!darkRoom) return;
+        var rad = inventory.torch ? 5 : 2;
+        for (var dr = -rad; dr <= rad; dr++)
+          for (var dc = -rad; dc <= rad; dc++)
+            if (Math.abs(dr) + Math.abs(dc) <= rad) {
+              var lr = player.r + dr, lc = player.c + dc;
+              if (inBounds(lr, lc)) litCells[lr + ',' + lc] = true;
+            }
+      }
+      function isLit(r, cc) {
+        if (!darkRoom) return true;
+        return !!litCells[r + ',' + cc];
+      }
+
+      // ── Game flow ──────────────────────────────────
+      function startRun(diff) {
+        difficulty = diff;
+        room = 0;
+        totalScore = 0;
+        if (lives <= 0) lives = MAX_LIVES; // refresh only after a full death
+        sEl.textContent = '0';
+        loadRoom();
+      }
+      function loadRoom() {
+        if (room >= ROOMS_PER_RUN) { state = 'victory'; return; }
+        genRoom();
+        state = 'playing';
+        updateHUD();
+      }
+      function updateHUD() {
+        hEl.textContent = 'Room ' + (room + 1) + '/' + ROOMS_PER_RUN +
+          ' (' + DIFF_NAMES[difficulty] + ')  •  Arrows/WASD to move  •  R to give up';
+      }
+      function bankAndDie() {
+        // Bank room score before dying so partial progress counts
+        totalScore += roomScore; roomScore = 0;
+        sEl.textContent = totalScore;
+        if (totalScore > best) {
+          best = totalScore;
+          localStorage.setItem('r2b_mdungeon_best', best);
+          bEl.textContent = best;
+        }
+        R2BScores.submit('mdungeon', totalScore);
+        state = 'dead';
+      }
+      function loseLife(reason) {
+        lives--;
+        showMsg(reason || 'Ouch! -1 Life');
+        shake = 8;
+        if (lives <= 0) { lives = 0; bankAndDie(); return; }
+        // Same room, restart layout
+        loadRoom();
+      }
+      function clearRoom() {
+        roomScore += 100 + lives * 25;
+        totalScore += roomScore; roomScore = 0;
+        sEl.textContent = totalScore;
+        if (totalScore > best) {
+          best = totalScore;
+          localStorage.setItem('r2b_mdungeon_best', best);
+          bEl.textContent = best;
+        }
+        state = 'roomclear';
+      }
+      function giveUp() {
+        bankAndDie();
+      }
+
+      // ── Player turn ────────────────────────────────
+      function tryMove(dr, dc) {
+        if (state !== 'playing') return;
+        var nr = player.r + dr, nc = player.c + dc;
+        if (!inBounds(nr, nc)) return;
+        var t = grid[nr][nc];
+        if (t === WALL) return;
+        if (t === DOOR) {
+          if (inventory.key) {
+            inventory.key = false;
+            grid[nr][nc] = FLOOR;
+            showMsg('Unlocked!');
+          } else {
+            showMsg('Need a key');
+            return;
+          }
+        }
+        if (t === LAVA) {
+          // Step into lava = lose a life
+          player.r = nr; player.c = nc;
+          updateLight();
+          loseLife('Burned!');
+          return;
+        }
+        if (isMob(t)) {
+          if (inventory.sword) {
+            var pts = t === CREEPER ? 200 : t === SKELETON ? 150 : 100;
+            roomScore += pts;
+            grid[nr][nc] = FLOOR;
+            showMsg('Killed +' + pts);
+            player.r = nr; player.c = nc;
+            updateLight();
+            return;
+          } else {
+            // No sword — push back, lose life
+            loseLife('Mob hit!');
+            return;
+          }
+        }
+        if (t === KEY)   { inventory.key = true;   roomScore += 25; grid[nr][nc] = FLOOR; showMsg('+Key'); }
+        if (t === SWORD) { inventory.sword = true; roomScore += 25; grid[nr][nc] = FLOOR; showMsg('+Sword'); }
+        if (t === TORCH) { inventory.torch = true; roomScore += 25; grid[nr][nc] = FLOOR; showMsg('+Torch'); }
+        if (t === HEART) {
+          if (lives < MAX_LIVES) { lives++; showMsg('+Life'); }
+          else showMsg('Lives full');
+          roomScore += 25; grid[nr][nc] = FLOOR;
+        }
+        if (t === PORTAL) {
+          player.r = nr; player.c = nc;
+          updateLight();
+          clearRoom();
+          return;
+        }
+        // Move
+        player.r = nr; player.c = nc;
+        updateLight();
+      }
+
+      // ── Drawing ────────────────────────────────────
+      function drawBtn(x, y, w, h, text, hot) {
+        c.fillStyle = hot ? '#444' : '#222';
+        c.fillRect(x, y, w, h);
+        c.strokeStyle = '#555'; c.lineWidth = 1;
+        c.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
+        c.fillStyle = '#fff';
+        c.font = 'bold 13px Minecraft, sans-serif';
+        c.textAlign = 'center'; c.textBaseline = 'middle';
+        c.fillText(text, x + w / 2, y + h / 2);
+        c.textBaseline = 'alphabetic';
+      }
+      function inBtn(px, py, x, y, w, h) {
+        return px >= x && px < x + w && py >= y && py < y + h;
+      }
+      function drawHeart(cx, cy, sz, empty) {
+        var p = Math.max(1, Math.round(sz / 8));
+        c.fillStyle = empty ? '#3a0d0d' : '#e23c3c';
+        // Pixel heart 8x8
+        var shape = [
+          [0,1,1,0,0,1,1,0],
+          [1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1],
+          [1,1,1,1,1,1,1,1],
+          [0,1,1,1,1,1,1,0],
+          [0,0,1,1,1,1,0,0],
+          [0,0,0,1,1,0,0,0],
+          [0,0,0,0,0,0,0,0]
+        ];
+        var x0 = cx - (sz / 2), y0 = cy - (sz / 2);
+        for (var yy = 0; yy < 8; yy++)
+          for (var xx = 0; xx < 8; xx++)
+            if (shape[yy][xx]) c.fillRect(x0 + xx * p, y0 + yy * p, p, p);
+        // Highlight
+        if (!empty) {
+          c.fillStyle = 'rgba(255,255,255,0.55)';
+          c.fillRect(x0 + 1 * p, y0 + 1 * p, p, p);
+          c.fillRect(x0 + 2 * p, y0 + 1 * p, p, p);
+        }
+      }
+
+      // ── Tile renderers ─────────────────────────────
+      function drawFloor(px, py, r, cc) {
+        // Base cobblestone with subtle variation
+        var v = ((r * 7 + cc * 13) % 11) / 11;
+        if (v < 0.18) dt(4, 2, px, py);       // mossy
+        else if (v < 0.35) dt(1, 0, px, py);  // stone
+        else dt(0, 1, px, py);                // cobblestone
+      }
+      function drawTile(r, cc) {
+        var px = OX + cc * CELL, py = OY + r * CELL;
+        var t = grid[r][cc];
+        if (darkRoom && !isLit(r, cc)) {
+          c.fillStyle = '#05050a'; c.fillRect(px, py, CELL, CELL);
+          return;
+        }
+        // Floor under everything except walls
+        if (t !== WALL) drawFloor(px, py, r, cc);
+        switch (t) {
+          case WALL:
+            dt(5, 2, px, py); // obsidian
+            c.fillStyle = 'rgba(0,0,0,0.18)';
+            c.fillRect(px, py + CELL - 3, CELL, 3);
+            break;
+          case DOOR:
+            dt(1, 5, px, py); // door top sprite
+            c.fillStyle = 'rgba(255,200,0,0.10)';
+            c.fillRect(px, py, CELL, CELL);
+            break;
+          case PORTAL:
+            // Glowing nether portal
+            dt(0, 14, px, py); // portal animation tile
+            var glow = 0.25 + 0.20 * Math.sin(anim / 10);
+            c.fillStyle = 'rgba(180,80,255,' + glow + ')';
+            c.fillRect(px + 2, py + 2, CELL - 4, CELL - 4);
+            break;
+          case LAVA:
+            dt(14, 14, px, py); // lava sprite
+            var lglow = 0.3 + 0.2 * Math.sin(anim / 8 + r + cc);
+            c.fillStyle = 'rgba(255,120,0,' + lglow + ')';
+            c.fillRect(px, py, CELL, CELL);
+            break;
+          case KEY:
+            di(8, 1, px + 6, py + 6, CELL - 12);
+            break;
+          case SWORD:
+            di(0, 4, px + 4, py + 4, CELL - 8);
+            break;
+          case TORCH:
+            // Floating torch with warm halo
+            var tg = 0.18 + 0.10 * Math.sin(anim / 6);
+            c.fillStyle = 'rgba(255,170,40,' + tg + ')';
+            c.fillRect(px, py, CELL, CELL);
+            dt(0, 5, px + 4, py + 4); // torch sprite (smaller)
+            break;
+          case HEART:
+            drawHeart(px + CELL / 2, py + CELL / 2 + Math.sin(anim / 10) * 2, CELL * 0.7);
+            break;
+          case ZOMBIE:   dm(imgZombie, px, py); break;
+          case SKELETON: dm(imgSkeleton, px, py); break;
+          case CREEPER:  dm(imgCreeper, px, py); break;
+        }
+      }
+
+      // ── Render ─────────────────────────────────────
+      function render() {
+        anim++;
+        if (msgT > 0) msgT--;
+        if (shake > 0) shake--;
+
+        c.save();
+        if (shake > 0) {
+          c.translate(
+            (Math.random() - 0.5) * shake,
+            (Math.random() - 0.5) * shake
+          );
+        }
+
+        // Background
+        c.fillStyle = '#0e0e12';
+        c.fillRect(0, 0, W, H);
+
+        // Difficulty select
+        if (state === 'diffselect') {
+          // Obsidian backdrop
+          for (var br = 0; br < ROWS; br++)
+            for (var bc = 0; bc < COLS; bc++)
+              dt(5, 2, OX + bc * CELL, OY + br * CELL);
+          c.fillStyle = 'rgba(0,0,0,0.7)';
+          c.fillRect(0, 0, W, OY + ROWS * CELL);
+
+          c.fillStyle = '#fc0';
+          c.font = '22px Minecraft, sans-serif'; c.textAlign = 'center';
+          c.fillText('Mine Dungeon', W / 2, OY + 36);
+          c.fillStyle = '#aaa'; c.font = '11px Minecraft, sans-serif';
+          c.fillText('Choose Difficulty — 3 rooms per run', W / 2, OY + 56);
+
+          for (var di3 = 0; di3 < 3; di3++) {
+            var bx = W / 2 - 100, by = OY + 80 + di3 * 56;
+            drawBtn(bx, by, 200, 32, DIFF_NAMES[di3]);
+            c.fillStyle = DIFF_COLORS[di3]; c.globalAlpha = 0.18;
+            c.fillRect(bx + 1, by + 1, 198, 30);
+            c.globalAlpha = 1;
+            c.fillStyle = '#9aa'; c.font = '10px sans-serif'; c.textAlign = 'center';
+            c.fillText(DIFF_DESCS[di3], W / 2, by + 46);
+          }
+
+          // Shared lives row under all difficulty buttons
+          var ly = OY + 80 + 3 * 56 + 10;
+          c.fillStyle = '#fc0'; c.font = '12px Minecraft, sans-serif'; c.textAlign = 'center';
+          c.fillText('Lives (shared across difficulties)', W / 2, ly);
+          var hsz = 18, gap = 4;
+          var totalW = MAX_LIVES * hsz + (MAX_LIVES - 1) * gap;
+          var hx = W / 2 - totalW / 2 + hsz / 2;
+          for (var hh = 0; hh < MAX_LIVES; hh++) {
+            drawHeart(hx + hh * (hsz + gap), ly + 18, hsz, hh >= lives);
+          }
+
+          c.fillStyle = '#666'; c.font = '10px sans-serif'; c.textAlign = 'center';
+          c.fillText('Best: ' + best + '   •   Site: ' + siteBest, W / 2, H - 8);
+          c.restore();
+          return;
+        }
+
+        // Game grid
+        for (var r2 = 0; r2 < ROWS; r2++)
+          for (var c2 = 0; c2 < COLS; c2++)
+            drawTile(r2, c2);
+
+        // Player
+        var ppx = OX + player.c * CELL, ppy = OY + player.r * CELL;
+        if (isLit(player.r, player.c)) dm(imgPlayer, ppx, ppy);
+
+        // HUD
+        var hudY = OY + ROWS * CELL + 4;
+        c.fillStyle = '#141418'; c.fillRect(0, hudY - 4, W, HUD_H);
+        c.fillStyle = 'rgba(255,255,255,0.06)'; c.fillRect(0, hudY - 4, W, 1);
+
+        // Lives row
+        for (var lh = 0; lh < MAX_LIVES; lh++) {
+          drawHeart(OX + 12 + lh * 18, hudY + 12, 14, lh >= lives);
+        }
+
+        // Inventory icons
+        var ix = OX + 12 + MAX_LIVES * 18 + 12;
+        c.font = '11px Minecraft, sans-serif'; c.textAlign = 'left';
+        if (inventory.key)   { c.fillStyle = '#ff0'; c.fillText('Key',   ix, hudY + 16); ix += 36; }
+        if (inventory.sword) { c.fillStyle = '#aaf'; c.fillText('Sword', ix, hudY + 16); ix += 46; }
+        if (inventory.torch) { c.fillStyle = '#fa3'; c.fillText('Torch', ix, hudY + 16); ix += 46; }
+
+        // Score on right
+        c.fillStyle = '#fc0'; c.font = '12px Minecraft, sans-serif'; c.textAlign = 'right';
+        c.fillText('Score: ' + (totalScore + roomScore), W - OX - 8, hudY + 16);
+
+        // Give Up button
+        var gx = W / 2 - 36, gy = hudY + 30;
+        drawBtn(gx, gy, 72, 18, 'Give Up');
+        c.fillStyle = 'rgba(180,40,40,0.25)'; c.fillRect(gx + 1, gy + 1, 70, 16);
+
+        // Room indicator
+        c.fillStyle = '#888'; c.font = '10px Minecraft, sans-serif'; c.textAlign = 'left';
+        c.fillText('Room ' + (room + 1) + '/' + ROOMS_PER_RUN, OX + 8, hudY + 38);
+
+        // Message
+        if (msgT > 0) {
+          var a = Math.min(1, msgT / 30);
+          c.fillStyle = 'rgba(0,0,0,' + (a * 0.5) + ')';
+          var mw = c.measureText(msg).width + 18;
+          c.fillRect(W / 2 - mw / 2, OY + 4, mw, 18);
+          c.fillStyle = 'rgba(255,255,120,' + a + ')';
+          c.font = 'bold 12px Minecraft, sans-serif'; c.textAlign = 'center';
+          c.fillText(msg, W / 2, OY + 17);
+        }
+
+        // Overlays
+        if (state === 'roomclear') {
+          c.fillStyle = 'rgba(0,40,0,0.85)';
+          c.fillRect(0, 0, W, H);
+          c.fillStyle = '#5f5'; c.font = '20px Minecraft, sans-serif'; c.textAlign = 'center';
+          c.fillText('Room Cleared!', W / 2, H / 2 - 24);
+          c.fillStyle = '#fc0'; c.font = '14px Minecraft, sans-serif';
+          c.fillText('Score: ' + totalScore, W / 2, H / 2);
+          c.fillStyle = '#aaa'; c.font = '11px sans-serif';
+          c.fillText('Click or press Space for next room', W / 2, H / 2 + 18);
+          drawBtn(W / 2 - 60, H / 2 + 30, 120, 26, room + 1 >= ROOMS_PER_RUN ? 'Finish' : 'Next Room');
+        }
+        if (state === 'dead') {
+          c.fillStyle = 'rgba(60,0,0,0.88)';
+          c.fillRect(0, 0, W, H);
+          c.fillStyle = '#f55'; c.font = '22px Minecraft, sans-serif'; c.textAlign = 'center';
+          c.fillText('Run Over', W / 2, H / 2 - 30);
+          // Empty hearts row
+          var ehSz = 16, ehGap = 4;
+          var ehW = MAX_LIVES * ehSz + (MAX_LIVES - 1) * ehGap;
+          var ehx = W / 2 - ehW / 2 + ehSz / 2;
+          for (var eh = 0; eh < MAX_LIVES; eh++) drawHeart(ehx + eh * (ehSz + ehGap), H / 2 - 8, ehSz, true);
+          c.fillStyle = '#fc0'; c.font = '14px Minecraft, sans-serif';
+          c.fillText('Final Score: ' + totalScore, W / 2, H / 2 + 16);
+          drawBtn(W / 2 - 70, H / 2 + 28, 140, 26, 'Difficulty Select');
+        }
+        if (state === 'victory') {
+          c.fillStyle = 'rgba(0,0,40,0.9)';
+          c.fillRect(0, 0, W, H);
+          c.fillStyle = '#ff0'; c.font = '24px Minecraft, sans-serif'; c.textAlign = 'center';
+          c.fillText('Victory!', W / 2, H / 2 - 30);
+          c.fillStyle = '#fff'; c.font = '14px Minecraft, sans-serif';
+          c.fillText('All ' + ROOMS_PER_RUN + ' rooms cleared on ' + DIFF_NAMES[difficulty], W / 2, H / 2 - 6);
+          c.fillStyle = '#fc0';
+          c.fillText('Score: ' + totalScore, W / 2, H / 2 + 14);
+          drawBtn(W / 2 - 70, H / 2 + 30, 140, 26, 'Play Again');
+        }
+
+        c.restore();
+      }
+
+      // ── Loop ───────────────────────────────────────
+      function loop() {
+        render();
+        setAnim(requestAnimationFrame(loop));
+      }
+
+      // ── Input ──────────────────────────────────────
+      function getPos(e) {
+        var rect = cvs.getBoundingClientRect();
+        var x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+        var y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+        return { x: x * (cvs.width / rect.width), y: y * (cvs.height / rect.height) };
       }
       function onClick(e) {
         var pos = getPos(e);
-        if (handleOverlayClick(pos)) return;
-        if (!player || state !== 'playing') return;
-        var pcx = OX + player.c * CELL + CELL / 2;
-        var pcy = OY + player.r * CELL + CELL / 2;
-        var dx = pos.x - pcx, dy = pos.y - pcy;
-        if (Math.abs(dx) < 5 && Math.abs(dy) < 5) return;
-        if (Math.abs(dx) > Math.abs(dy)) slide(0, dx > 0 ? 1 : -1);
-        else slide(dy > 0 ? 1 : -1, 0);
+        if (state === 'diffselect') {
+          for (var di4 = 0; di4 < 3; di4++) {
+            var bx = W / 2 - 100, by = OY + 80 + di4 * 56;
+            if (inBtn(pos.x, pos.y, bx, by, 200, 32)) { startRun(di4); return; }
+          }
+          return;
+        }
+        if (state === 'roomclear') {
+          if (inBtn(pos.x, pos.y, W / 2 - 60, H / 2 + 30, 120, 26)) {
+            room++;
+            loadRoom();
+          }
+          return;
+        }
+        if (state === 'dead') {
+          if (inBtn(pos.x, pos.y, W / 2 - 70, H / 2 + 28, 140, 26)) {
+            // Reset lives only on returning to menu after a death
+            lives = MAX_LIVES;
+            state = 'diffselect';
+          }
+          return;
+        }
+        if (state === 'victory') {
+          if (inBtn(pos.x, pos.y, W / 2 - 70, H / 2 + 30, 140, 26)) {
+            state = 'diffselect';
+          }
+          return;
+        }
+        if (state === 'playing') {
+          // Give Up button
+          var hudY = OY + ROWS * CELL + 4;
+          if (inBtn(pos.x, pos.y, W / 2 - 36, hudY + 30, 72, 18)) { giveUp(); return; }
+          // Click-to-step toward player
+          var pcx = OX + player.c * CELL + CELL / 2;
+          var pcy = OY + player.r * CELL + CELL / 2;
+          var dx = pos.x - pcx, dy = pos.y - pcy;
+          if (Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
+          if (Math.abs(dx) > Math.abs(dy)) tryMove(0, dx > 0 ? 1 : -1);
+          else tryMove(dy > 0 ? 1 : -1, 0);
+        }
       }
       function onKey(e) {
         if (state === 'diffselect') {
@@ -3780,34 +3416,20 @@
           else if (e.key === '3') { startRun(2); e.preventDefault(); }
           return;
         }
-        if (state === 'dead') {
-          if (e.key === ' ') { state = 'diffselect'; draw(); e.preventDefault(); }
+        if (state === 'roomclear') {
+          if (e.key === ' ' || e.key === 'Enter') { room++; loadRoom(); e.preventDefault(); }
           return;
         }
-        if (state === 'outofmoves') {
+        if (state === 'dead' || state === 'victory') {
           if (e.key === ' ' || e.key === 'Enter') {
-            lives--; if (lives <= 0) { die(); draw(); return; }
-            loadLevel(level); e.preventDefault();
-          }
-          return;
-        }
-        if (state === 'levelcomplete') {
-          if (e.key === ' ' || e.key === 'Enter') { level++; loadLevel(level); e.preventDefault(); }
-          if (e.key === 'r' || e.key === 'R') {
-            if (levelScoreBanked) { totalScore -= score; levelScoreBanked = false; sEl.textContent = totalScore; }
-            loadLevel(level);
+            if (state === 'dead') lives = MAX_LIVES;
+            state = 'diffselect';
             e.preventDefault();
           }
           return;
         }
-        if (state === 'victory') {
-          if (e.key === ' ') { state = 'diffselect'; draw(); e.preventDefault(); }
-          return;
-        }
-        if (e.key === 'r' || e.key === 'R') {
-          if (lives > 1) { lives--; loadLevel(level); } else { showMsg('Last life!'); }
-          e.preventDefault(); return;
-        }
+        if (state !== 'playing') return;
+        if (e.key === 'r' || e.key === 'R') { giveUp(); e.preventDefault(); return; }
         var dr = 0, dc = 0;
         if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') dr = -1;
         else if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') dr = 1;
@@ -3815,23 +3437,29 @@
         else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') dc = 1;
         else return;
         e.preventDefault();
-        slide(dr, dc);
+        tryMove(dr, dc);
+      }
+      function onTouchStart(e) { if (e.target === cvs) e.preventDefault(); }
+      function onTouchEnd(e) {
+        if (e.target !== cvs) return;
+        e.preventDefault();
+        // Treat tap as click
+        var rect = cvs.getBoundingClientRect();
+        var t0 = e.changedTouches && e.changedTouches[0];
+        if (!t0) return;
+        var pos = {
+          x: (t0.clientX - rect.left) * (cvs.width / rect.width),
+          y: (t0.clientY - rect.top) * (cvs.height / rect.height)
+        };
+        onClick({ clientX: t0.clientX, clientY: t0.clientY, touches: [t0] });
       }
 
       cvs.addEventListener('click', onClick);
-      cvs.addEventListener('touchstart', onTouchStart, {passive: false});
-      cvs.addEventListener('touchend', onTouchEnd, {passive: false});
+      cvs.addEventListener('touchstart', onTouchStart, { passive: false });
+      cvs.addEventListener('touchend', onTouchEnd, { passive: false });
       document.addEventListener('keydown', onKey);
 
-      // Start at difficulty select
       state = 'diffselect';
-      function loop() {
-        updateSlideAnim();
-        updateParticles();
-        updateShake();
-        draw();
-        setAnim(requestAnimationFrame(loop));
-      }
       loop();
 
       return {
@@ -3843,6 +3471,7 @@
         }
       };
     }
+
 
     // Mizardry promo popup
     (function () {
