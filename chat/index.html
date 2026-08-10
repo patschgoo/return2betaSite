@@ -31,8 +31,21 @@
       padding-top: 0;
     }
     body.popup-mode .header-band { display: none; }
-    body.popup-mode .chat-area { padding: 8px; }
+    body.popup-mode .chat-area { padding: 4px; }
     body.popup-mode .chat-area h1 { display: none; }
+    body.popup-mode .username-overlay { top: 0; }
+    /* Bigger, labelled tabs in popup so they're obvious */
+    body.popup-mode .channel-tabs { padding: 4px 8px 0; gap: 4px; background: rgba(0,0,0,0.45); }
+    body.popup-mode .channel-tab { font-size: 0.8rem; padding: 8px 0; border-bottom-width: 3px; }
+    body.popup-mode .channel-tabs::before {
+      content: 'Channel:';
+      color: #666;
+      font-family: 'Minecraft', sans-serif;
+      font-size: 0.6rem;
+      align-self: center;
+      white-space: nowrap;
+      margin-right: 6px;
+    }
     .header-band {
       min-height: 48px;
       width: 100%;

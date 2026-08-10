@@ -225,35 +225,71 @@ const discordClient = new Client({
 discordClient.once(Events.ClientReady, async (c) => {
   console.log(`Discord bot logged in as ${c.user.tag}`);
 
-  // Seed mc_lobby log from Discord history on first run (when log is empty)
+  // Seed mc_lobby log from full Discord history on first run
   if (DISCORD_MC_CHANNEL_ID) {
     try {
       const empty = !fs.existsSync(MC_LOG_FILE) ||
                     fs.readFileSync(MC_LOG_FILE, 'utf8').trim() === '';
-      if (empty) {
-        const ch = await c.channels.fetch(DISCORD_MC_CHANNEL_ID);
-        if (ch) {
-          const fetched = await ch.messages.fetch({ limit: 100 });
-          const sorted = [...fetched.values()]
-            .sort((a, b) => a.createdTimestamp - b.createdTimestamp);
-          for (const m of sorted) {
-            if (m.author.id === c.user.id) continue;
-            if (m.author.bot && m.content.startsWith('**[Web]')) continue;
-            const entry = {
-              type: 'chat',
-              source: m.author.bot ? 'minecraft' : 'discord',
-              username: m.member?.displayName || m.author.displayName || m.author.username,
-              text: m.content.slice(0, 500),
-              timestamp: m.createdTimestamp,
-            };
-            fs.appendFileSync(MC_LOG_FILE, JSON.stringify(entry) + '\n');
-          }
-          console.log(`[mc-history] Seeded ${sorted.length} messages from Discord`);
-        }
-      }
+      if (empty) await importDiscordHistory(c, DISCORD_MC_CHANNEL_ID);
     } catch (e) {
       console.error('[mc-history] Seed failed:', e.message);
     }
+  }
+});
+
+// Paginate through Discord channel history oldest-first and write to log
+async function importDiscordHistory(readyClient, channelId) {
+  const ch = await readyClient.channels.fetch(channelId);
+  if (!ch) return 0;
+  const all = [];
+  let before = undefined;
+  for (let page = 0; page < 200; page++) { // cap at 20 000 messages
+    const batch = await ch.messages.fetch({ limit: 100, ...(before ? { before } : {}) });
+    if (!batch.size) break;
+    all.push(...batch.values());
+    before = batch.last().id;
+    if (batch.size < 100) break;
+    await new Promise(r => setTimeout(r, 500)); // respect Discord rate limit
+  }
+  all.sort((a, b) => a.createdTimestamp - b.createdTimestamp);
+  const botId = readyClient.user.id;
+  let written = 0;
+  for (const m of all) {
+    if (m.author.id === botId) continue;
+    if (m.author.bot && m.content.startsWith('**[Web]')) continue;
+    const entry = {
+      type: 'chat',
+      source: m.author.bot ? 'minecraft' : 'discord',
+      username: m.member?.displayName || m.author.displayName || m.author.username,
+      text: m.content.slice(0, 500),
+      timestamp: m.createdTimestamp,
+    };
+    fs.appendFileSync(MC_LOG_FILE, JSON.stringify(entry) + '\n');
+    written++;
+  }
+  console.log(`[mc-history] Imported ${written} messages from Discord`);
+  return written;
+}
+
+// Protected endpoint to re-import full Discord history (wipes existing log)
+app.get('/mc-history/import', async (req, res) => {
+  const origin = req.headers.origin || '';
+  if (ALLOWED_ORIGINS.some(o => origin.startsWith(o))) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
+  const secret = process.env.IMPORT_SECRET;
+  if (!secret || req.query.token !== secret) {
+    res.status(403).json({ error: 'Forbidden' }); return;
+  }
+  if (!DISCORD_MC_CHANNEL_ID) {
+    res.status(400).json({ error: 'DISCORD_MC_CHANNEL_ID not set' }); return;
+  }
+  try {
+    if (fs.existsSync(MC_LOG_FILE)) fs.writeFileSync(MC_LOG_FILE, '');
+    const count = await importDiscordHistory(discordClient, DISCORD_MC_CHANNEL_ID);
+    res.json({ ok: true, imported: count });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
   }
 });
 

@@ -131,6 +131,7 @@
       <input type="text" id="searchInput" placeholder="Search messages…" />
       <span id="msgCount"></span>
       <button class="btn" id="downloadBtn">Download .txt</button>
+      <button class="btn" id="importBtn" style="border-color:rgba(85,255,85,0.4);color:#5f5" title="Fetch full Discord history (requires admin token)">↻ Import all from Discord</button>
     </div>
 
     <div class="log" id="log"><p class="loading">Loading…</p></div>
@@ -225,6 +226,20 @@
     document.getElementById('searchInput').addEventListener('input', applySearch);
 
     // Download as plain .txt (censored words shown as ***)
+    document.getElementById('importBtn').addEventListener('click', async () => {
+      const token = prompt('Enter import token:');
+      if (!token) return;
+      const btn = document.getElementById('importBtn');
+      btn.textContent = 'Importing…'; btn.disabled = true;
+      try {
+        const r = await fetch('https://chat.return2beta.com/mc-history/import?token=' + encodeURIComponent(token));
+        const d = await r.json();
+        if (d.ok) { alert(`Imported ${d.imported} messages. Reloading…`); await load(); }
+        else alert('Error: ' + (d.error || 'unknown'));
+      } catch { alert('Request failed — server may be offline.'); }
+      btn.textContent = '\u21bb Import all from Discord'; btn.disabled = false;
+    });
+
     document.getElementById('downloadBtn').addEventListener('click', () => {
       const lines = allMessages.map(m => {
         const { label } = sourceBadge(m.source);
