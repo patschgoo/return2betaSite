@@ -222,8 +222,39 @@ const discordClient = new Client({
   ],
 });
 
-discordClient.once(Events.ClientReady, (c) => {
+discordClient.once(Events.ClientReady, async (c) => {
   console.log(`Discord bot logged in as ${c.user.tag}`);
+
+  // Seed mc_lobby log from Discord history on first run (when log is empty)
+  if (DISCORD_MC_CHANNEL_ID) {
+    try {
+      const empty = !fs.existsSync(MC_LOG_FILE) ||
+                    fs.readFileSync(MC_LOG_FILE, 'utf8').trim() === '';
+      if (empty) {
+        const ch = await c.channels.fetch(DISCORD_MC_CHANNEL_ID);
+        if (ch) {
+          const fetched = await ch.messages.fetch({ limit: 100 });
+          const sorted = [...fetched.values()]
+            .sort((a, b) => a.createdTimestamp - b.createdTimestamp);
+          for (const m of sorted) {
+            if (m.author.id === c.user.id) continue;
+            if (m.author.bot && m.content.startsWith('**[Web]')) continue;
+            const entry = {
+              type: 'chat',
+              source: m.author.bot ? 'minecraft' : 'discord',
+              username: m.member?.displayName || m.author.displayName || m.author.username,
+              text: m.content.slice(0, 500),
+              timestamp: m.createdTimestamp,
+            };
+            fs.appendFileSync(MC_LOG_FILE, JSON.stringify(entry) + '\n');
+          }
+          console.log(`[mc-history] Seeded ${sorted.length} messages from Discord`);
+        }
+      }
+    } catch (e) {
+      console.error('[mc-history] Seed failed:', e.message);
+    }
+  }
 });
 
 discordClient.on(Events.MessageCreate, (message) => {

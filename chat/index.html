@@ -26,6 +26,13 @@
     body {
       padding-top: 48px;
     }
+    /* In popup mode the nav is hidden so no top offset needed */
+    body.popup-mode {
+      padding-top: 0;
+    }
+    body.popup-mode .header-band { display: none; }
+    body.popup-mode .chat-area { padding: 8px; }
+    body.popup-mode .chat-area h1 { display: none; }
     .header-band {
       min-height: 48px;
       width: 100%;
@@ -352,6 +359,8 @@
   </style>
 </head>
 <body>
+  <!-- Detect popup mode immediately to avoid layout flash -->
+  <script>if (window.opener) document.body.classList.add('popup-mode');</script>
   <header class="header-band" aria-label="Header">
     <a class="nav-link" href="/"><img src="../images/home_icon.png" alt="Home icon" />Home</a>
     <a class="nav-link" href="/map/"><img src="../images/map_icon.webp" alt="Map icon" />Map</a>
