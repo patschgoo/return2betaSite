@@ -211,6 +211,12 @@
       color: #f5c542;
       border-bottom-color: #f5c542;
     }
+    .channel-tab:disabled {
+      color: #444;
+      cursor: not-allowed;
+      border-bottom-color: transparent;
+    }
+    .channel-tab:disabled:hover { color: #444; }
     .chat-input-area {
       display: flex;
       border-top: 1px solid rgba(85,255,85,0.22);
@@ -434,7 +440,10 @@
     let ws = null;
     let username = localStorage.getItem('r2b_chat_username');
     let reconnectDelay = 1000;
-    let activeChannel = 'lobby'; // 'lobby' or 'mc_lobby'
+    // Restore channel from URL param (so popup inherits correct tab)
+    const _urlChannel = new URLSearchParams(location.search).get('ch');
+    let activeChannel = _urlChannel === 'mc_lobby' ? 'mc_lobby' : 'lobby';
+    let mcOnline = null; // null = unknown, true/false after first poll
 
     if (username) {
       overlay.classList.add('hidden');
@@ -604,11 +613,43 @@
     tabLobby.addEventListener('click', () => switchChannel('lobby'));
     tabMC.addEventListener('click',    () => switchChannel('mc_lobby'));
 
-    // Pop-out button
+    // Pop-out button — passes current channel so popup opens on same tab
     popupBtn.addEventListener('click', () => {
-      window.open(window.location.href, 'Return2Beta Chat',
+      const url = location.pathname + '?ch=' + activeChannel;
+      window.open(url, 'Return2Beta Chat',
         'width=480,height=640,menubar=no,toolbar=no,location=no,status=no');
     });
+
+    // ── MC server status polling ─────────────────────────
+    function applyMcStatus(online) {
+      mcOnline = online;
+      tabMC.disabled = !online;
+      if (!online) {
+        tabMC.title = 'Minecraft server is offline';
+        if (activeChannel === 'mc_lobby') switchChannel('lobby');
+      } else {
+        tabMC.title = '';
+      }
+      // Sync active tab appearance after status change
+      tabLobby.classList.toggle('active', activeChannel === 'lobby');
+      tabMC.classList.toggle('active', activeChannel === 'mc_lobby' && online);
+    }
+    async function pollMcStatus() {
+      try {
+        const r = await fetch('https://chat.return2beta.com/mc-status');
+        const d = await r.json();
+        applyMcStatus(!!d.online);
+      } catch { applyMcStatus(false); }
+    }
+    pollMcStatus();
+    setInterval(pollMcStatus, 30_000);
+
+    // Apply initial channel from URL param after DOM is ready
+    if (activeChannel === 'mc_lobby') {
+      tabLobby.classList.remove('active');
+      tabMC.classList.add('active');
+      chatInput.placeholder = 'Message #mc_lobby...';
+    }
 
     connect();
   </script>

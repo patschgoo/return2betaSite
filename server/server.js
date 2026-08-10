@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const http = require('http');
+const net = require('net');
 const { WebSocketServer } = require('ws');
 const { Client, GatewayIntentBits, Events } = require('discord.js');
 const scoresHandler = require('./scores-handler');
@@ -54,6 +55,38 @@ function sanitize(str) {
 // ── Express + HTTP server ───────────────────────────────
 const app = express();
 app.get('/health', (_req, res) => res.json({ ok: true }));
+
+// ── MC server status ─────────────────────────────
+// TCP probe to the GravelHost backend; cached 30s to avoid hammering.
+const MC_HOST = '5.9.123.120', MC_PORT = 50179, MC_STATUS_TTL = 30_000;
+let mcCache = { online: false, at: 0 };
+
+function probeMcServer() {
+  return new Promise((resolve) => {
+    const sock = net.createConnection({ host: MC_HOST, port: MC_PORT, timeout: 5000 });
+    sock.once('connect', () => { sock.destroy(); resolve(true); });
+    sock.once('error',   () => resolve(false));
+    sock.once('timeout', () => { sock.destroy(); resolve(false); });
+  });
+}
+async function getMcStatus() {
+  if (Date.now() - mcCache.at < MC_STATUS_TTL) return mcCache.online;
+  mcCache.online = await probeMcServer();
+  mcCache.at = Date.now();
+  return mcCache.online;
+}
+
+app.get('/mc-status', async (req, res) => {
+  const origin = req.headers.origin || '';
+  if (ALLOWED_ORIGINS.some(o => origin.startsWith(o))) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
+  res.json({ online: await getMcStatus() });
+});
+
+// Warm the cache at startup
+probeMcServer().then(ok => { mcCache.online = ok; mcCache.at = Date.now(); });
+
 const server = http.createServer(app);
 
 // ── WebSocket server ────────────────────────────────────
