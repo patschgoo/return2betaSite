@@ -497,7 +497,7 @@
     .cw-msg .time { color: #555; font-size: 0.85em; margin-right: 4px; }
     .cw-msg .name-web { color: #55ff55; }
     .cw-msg .name-discord { color: #7289da; }
-    .cw-censor{display:inline-block;cursor:pointer;user-select:none}.cw-censor>.cw{display:none}.cw-censor::before{content:"████";background:#3a3a3a;color:#666;border-radius:2px;padding:0 2px;font-size:.9em}.cw-censor:hover::before{display:none}.cw-censor:hover>.cw{display:inline;color:#f88}
+    .cw-censor{display:inline-block;filter:blur(5px);background:rgba(255,80,80,0.12);border-radius:2px;cursor:pointer;user-select:none;transition:filter .15s;color:#d8d8d8}.cw-censor:hover{filter:blur(0);color:#f88}
     .cw-msg.system { color: #888; font-style: italic; }
     .cw-input-area {
       display: flex; border-top: 1px solid rgba(85,255,85,0.22);
@@ -615,7 +615,7 @@
     closeBtn.addEventListener('click', function() { panel.classList.remove('open'); });
 
     function escapeHtml(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
-    var CW_BAD=['fuck','fucking','fucker','shit','bitch','bitches','asshole','cunt','dick','dickhead','cock','nigger','nigga','faggot','fag','bastard','whore','slut','retard','retarded','kys'];var CW_RE=new RegExp('('+CW_BAD.map(function(w){return w.replace(/[-\/\\^\+?.()|\[\]{}]/g,'\\\$&');}).join('|')+')','gi');function censorText(s){return escapeHtml(s).replace(CW_RE,function(m){return '<span class="cw-censor"><span class="cw">'+m+'</span></span>';});}
+    var CW_BAD=['fuck','fucking','fucker','shit','bitch','bitches','asshole','cunt','dick','dickhead','cock','nigger','nigga','faggot','fag','bastard','whore','slut','retard','retarded','kys'];var CW_RE=new RegExp('\\b('+CW_BAD.map(function(w){return w.replace(/[-\/\\^\+?.()|\[\]{}]/g,'\\\$&');}).join('|')+')','gi');function censorText(s){return escapeHtml(s).replace(CW_RE,function(m){return '<span class="cw-censor"><span class="cw">'+m+'</span></span>';});}
     function formatTime(ts) { return new Date(ts).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}); }
     function addMsg(html) { var d = document.createElement('div'); d.className='cw-msg'; d.innerHTML=html; msgs.appendChild(d); msgs.scrollTop=msgs.scrollHeight; }
     function addSys(t) { var d=document.createElement('div'); d.className='cw-msg system'; d.textContent=t; msgs.appendChild(d); msgs.scrollTop=msgs.scrollHeight; }
