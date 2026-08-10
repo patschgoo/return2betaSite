@@ -539,6 +539,9 @@
       text-decoration: none; border-top: 1px solid rgba(85,255,85,0.12);
     }
     .cw-expand-link:hover { color: #55ff55; }
+    .cw-tabs{display:flex;border-bottom:1px solid rgba(85,255,85,0.22);background:rgba(0,0,0,0.2)}
+    .cw-tab{flex:1;padding:5px 0;background:none;border:none;border-bottom:2px solid transparent;color:#666;font-family:'Minecraft',sans-serif;font-size:.55rem;cursor:pointer;transition:color .15s}
+    .cw-tab:hover{color:#aaa}.cw-tab.active{color:#55ff55;border-bottom-color:#55ff55}.cw-tab.active.cw-tab-mc{color:#f5c542;border-bottom-color:#f5c542}.cw-tab:disabled{color:#333;cursor:not-allowed}
     .cw-logout { background: none; border: none; color: #888; font-family: 'Minecraft', sans-serif; font-size: 0.55rem; cursor: pointer; margin-left: 6px; padding: 0; }
     .cw-logout:hover { color: #ff5555; }
     .cw-resize-handle { display: none; position: absolute; top: 0; left: 0; width: 16px; height: 16px; cursor: nwse-resize; z-index: 12; }
@@ -564,6 +567,7 @@
       <span>Chat <span class="cw-status" id="cwStatus">Connecting...</span></span>
       <span><button class="cw-logout" id="cwLogout" title="Switch username" style="display:none">[switch]</button><button class="cw-close" id="cwClose">&times;</button></span>
     </div>
+    <div class="cw-tabs"><button class="cw-tab active" id="cwTabLobby">#lobby</button><button class="cw-tab cw-tab-mc" id="cwTabMC">#mc_lobby</button></div>
     <div class="cw-messages" id="cwMessages"></div>
     <div class="cw-input-area">
       <input type="text" id="cwInput" placeholder="Type a message..." maxlength="500" autocomplete="off" disabled />
@@ -593,7 +597,12 @@
     var nameInput = document.getElementById('cwNameInput');
     var nameBtn = document.getElementById('cwNameBtn');
     var logoutBtn = document.getElementById('cwLogout');
-    var ws = null, username = localStorage.getItem('r2b_chat_username'), reconnectDelay = 1000, opened = false;
+    var ws = null, username = localStorage.getItem('r2b_chat_username'), reconnectDelay = 1000, opened = false, activeChannel = 'lobby';
+    var tabLobby = document.getElementById('cwTabLobby'), tabMC = document.getElementById('cwTabMC');
+
+    function switchCwChannel(ch){if(ch===activeChannel)return;activeChannel=ch;tabLobby.classList.toggle('active',ch==='lobby');tabMC.classList.toggle('active',ch==='mc_lobby');msgs.innerHTML='';addSys('Switched to #'+ch);if(ws&&ws.readyState===1&&username)ws.send(JSON.stringify({type:'set_username',username:username,channel:ch}));}
+    tabLobby.addEventListener('click',function(){switchCwChannel('lobby');});
+    tabMC.addEventListener('click',function(){switchCwChannel('mc_lobby');});
 
     if (username) { nameOverlay.classList.add('hidden'); logoutBtn.style.display = ''; }
 
@@ -608,8 +617,8 @@
     function addMsg(html) { var d = document.createElement('div'); d.className='cw-msg'; d.innerHTML=html; msgs.appendChild(d); msgs.scrollTop=msgs.scrollHeight; }
     function addSys(t) { var d=document.createElement('div'); d.className='cw-msg system'; d.textContent=t; msgs.appendChild(d); msgs.scrollTop=msgs.scrollHeight; }
     function renderChat(m) {
-      var nc = m.source==='discord'?'name-discord':'name-web';
-      var b = m.source==='discord'?'[Discord]':'[Guest]';
+      var nc = m.source==='discord'?'name-discord':m.source==='minecraft'?'name-mc':'name-web';
+      var b = m.source==='discord'?'[Discord]':m.source==='minecraft'?'[MC]':'[Guest]';
       addMsg('<span class="time">'+escapeHtml(formatTime(m.timestamp))+'</span><span class="'+nc+'">'+escapeHtml(b+' '+m.username)+':</span> '+escapeHtml(m.text));
     }
 
@@ -618,7 +627,7 @@
       ws.onopen = function() {
         status.textContent='Connected'; status.classList.add('connected');
         reconnectDelay=1000;
-        if (username) ws.send(JSON.stringify({type:'set_username',username:username}));
+        if (username) ws.send(JSON.stringify({type:'set_username',username:username,channel:activeChannel}));
       };
       ws.onmessage = function(e) {
         var data; try{data=JSON.parse(e.data);}catch(x){return;}
@@ -640,14 +649,14 @@
     function send() {
       var t=input.value.trim(); if(!t||!ws||ws.readyState!==1)return;
       var now=Date.now(); if(now-lastSend<1500)return; lastSend=now;
-      ws.send(JSON.stringify({type:'chat',text:t})); input.value=''; input.focus();
+      ws.send(JSON.stringify({type:'chat',text:t,channel:activeChannel})); input.value=''; input.focus();
     }
     sendBtn.addEventListener('click', send);
     input.addEventListener('keydown', function(e){if(e.key==='Enter')send();});
     nameBtn.addEventListener('click', function(){
       var n=nameInput.value.trim(); if(!n)return; username=n;
       localStorage.setItem('r2b_chat_username', n);
-      if(ws&&ws.readyState===1) ws.send(JSON.stringify({type:'set_username',username:n}));
+      if(ws&&ws.readyState===1) ws.send(JSON.stringify({type:'set_username',username:n,channel:activeChannel}));
     });
     nameInput.addEventListener('keydown', function(e){if(e.key==='Enter')nameBtn.click();});
     logoutBtn.addEventListener('click', function(){
