@@ -170,7 +170,17 @@ wss.on('connection', (ws, req) => {
       ws.activeChannel = requestedChannel;
 
       ws.send(JSON.stringify({ type: 'username_set', username }));
-      ws.send(JSON.stringify({ type: 'history', messages: channelHistory[requestedChannel] }));
+
+      // For mc_lobby serve last 20 from the persistent log (survives server restarts)
+      if (requestedChannel === 'mc_lobby' && fs.existsSync(MC_LOG_FILE)) {
+        try {
+          const lines = fs.readFileSync(MC_LOG_FILE, 'utf8').trim().split('\n').filter(Boolean);
+          const persisted = lines.slice(-20).map(l => { try { return JSON.parse(l); } catch { return null; } }).filter(Boolean);
+          ws.send(JSON.stringify({ type: 'history', messages: persisted }));
+        } catch { ws.send(JSON.stringify({ type: 'history', messages: channelHistory[requestedChannel] })); }
+      } else {
+        ws.send(JSON.stringify({ type: 'history', messages: channelHistory[requestedChannel] }));
+      }
       return;
     }
 

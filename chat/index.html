@@ -462,9 +462,11 @@
     let ws = null;
     let username = localStorage.getItem('r2b_chat_username');
     let reconnectDelay = 1000;
-    // Restore channel from URL param (so popup inherits correct tab)
+    // URL param takes precedence; fall back to last saved choice
     const _urlChannel = new URLSearchParams(location.search).get('ch');
-    let activeChannel = _urlChannel === 'mc_lobby' ? 'mc_lobby' : 'lobby';
+    let activeChannel = _urlChannel === 'mc_lobby' ? 'mc_lobby'
+                      : _urlChannel === 'lobby'    ? 'lobby'
+                      : (localStorage.getItem('r2b_chat_channel') || 'lobby');
     let mcOnline = null; // null = unknown, true/false after first poll
 
     if (username) {
@@ -621,6 +623,7 @@
     function switchChannel(ch) {
       if (ch === activeChannel) return;
       activeChannel = ch;
+      localStorage.setItem('r2b_chat_channel', ch);
       tabLobby.classList.toggle('active', ch === 'lobby');
       tabMC.classList.toggle('active', ch === 'mc_lobby');
       chatInput.placeholder = ch === 'mc_lobby' ? 'Message #mc_lobby...' : 'Type a message...';

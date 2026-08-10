@@ -597,10 +597,11 @@
     var nameInput = document.getElementById('cwNameInput');
     var nameBtn = document.getElementById('cwNameBtn');
     var logoutBtn = document.getElementById('cwLogout');
-    var ws = null, username = localStorage.getItem('r2b_chat_username'), reconnectDelay = 1000, opened = false, activeChannel = 'lobby';
+    var ws = null, username = localStorage.getItem('r2b_chat_username'), reconnectDelay = 1000, opened = false, activeChannel = localStorage.getItem('r2b_chat_channel') || 'lobby';
     var tabLobby = document.getElementById('cwTabLobby'), tabMC = document.getElementById('cwTabMC');
+    if (activeChannel === 'mc_lobby') { tabLobby.classList.remove('active'); tabMC.classList.add('active'); }
 
-    function switchCwChannel(ch){if(ch===activeChannel)return;activeChannel=ch;tabLobby.classList.toggle('active',ch==='lobby');tabMC.classList.toggle('active',ch==='mc_lobby');msgs.innerHTML='';addSys('Switched to #'+ch);if(ws&&ws.readyState===1&&username)ws.send(JSON.stringify({type:'set_username',username:username,channel:ch}));}
+    function switchCwChannel(ch){if(ch===activeChannel)return;activeChannel=ch;localStorage.setItem('r2b_chat_channel',ch);tabLobby.classList.toggle('active',ch==='lobby');tabMC.classList.toggle('active',ch==='mc_lobby');msgs.innerHTML='';addSys('Switched to #'+ch);if(ws&&ws.readyState===1&&username)ws.send(JSON.stringify({type:'set_username',username:username,channel:ch}));}
     tabLobby.addEventListener('click',function(){switchCwChannel('lobby');});
     tabMC.addEventListener('click',function(){switchCwChannel('mc_lobby');});
 
