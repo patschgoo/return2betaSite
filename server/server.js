@@ -1,4 +1,6 @@
 require('dotenv').config();
+const fs = require('fs');
+const path = require('path');
 const express = require('express');
 const http = require('http');
 const net = require('net');
@@ -87,6 +89,27 @@ app.get('/mc-status', async (req, res) => {
 // Warm the cache at startup
 probeMcServer().then(ok => { mcCache.online = ok; mcCache.at = Date.now(); });
 
+// ── mc_lobby persistent history log ─────────────────
+const MC_LOG_FILE = path.join(__dirname, 'mc-lobby-history.jsonl');
+
+function appendMcLog(msg) {
+  fs.appendFile(MC_LOG_FILE, JSON.stringify(msg) + '\n', () => {});
+}
+
+app.get('/mc-history', (req, res) => {
+  const origin = req.headers.origin || '';
+  if (ALLOWED_ORIGINS.some(o => origin.startsWith(o))) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
+  fs.readFile(MC_LOG_FILE, 'utf8', (err, data) => {
+    if (err) { res.json({ messages: [] }); return; }
+    const messages = data.trim().split('\n').filter(Boolean).map(line => {
+      try { return JSON.parse(line); } catch { return null; }
+    }).filter(Boolean);
+    res.json({ messages });
+  });
+});
+
 const server = http.createServer(app);
 
 // ── WebSocket server ────────────────────────────────────
@@ -104,6 +127,7 @@ function pushHistory(channel, msg) {
   const hist = channelHistory[channel] || channelHistory.lobby;
   hist.push(msg);
   if (hist.length > MESSAGE_HISTORY_SIZE) hist.shift();
+  if (channel === 'mc_lobby') appendMcLog(msg);
 }
 
 // Broadcast only to clients on the given channel
