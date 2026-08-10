@@ -178,10 +178,39 @@
       font-size: 0.85em;
       margin-right: 6px;
     }
-    .chat-msg .name-web { color: #55ff55; }
-    .chat-msg .name-discord { color: #7289da; }
+    .chat-msg .name-web     { color: #55ff55; }
+    .chat-msg .name-discord  { color: #7289da; }
+    .chat-msg .name-mc       { color: #f5c542; }
     .chat-msg .text { color: #d8d8d8; }
     .chat-msg.system { color: #888; font-style: italic; }
+    /* Channel tabs */
+    .channel-tabs {
+      display: flex;
+      border-bottom: 1px solid rgba(85,255,85,0.22);
+      background: rgba(0,0,0,0.25);
+    }
+    .channel-tab {
+      flex: 1;
+      padding: 6px 0;
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: #777;
+      font-family: 'Minecraft', sans-serif;
+      font-size: 0.65rem;
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s;
+      text-shadow: 1px 1px 0 rgba(0,0,0,0.7);
+    }
+    .channel-tab:hover { color: #aaa; }
+    .channel-tab.active {
+      color: #55ff55;
+      border-bottom-color: #55ff55;
+    }
+    .channel-tab.active.mc {
+      color: #f5c542;
+      border-bottom-color: #f5c542;
+    }
     .chat-input-area {
       display: flex;
       border-top: 1px solid rgba(85,255,85,0.22);
@@ -360,6 +389,10 @@
           <button class="popup-btn" id="popupBtn" title="Open chat in popup">Pop out</button>
         </span>
       </div>
+      <div class="channel-tabs">
+        <button class="channel-tab active" id="tabLobby">#lobby</button>
+        <button class="channel-tab mc" id="tabMC">#mc_lobby</button>
+      </div>
       <div class="chat-messages" id="messages"></div>
       <div class="chat-input-area">
         <input type="text" id="chatInput" placeholder="Type a message..." maxlength="500" autocomplete="off" disabled />
@@ -395,10 +428,13 @@
     const nameInput  = document.getElementById('usernameInput');
     const nameBtn    = document.getElementById('usernameBtn');
     const nameError  = document.getElementById('usernameError');
+    const tabLobby   = document.getElementById('tabLobby');
+    const tabMC      = document.getElementById('tabMC');
 
     let ws = null;
     let username = localStorage.getItem('r2b_chat_username');
     let reconnectDelay = 1000;
+    let activeChannel = 'lobby'; // 'lobby' or 'mc_lobby'
 
     if (username) {
       overlay.classList.add('hidden');
@@ -440,20 +476,15 @@
         statusEl.classList.add('connected');
         reconnectDelay = 1000;
         if (username) {
-          ws.send(JSON.stringify({ type: 'set_username', username }));
-        }
-      };
-
-      ws.onmessage = (e) => {
-        let data;
+            ws.send(JSON.stringify({ type: 'set_username', username, channel: activeChannel }));
         try { data = JSON.parse(e.data); } catch { return; }
 
         if (data.type === 'history') {
           if (data.messages && data.messages.length) {
             addSystem('--- Recent messages ---');
             data.messages.forEach(function(m) {
-              var nameClass = m.source === 'discord' ? 'name-discord' : 'name-web';
-              var badge = m.source === 'discord' ? '[Discord]' : '[Guest]';
+              var nameClass = m.source === 'discord' ? 'name-discord' : m.source === 'minecraft' ? 'name-mc' : 'name-web';
+              var badge = m.source === 'discord' ? '[Discord]' : m.source === 'minecraft' ? '[MC]' : '[Guest]';
               var time = formatTime(m.timestamp);
               addMessage(
                 '<span class="time">' + escapeHtml(time) + '</span>' +
@@ -487,8 +518,8 @@
         }
 
         if (data.type === 'chat') {
-          const nameClass = data.source === 'discord' ? 'name-discord' : 'name-web';
-          const badge = data.source === 'discord' ? '[Discord]' : '[Guest]';
+          const nameClass = data.source === 'discord' ? 'name-discord' : data.source === 'minecraft' ? 'name-mc' : 'name-web';
+          const badge = data.source === 'discord' ? '[Discord]' : data.source === 'minecraft' ? '[MC]' : '[Guest]';
           const time = formatTime(data.timestamp);
           addMessage(
             '<span class="time">' + escapeHtml(time) + '</span>' +
@@ -517,7 +548,7 @@
       var now = Date.now();
       if (now - lastSendTime < 1500) return;
       lastSendTime = now;
-      ws.send(JSON.stringify({ type: 'chat', text }));
+      ws.send(JSON.stringify({ type: 'chat', text, channel: activeChannel }));
       chatInput.value = '';
       chatInput.focus();
     }
@@ -533,7 +564,7 @@
       username = name;
       localStorage.setItem('r2b_chat_username', name);
       if (ws && ws.readyState === 1) {
-        ws.send(JSON.stringify({ type: 'set_username', username: name }));
+        ws.send(JSON.stringify({ type: 'set_username', username: name, channel: activeChannel }));
       }
     });
     nameInput.addEventListener('keydown', (e) => {
@@ -550,6 +581,23 @@
       nameInput.value = '';
       nameInput.focus();
     });
+
+    function switchChannel(ch) {
+      if (ch === activeChannel) return;
+      activeChannel = ch;
+      tabLobby.classList.toggle('active', ch === 'lobby');
+      tabMC.classList.toggle('active', ch === 'mc_lobby');
+      chatInput.placeholder = ch === 'mc_lobby' ? 'Message #mc_lobby...' : 'Type a message...';
+      messagesEl.innerHTML = '';
+      addSystem('Switched to #' + ch);
+      if (ws && ws.readyState === 1 && username) {
+        // Re-announce to server so it sends history for the new channel
+        ws.send(JSON.stringify({ type: 'set_username', username, channel: ch }));
+      }
+    }
+
+    tabLobby.addEventListener('click', () => switchChannel('lobby'));
+    tabMC.addEventListener('click',    () => switchChannel('mc_lobby'));
 
     // Pop-out button
     popupBtn.addEventListener('click', () => {
