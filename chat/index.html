@@ -203,6 +203,12 @@
     .chat-msg .name-mc       { color: #f5c542; }
     .chat-msg .text { color: #d8d8d8; }
     .chat-msg.system { color: #888; font-style: italic; }
+    /* ████ block censoring — hover to reveal */
+    .censor { display:inline-block; cursor:pointer; user-select:none; position:relative; }
+    .censor>.cw { display:none; }
+    .censor::before { content:'\2588\2588\2588\2588'; background:#3a3a3a; color:#666; border-radius:2px; padding:0 3px; font-size:0.9em; }
+    .censor:hover::before { display:none; }
+    .censor:hover>.cw { display:inline; color:#f88; }
     /* Channel tabs */
     .channel-tabs {
       display: flex;
@@ -501,6 +507,12 @@
       return div.innerHTML;
     }
 
+    const BAD_WORDS_CHAT = ['fuck','fucking','fucker','shit','shitting','bullshit','bitch','bitches','asshole','cunt','cunts','dick','dickhead','cock','nigger','nigga','faggot','fag','bastard','whore','slut','retard','retarded','kys'];
+    const CENSOR_RE_CHAT = new RegExp('(' + BAD_WORDS_CHAT.map(w => w.replace(/[-\/\\^$*+?.()|[\]{}]/g,'\\$&')).join('|') + ')','gi');
+    function censorText(s) {
+      return escapeHtml(s).replace(CENSOR_RE_CHAT, (m) => '<span class="censor"><span class="cw">' + m + '</span></span>');
+    }
+
     function connect() {
       ws = new WebSocket(WS_URL);
 
@@ -527,7 +539,7 @@
               addMessage(
                 '<span class="time">' + escapeHtml(time) + '</span>' +
                 '<span class="' + nameClass + '">' + escapeHtml(badge + ' ' + m.username) + ':</span> ' +
-                '<span class="text">' + escapeHtml(m.text) + '</span>'
+                '<span class="text">' + censorText(m.text) + '</span>'
               );
             });
             addSystem('--- End of history ---');
@@ -562,7 +574,7 @@
           addMessage(
             '<span class="time">' + escapeHtml(time) + '</span>' +
             '<span class="' + nameClass + '">' + escapeHtml(badge + ' ' + data.username) + ':</span> ' +
-            '<span class="text">' + escapeHtml(data.text) + '</span>'
+            '<span class="text">' + censorText(data.text) + '</span>'
           );
         }
       };

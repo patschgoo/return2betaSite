@@ -99,17 +99,27 @@
     .log-source-minecraft{ color: #f5c542; }
     .log-text { color: #d8d8d8; }
 
-    /* ── Censored words — blurred unless hovered ───────── */
+    /* ── Censored words — ████ block, hover to reveal ─── */
     .censor {
       display: inline-block;
-      background: rgba(255,80,80,0.15);
-      border-radius: 2px;
-      filter: blur(4px);
       cursor: pointer;
       user-select: none;
-      transition: filter 0.2s;
+      position: relative;
     }
-    .censor:hover { filter: blur(0); }
+    /* Hide actual word; show ████ via ::before */
+    .censor > .cw { display: none; }
+    .censor::before {
+      content: '\2588\2588\2588\2588';
+      background: #3a3a3a;
+      color: #666;
+      border-radius: 2px;
+      padding: 0 3px;
+      letter-spacing: 1px;
+      font-size: 0.9em;
+    }
+    /* Hover: hide blocks, reveal word in red */
+    .censor:hover::before { display: none; }
+    .censor:hover > .cw { display: inline; color: #f88; }
 
     .empty { color: #555; font-style: italic; padding: 20px 0; text-align: center; }
     .loading { color: #888; padding: 20px 0; text-align: center; }
@@ -164,7 +174,9 @@
 
     function censorText(raw) {
       const escaped = raw.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-      return escaped.replace(CENSOR_RE, '<span class="censor">$1</span>');
+      return escaped.replace(CENSOR_RE, (match) =>
+        '<span class="censor"><span class="cw">' + match + '</span></span>'
+      );
     }
 
     function formatTime(ts) {
