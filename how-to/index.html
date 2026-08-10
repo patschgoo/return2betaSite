@@ -439,6 +439,7 @@
         <li><a href="#server-mods">Server Mods</a></li>
         <li><a href="#useful-mods">Useful Mods</a></li>
         <li><a href="#troubleshooting">Troubleshooting</a></li>
+        <li><a href="#platform-notes">macOS &amp; Linux Notes</a></li>
         <li><a href="#incompatible">Incompatible Platforms</a></li>
       </ul>
     </div>
@@ -834,6 +835,46 @@
         <li>Beta 1.7.3 uses the old sound system. BetaCraft and LTS Launcher patch this automatically.</li>
         <li>For MultiMC/Prism, install <strong><a href="https://github.com/betacraftuk/legacyfix" target="_blank" rel="noopener noreferrer">LegacyFix</a></strong> — a mod that fixes sound, skins, and other legacy issues. Add it to your instance's mods folder.</li>
       </ul>
+    </div>
+
+    <!-- ─── Platform Notes: macOS & Linux ─── -->
+    <h2 id="platform-notes">Platform Notes: macOS &amp; Linux</h2>
+    <p style="color: #aaa; font-size: clamp(0.6rem, 1vw, 0.78rem); margin-bottom: 12px;">Return2Beta officially supports Windows, macOS, and Linux. Both macOS and Linux can connect without any server-side workaround — the direct endpoint <code>5.9.123.120:50179</code> is reachable from all three. Any issues you may hit are almost always <strong>client-side</strong>, and are listed below.</p>
+
+    <div class="launcher-section">
+      <h3>macOS (Intel &amp; Apple Silicon)</h3>
+      <ul>
+        <li><strong>Use Beta <code>b1.7.3</code>, not Release 1.7.3.</strong> The names are visually similar in launcher lists but they are completely different versions.</li>
+        <li><strong>Use Java 8</strong> for the Beta instance. Newer Java versions (17, 21) crash Beta 1.7.3 on launch. <a href="https://adoptium.net/temurin/releases/?version=8" target="_blank" rel="noopener noreferrer">Temurin 8</a> is a reliable free build.</li>
+        <li><strong>Allocate only 512 MB – 1 GB</strong> of RAM to the client. Beta does not benefit from more, and over-allocation can cause launch failures.</li>
+        <li><strong>BetaCraft is the easiest option on Mac</strong> — it bundles the legacy sound/skin/session fixes that Beta 1.7.3 otherwise needs.</li>
+        <li>With <strong>Prism Launcher</strong> or <strong>MultiMC</strong>, add <a href="https://github.com/betacraftuk/legacyfix" target="_blank" rel="noopener noreferrer">LegacyFix</a> to the instance's mods folder to restore old sound and skin services.</li>
+        <li><strong>Apple Silicon (M1/M2/M3/M4):</strong> the launcher architecture and the Java architecture must match.
+          <ul>
+            <li>An ARM (aarch64) launcher usually needs an ARM Java 8 build (e.g. <a href="https://www.azul.com/downloads/?version=java-8-lts&os=macos&architecture=arm-64-bit&package=jdk" target="_blank" rel="noopener noreferrer">Azul Zulu 8 for macOS ARM64</a>).</li>
+            <li>Some older Intel-only components (or an x86_64 launcher) require <strong>Rosetta 2</strong>. Install it with <code>softwareupdate --install-rosetta</code> in Terminal if prompted.</li>
+          </ul>
+        </li>
+        <li><strong>Gatekeeper may block unsigned launchers</strong> on first run. If macOS says the app "cannot be opened" or "is damaged", open <strong>System Settings → Privacy &amp; Security</strong> and click <em>Open Anyway</em>, or run <code>xattr -dr com.apple.quarantine /path/to/Launcher.app</code> in Terminal.</li>
+        <li><strong>LegacyVoiceChat</strong> needs microphone access under <strong>System Settings → Privacy &amp; Security → Microphone</strong>. If Java is not listed, launch the client once with the mod enabled — macOS will then offer the permission prompt.</li>
+        <li><strong>Right-click:</strong> enable "Secondary click" in <strong>System Settings → Trackpad</strong>, or use <kbd>Control</kbd>-click, or plug in a two-button mouse. Without this you cannot place blocks in-game.</li>
+        <li><strong>DynamicLight</strong> requires no Mac-specific setup — it is driven by the server.</li>
+      </ul>
+
+      <h3>Linux</h3>
+      <ul>
+        <li><strong>Install a Java 8 JRE.</strong> On Debian/Ubuntu: <code>sudo apt install openjdk-8-jre</code>. On Fedora: <code>sudo dnf install java-1.8.0-openjdk</code>. On Arch: <code>sudo pacman -S jre8-openjdk</code>.</li>
+        <li>In Prism/MultiMC/BetaCraft, point the instance's Java path at the Java 8 binary (typically <code>/usr/lib/jvm/java-8-openjdk*/bin/java</code>).</li>
+        <li><strong>Wayland:</strong> Beta 1.7.3 uses old LWJGL2 which does not speak Wayland natively. It runs through <strong>XWayland</strong> automatically on most desktops, but if the window fails to grab the cursor or keyboard input misbehaves, launch under an X11 session, or set <code>SDL_VIDEODRIVER=x11</code> / <code>GDK_BACKEND=x11</code> in the instance environment.</li>
+        <li><strong>Sound:</strong> if you hear nothing, install the <code>pulseaudio</code> or <code>pipewire-pulse</code> compatibility layer. On PipeWire-only systems, launch with <code>PULSE_LATENCY_MSEC=60</code>. LegacyFix (see above) also repairs Beta's own sound download URLs.</li>
+        <li><strong>Flatpak launchers</strong> (e.g. Flatpak Prism) are sandboxed. Give them access to your Java install with <code>flatpak override --user --filesystem=/usr/lib/jvm org.prismlauncher.PrismLauncher</code>, or use the native package.</li>
+        <li><strong>Snap Java</strong> is confined and often cannot see the launcher's working directory. Prefer distro-packaged or Adoptium/Temurin Java over the Snap version.</li>
+        <li><strong>Missing 32-bit libraries:</strong> a few old LWJGL natives are 32-bit. If launch logs mention <code>libGL</code> or <code>libopenal</code> not found, install the multilib/i386 mesa and OpenAL packages for your distro.</li>
+        <li><strong>NVIDIA proprietary drivers</strong> occasionally crash on the Beta title screen. Update to a current driver, or switch that instance to software rendering with <code>LIBGL_ALWAYS_SOFTWARE=1</code> as a fallback.</li>
+        <li><strong>Firewalls:</strong> allow outbound TCP to the server IP. UFW users: <code>sudo ufw allow out 25565/tcp</code> (and <code>50179/tcp</code> if using the direct endpoint).</li>
+      </ul>
+
+      <div class="note">Modern (Java 17+) clients such as vanilla release launchers cannot talk to a Beta 1.7.3 server directly. Use the Return2Beta <strong>ViaProxy</strong> address described further up this page, or launch native <code>b1.7.3</code> via BetaCraft with Java 8 for the smoothest experience.</div>
     </div>
 
     <!-- ─── Incompatible Platforms ─── -->
