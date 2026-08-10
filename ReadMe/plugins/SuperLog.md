@@ -10,3 +10,4 @@ SuperLog runs silently in the background. Your actions (block placement, block b
 - No commands for regular players.
 - If you've been griefed, staff can use the logs to find out who did it and when.
 - This is why you should always report griefing — the evidence is recorded automatically.
+- Command logging is enabled. Staff must confirm that `/login`, `/register`, and password-change arguments are filtered or redacted; otherwise authentication passwords may be written to logs.

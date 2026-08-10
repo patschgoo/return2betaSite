@@ -14,4 +14,5 @@ Members can check the server's current performance at any time.
 ## Notes
 - A healthy server runs at 20 TPS. Lower numbers mean more lag.
 - The displayed value is an average over 10 readings for accuracy.
+- ServerHealth independently records effective TPS and storage every five minutes for operator review.
 - If the server is consistently laggy, consider starting a vote to restart (see Vote plugin).

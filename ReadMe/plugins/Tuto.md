@@ -9,8 +9,8 @@ Members (and Visitors) can list and read available tutorials to learn about the 
 ## Commands
 | Command | Description |
 |---------|-------------|
-| `/tutolist` | List all available tutorials (5 per page). |
-| `/tutolist <page>` | View a specific page of the tutorial list. |
+| `/tuto list` | List all available tutorials. |
+| `/tuto list <page>` | View a specific page of the tutorial list. |
 | `/tuto <name>` | Open a specific tutorial. |
 | `/tuto <name> <page>` | Jump to a specific page in a tutorial. |
 
@@ -71,3 +71,4 @@ Members (and Visitors) can list and read available tutorials to learn about the 
 - Tutorials are color-coded: main text in aqua, menus in red, lists in white.
 - Each tutorial page may include text, blocks to try placing, or commands to try.
 - Tutorial title and page title are shown at the top of each page.
+- Visitors have permission to list and read tutorials.

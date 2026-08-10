@@ -8,5 +8,8 @@ This is a background plugin with no player impact. It ensures server logs are pr
 
 ## Notes
 - Logs are backed up every **24 hours** (1440 minutes).
+- A size rotation also occurs when the active log reaches **10 MB**.
 - Backups are compressed (zipped) to save space.
+- ServerHealth keeps the 14 newest archives, one daily archive for 30 days, and one weekly archive for 180 days.
+- Retention uses timestamps in archive filenames, so copied files retain their correct age ordering.
 - No commands for regular players.

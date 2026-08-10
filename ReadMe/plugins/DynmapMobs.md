@@ -4,30 +4,19 @@
 Dynmap-Mobs is a Dynmap addon that shows mob markers on the live web map. Each tracked mob type appears as an icon on the map so you can see where mobs are in real-time.
 
 ## How It Affects You
-When viewing the Dynmap in your browser, you can toggle on the "Mobs" layer to see hostile and notable mobs on the map. This helps you find or avoid mobs in the world.
+When viewing the Dynmap in your browser, you can toggle the "Nearby Mobs" layer. Markers are sampled around online players instead of scanning every loaded creature.
 
-## Tracked Mobs
-| Mob | Shown on Map |
-|-----|:---:|
-| Creeper | Yes |
-| Skeleton | Yes |
-| Zombie | Yes |
-| Spider | Yes |
-| Spider Jockey | Yes |
-| Ghast | Yes |
-| Slime | Yes |
-| Giant | Yes |
-| Zombie Pigman | Yes |
-| Chicken | No |
-| Cow | No |
-| Pig | No |
-| Sheep | No |
-| Squid | No |
-| Wolf | No |
-| Tamed Wolf | No |
+## Sampling Limits
+| Setting | Value |
+|---------|------:|
+| Update period | 15 seconds |
+| Horizontal player radius | 64 blocks |
+| Vertical player radius | 32 blocks |
+| Maximum markers per player | 6 |
+| Maximum markers total | 24 |
+| Coordinate resolution | 2 blocks |
 
 ## Notes
-- Mob positions update every **5 seconds**.
-- Mobs hidden under solid blocks (15+ blocks of cover) or in shadow (light level 4 or below) are not shown.
-- The "Mobs" layer can be toggled on/off in the Dynmap web interface.
-- Passive animals are not tracked by default — only hostile and notable mobs.
+- Hostile and passive mobs use configurable sampling weights.
+- Marker count is bounded even when many mobs are loaded.
+- ServerHealth reports Dynmap storage, while old tile deletion remains report-only to avoid holes in valid map coverage.

@@ -5,7 +5,8 @@ AuthMe protects your account by requiring you to register a password and log in 
 
 ## How It Affects You
 - On first join, you must register with a password.
-- Each time you connect, you must log in within 30 seconds or you will be timed out.
+- Each time you connect, you must log in within 60 seconds or you will be timed out.
+- Login or registration reminders are shown every 10 seconds.
 - Until you log in, you cannot chat, use commands (except `/login` and `/register`), or walk around.
 - You stay at your last location when you connect — you are frozen in place until you log in.
 - Usernames must be 3–20 characters and can only contain letters, numbers, and underscores.
@@ -19,3 +20,8 @@ AuthMe protects your account by requiring you to register a password and log in 
 | `/logout` | Log out of your account. |
 | `/changepassword <old> <new>` | Change your password. |
 | `/unregister <password>` | Unregister your account. |
+
+## Notes
+- Registration and login permissions default to all players, including Visitors.
+- Sessions are disabled, so players authenticate after each connection.
+- Never reuse an important password. Authentication commands may be visible to legacy command-logging plugins unless those commands are filtered.

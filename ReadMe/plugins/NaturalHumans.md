@@ -1,15 +1,21 @@
 # NaturalHumans
 
 ## What It Does
-NaturalHumans adds human NPCs as hostile mobs that naturally spawn in the world. They carry weapons and armor, making them challenging enemies.
+NaturalHumans 2.1 adds hostile, neutral, and quest-role human NPCs that naturally spawn in the world. Players can tame them into persistent friendly followers.
 
 ## How It Affects You
-You may encounter hostile human NPCs while exploring. They carry equipment and drop loot when killed.
+New humans are 55-weight hostile, 30-weight neutral, or 15-weight quest characters. Hostiles attack nearby players; neutral and quest humans attack only in retaliation.
+
+Right-click any untamed human with an apple for a 35% taming chance. The apple is consumed on every attempt. A successful tame binds that human to you; right-click it again with any item to toggle follow or stay. Owners cannot hurt their friendly human.
+
+Quest humans invoke QuestPlus's normal `/quest new` offer when right-clicked. They are not Citizens NPCs.
 
 ## Spawn Details
 - **Spawn rate:** 3% chance per eligible mob spawn.
 - **Trigger mobs:** Humans can spawn alongside Zombies, Skeletons, Spiders, Creepers, Cows, and Chickens.
 - **50% chance** of spawning with no equipment at all.
+- Names are selected without active duplicates from a configurable pool of 63 existing-account names. Legacy skin availability depends on the external skin service.
+- Friendly humans retain owner, position, health, follow state, armor, and held item across restarts.
 
 ## Equipment
 
@@ -48,6 +54,7 @@ Each equipment slot has a **25% drop chance** on death:
 - Helmet, Chestplate, Leggings, Boots, Main Hand weapon.
 
 ## Tips
-- Half of all humans spawn naked — easy kills.
+- Neutral and quest humans leave you alone until attacked.
+- Half of all humans spawn without equipment.
 - Diamond-equipped humans are very rare but extremely tough — the gear they drop makes it worth the fight.
 - Humans can spawn wherever hostile mobs or even cows/chickens spawn, so stay alert even in peaceful areas.

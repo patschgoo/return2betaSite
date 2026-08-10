@@ -16,7 +16,7 @@ You can view the live map at any time to find locations, see who's online and wh
 - **Chat balloons** appear above players on the map for 5 seconds.
 
 ## How to Access
-- Open the dynmap in your web browser at the server's configured address (port **50180**).
+- Open the Dynmap at the server host on port **50180**.
 - The default view shows the overworld flat map.
 
 ## Notes
@@ -24,3 +24,5 @@ You can view the live map at any time to find locations, see who's online and wh
 - Your position is visible to other players viewing the map.
 - You can chat through the web interface (limited to once every 5 seconds).
 - Join/quit messages from the server appear on the web map.
+- Rendering is limited to 20 chunk loads per tick.
+- ServerHealth records tile storage and reports tiles older than 180 days. It does not delete tiles automatically because age-only pruning can leave holes in valid map coverage.

@@ -23,7 +23,7 @@ The core Minecraft server configuration.
 | `server-port` | `50179` | Main game port. |
 | `spawn-animals` | `true` | Animals spawn naturally. |
 | `spawn-monsters` | `true` | Hostile mobs spawn naturally. |
-| `view-distance` | `10` | Render distance of 10 chunks. |
+| `view-distance` | `10` | Global chunk ceiling. PlayerViewDistance defaults each player to 8 and allows 2-10 chunks. |
 | `white-list` | `false` | Whitelist is disabled — anyone can join. |
 
 ## poseidon.yml
@@ -61,7 +61,7 @@ Poseidon-specific enhancements, fixes, and security settings.
 | Block pistons pushing furnaces | Yes | Prevents server crash from pistons pushing furnaces. |
 | Skeleton shooting sound | Yes | Fixes bow shooting sounds not playing. |
 | Optimized sponges | Yes | Removes unnecessary sponge block updates. |
-| Optimized explosions | No | Standard explosion calculations. |
+| Optimized explosions | Yes | Uses Poseidon's optimized explosion calculations. |
 
 ### World Settings
 | Setting | Value | Description |
@@ -85,3 +85,26 @@ Poseidon-specific enhancements, fixes, and security settings.
 | Already online | "A player with your username or uuid is already online, try reconnecting in a minute." |
 | Player join | "[player] joined the game." |
 | Player leave | "[player] left the game." |
+
+## Hosting and Ports
+
+| Service | Address |
+|---------|---------|
+| Minecraft | `5.9.123.120:50179` |
+| Dynmap | `5.9.123.120:50180` |
+
+Both ports were reachable during the August 10, 2026 acceptance check. External restart launching remains disabled; Gravel Host's panel or watchdog should own process startup unless the host explicitly supports a custom `start.sh` process.
+
+## Operational Monitoring
+- ServerHealth records effective TPS, total server size, free disk space, world-backup size, log-backup size, and Dynmap tile size every five minutes.
+- Warnings are logged below 17 TPS or below 2 GB free disk space.
+- Monitoring history rotates at 5 MB and keeps five rotated files.
+- Dynmap tile age is reported but tiles are not automatically deleted.
+- The runtime identifies this local JAR as Project Poseidon 1.1.10; verify the displayed version after each hosted JAR update.
+
+## Acceptance Check
+The full staged server reached `Done`, loaded AuthMe, AcceptRules, PermissionsEx, Tuto, DynamicLight, Dynmap, dynmap-mobs, Return2BetaAds, Backup, economy plugins, LagMeter, and ServerHealth. It returned 20 TPS, served Dynmap over HTTP, created a readable world-backup ZIP, completed `save-all`, and shut down cleanly.
+
+The August 10, 2026 focused plugin check also loaded PlayerViewDistance with its Poseidon reflection bindings, reported default 8 and range 2-10, loaded Return2BetaAds 1.1 with three messages, returned the configured Discord invite from `/discord`, and shut down cleanly.
+
+Player-only workflows still require a real Beta 1.7.3 guest account after deployment: registration/login, `/rules`, `/acceptrules`, `/tuto list`, `/viewdistance 2`, `/viewdistance 10`, visible chunk-radius changes, DynamicLight while holding an item, explosion behavior, and visible mob markers.
