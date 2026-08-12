@@ -400,8 +400,6 @@
       <p class="ip-label">Server IPs:</p>
       <div class="ip-box">
         <span class="ip primary">mc.return2beta.com</span>
-        <span class="ip">beta.mildvanilla.org</span>
-        <span class="ip">mc.mildbeta.world</span>
         <span class="ip">5.9.123.120:50179</span>
         <span class="ip">217.160.170.104</span>
       </div>
@@ -733,8 +731,6 @@
             <tr><th>Address</th><th>Notes</th></tr>
             <tr><td><code>mc.return2beta.com</code></td><td>SRV auto-redirects to port 25568</td></tr>
             <tr><td><code>mc.return2beta.com:25568</code></td><td>Explicit ViaProxy port</td></tr>
-            <tr><td><code>beta.mildvanilla.org:25568</code></td><td>Explicit ViaProxy port</td></tr>
-            <tr><td><code>mc.mildbeta.world:25568</code></td><td>Explicit ViaProxy port</td></tr>
             <tr><td><code>217.160.170.104:25568</code></td><td>Explicit ViaProxy port</td></tr>
           </table>
           <div class="note">The SRV record only exists for <code>mc.return2beta.com</code>. Other domains require <code>:25568</code> to be specified.</div>
@@ -747,8 +743,6 @@
           <table>
             <tr><th>Address</th><th>Port</th></tr>
             <tr><td><code>mc.return2beta.com</code></td><td>19132</td></tr>
-            <tr><td><code>beta.mildvanilla.org</code></td><td>19132</td></tr>
-            <tr><td><code>mc.mildbeta.world</code></td><td>19132</td></tr>
             <tr><td><code>217.160.170.104</code></td><td>19132</td></tr>
           </table>
           <div class="note">Bedrock does not support SRV records — the port must be entered manually.</div>
@@ -771,8 +765,6 @@
             <tr><td><code>5.9.123.120:50179</code></td><td>Direct to Gravelhost server</td></tr>
             <tr><td><code>mc.return2beta.com</code></td><td>SRV → ViaProxy (works for Beta too)</td></tr>
             <tr><td><code>mc.return2beta.com:25565</code></td><td>nginx stream → Gravelhost</td></tr>
-            <tr><td><code>beta.mildvanilla.org</code></td><td>Default port 25565 → Gravelhost</td></tr>
-            <tr><td><code>mc.mildbeta.world</code></td><td>Default port 25565 → Gravelhost</td></tr>
             <tr><td><code>217.160.170.104</code></td><td>Default port 25565 → Gravelhost</td></tr>
           </table>
           <div class="note">Port 25565 is the Minecraft default, so it can be omitted.</div>
